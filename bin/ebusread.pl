@@ -54,22 +54,26 @@ foreach $line (<CONFIG>)
     chomp $output;
     print LOGFILE "$localname $output\n";
 
-## FIXME some error checking should go here - for $output containing errors
-
-    open LINE, ">>", "$logdirectory/$localname.log" or die $!;
-    print LINE "$timestamp $output\n";
-    close LINE;
-    # if the rrd doesn't exist, don't attempt to write
-    if ( -f "$rrddirectory/${localname}.rrd" )
+    if ($output =~ /error/ )
     {
-      $output = `rrdtool update $rrddirectory/$localname.rrd $timestamp:$output`;
-      print LOGFILE "rrdtool said $output\n";
+      print LOGFILE "got error in ebusctl output - not saving\n";
     }
     else
     {
-      print LOGFILE "rrd for $localname doesn't exist, skipping update\n";
+      open LINE, ">>", "$logdirectory/$localname.log" or die $!;
+      print LINE "$timestamp $output\n";
+      close LINE;
+      # if the rrd doesn't exist, don't attempt to write
+      if ( -f "$rrddirectory/${localname}.rrd" )
+      {
+        $output = `rrdtool update $rrddirectory/$localname.rrd $timestamp:$output`;
+        print LOGFILE "rrdtool said $output\n";
+      }
+      else
+      {
+        print LOGFILE "rrd for $localname doesn't exist, skipping update\n";
+      }
     }
-
     # sleep 0.2sec - if we read ebus too fast, it fucks up
     # 0.1 sec sleep consistently generates errors from ebusd
     select(undef, undef, undef, 0.2);
