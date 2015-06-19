@@ -8,7 +8,7 @@
 #
 $config="/data/hm/conf/ebusread.conf";
 # $rrddirectory="/data/hm/rrd";
-$logdirectory="/data/hm/logs";
+$logdirectory="/data/hm/log";
 $logfile="ebusread.log";
 
 $timestamp = time();
