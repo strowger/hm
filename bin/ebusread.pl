@@ -7,9 +7,17 @@
 # begun
 #
 $config="/data/hm/conf/ebusread.conf";
-# $rrddirectory="/data/hm/rrd";
+$rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="ebusread.log";
+$lockfile="/tmp/ebusread.lock";
+
+if ( -f $lockfile ) 
+{
+  die "Lockfile exists in $lockfile; exiting";
+}
+
+open LOCKFILE, ">", $lockfile or die $!;
 
 $timestamp = time();
 
@@ -22,6 +30,7 @@ open CONFIG, "<", "$config" or die $!;
 $count = 0;
 foreach $line (<CONFIG>)
 {
+  $timestamp = time();
   ($value, $field, $circuit, $localname) = split(',',$line);
   # starts with hash means comment, so ignore
   # ignore if there isn't a value for all items
@@ -29,7 +38,7 @@ foreach $line (<CONFIG>)
   {
     # here is stuff we just do for each *valid* config line
     chomp $localname;
-    print LOGFILE "reading $value $field $circuit $localname: ";
+    print LOGFILE "$timestamp: reading $value $field $circuit $localname: ";
     # where there's a fieldname for the value
     if ($field !~ "NULL")
     {
@@ -43,14 +52,27 @@ foreach $line (<CONFIG>)
     # there's a blank line on each ebusctl read, so we need to chomp twice
     chomp $output;
     chomp $output;
-    print LOGFILE "$localname $output";
+    print LOGFILE "$localname $output\n";
+
+## FIXME some error checking should go here - for $output containing errors
 
     open LINE, ">>", "$logdirectory/$localname.log" or die $!;
     print LINE "$timestamp $output\n";
     close LINE;
+    # if the rrd doesn't exist, don't attempt to write
+    if ( -f "$rrddirectory/${localname}.rrd" )
+    {
+      $output = `rrdtool update $rrddirectory/$localname.rrd $timestamp:$output`;
+      print LOGFILE "rrdtool said $output\n";
+    }
+    else
+    {
+      print LOGFILE "rrd for $localname doesn't exist, skipping update\n";
+    }
 
-    # sleep 0.25sec - if we read ebus too fast, it fucks up
-    select(undef, undef, undef, 0.25);
+    # sleep 0.2sec - if we read ebus too fast, it fucks up
+    # 0.1 sec sleep consistently generates errors from ebusd
+    select(undef, undef, undef, 0.2);
     $count++;
 
   }
@@ -63,5 +85,7 @@ foreach $line (<CONFIG>)
 }
 
 print LOGFILE "processed $count valid config items\n";
+print LOGFILE "exiting successfully\n\n";
 
-
+close LOCKFILE;
+unlink $lockfile;
