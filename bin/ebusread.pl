@@ -29,7 +29,7 @@ foreach $line (<CONFIG>)
   {
     # here is stuff we just do for each *valid* config line
     chomp $localname;
-    print LOGFILE "reading $value $field $circuit $localname\n";
+    print LOGFILE "reading $value $field $circuit $localname: ";
     # where there's a fieldname for the value
     if ($field !~ "NULL")
     {
@@ -40,6 +40,8 @@ foreach $line (<CONFIG>)
     {
       $output = `ebusctl read -f -c $circuit $value`;
     }
+    # there's a blank line on each ebusctl read, so we need to chomp twice
+    chomp $output;
     chomp $output;
     print LOGFILE "$localname $output";
 
