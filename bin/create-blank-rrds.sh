@@ -153,3 +153,19 @@ rrdtool create modtempdesired.rrd --start 1434700000 --step 60 \
 DS:temp:GAUGE:120:-50:200 \
 RRA:LAST:0.5:1:15811200
 
+# daily, weekly, 4weekly average,min,max
+rrdtool create roomtemp.rrd --start 1434700000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
+
+

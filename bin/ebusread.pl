@@ -54,7 +54,7 @@ foreach $line (<CONFIG>)
     chomp $output;
     print LOGFILE "$localname $output\n";
 
-    if ($output =~ /error/ )
+    if (($output =~ /error/ ) || ($output =~ /ERR/ ))
     {
       print LOGFILE "got error in ebusctl output - not saving\n";
     }
