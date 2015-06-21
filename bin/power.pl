@@ -66,7 +66,6 @@ while ($line = <SERIAL>)
 #    print TEMPLOG "rrdtool said $output\n";
     $output = `rrdtool update $rrddirectory/cctemp.rrd $timestamp:$temp`;
 #    print TEMPLOG "rrdtool said $output\n";
-    last;
   }
 }
 }
