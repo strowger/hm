@@ -28,46 +28,44 @@ open SERIAL, "<", "/dev/currentcost" or die $!;
 
 while (1) {
 # run forever
-
-while ($line = <SERIAL>)
+open SERIAL, "<", "/dev/currentcost" or die $!;
+$line = <SERIAL>;
+$timestamp = time();
+print TEMPLOG "$timestamp: $line";
+# catch only the real-time data and not the historical stuff it chucks out periodically
+# sensor 0 is the clamp meter
+# sensor 8 is the calculated watts value from the optismart??
+# sensor 9 is the raw value of impulses from the optismart??
+if ($line =~ m!<tmpr>\s*(-*[\d.]+)</tmpr><sensor>0</sensor>.*<ch1><watts>0*(\d+)</watts></ch1>!)
 {
-  $timestamp = time();
-  print TEMPLOG "$timestamp: $line";
-  # catch only the real-time data and not the historical stuff it chucks out periodically
-  # sensor 0 is the clamp meter
-  # sensor 8 is the calculated watts value from the optismart??
-  # sensor 9 is the raw value of impulses from the optismart??
-  if ($line =~ m!<tmpr>\s*(-*[\d.]+)</tmpr><sensor>0</sensor>.*<ch1><watts>0*(\d+)</watts></ch1>!)
-  {
-     $temp = $1;
-     $powerclamp = $2;
-     print LOGFILE "$timestamp clamp ${powerclamp}W ${temp}C\n";
-     $output = `rrdtool update $rrddirectory/ccclampwatts.rrd $timestamp:$powerclamp`;
-#     print TEMPLOG "rrdtool said $output\n";
-     $output = `rrdtool update $rrddirectory/cctemp.rrd $timestamp:$temp`;
-#     print TEMPLOG "rrdtool said $output\n";
-  }
-  if ($line =~ m!<tmpr>\s*(-*[\d.]+)</tmpr><sensor>8</sensor>.*<ch1><watts>0*(\d+)</watts></ch1>!)
-  {
-     $temp = $1;
-     $poweropti = $2;
-     print LOGFILE "$timestamp opti ${poweropti}W ${temp}C\n";
-     $output = `rrdtool update $rrddirectory/ccoptiwatts.rrd $timestamp:$poweropti`;     
-#     print TEMPLOG "rrdtool said $output\n";
-     $output = `rrdtool update $rrddirectory/cctemp.rrd $timestamp:$temp`;
-#     print TEMPLOG "rrdtool said $output\n";
-  }
-  if ($line =~ m!<tmpr>\s*(-*[\d.]+)</tmpr><sensor>9</sensor>.*<imp>0*(\d+)</imp>!)
-  {
-    $temp = $1;
-    $powerimp = $2;
-    print LOGFILE "$timestamp opti ${powerimp}cnt ${temp}C\n";
-    $output = `rrdtool update $rrddirectory/ccopticount.rrd $timestamp:$powerimp`;
-#    print TEMPLOG "rrdtool said $output\n";
-    $output = `rrdtool update $rrddirectory/cctemp.rrd $timestamp:$temp`;
-#    print TEMPLOG "rrdtool said $output\n";
-  }
+   $temp = $1;
+   $powerclamp = $2;
+   print LOGFILE "$timestamp clamp ${powerclamp}W ${temp}C\n";
+   $output = `rrdtool update $rrddirectory/ccclampwatts.rrd $timestamp:$powerclamp`;
+#   print TEMPLOG "rrdtool said $output\n";
+   $output = `rrdtool update $rrddirectory/cctemp.rrd $timestamp:$temp`;
+#   print TEMPLOG "rrdtool said $output\n";
 }
+if ($line =~ m!<tmpr>\s*(-*[\d.]+)</tmpr><sensor>8</sensor>.*<ch1><watts>0*(\d+)</watts></ch1>!)
+{
+   $temp = $1;
+   $poweropti = $2;
+   print LOGFILE "$timestamp opti ${poweropti}W ${temp}C\n";
+   $output = `rrdtool update $rrddirectory/ccoptiwatts.rrd $timestamp:$poweropti`;     
+#   print TEMPLOG "rrdtool said $output\n";
+   $output = `rrdtool update $rrddirectory/cctemp.rrd $timestamp:$temp`;
+#   print TEMPLOG "rrdtool said $output\n";
+}
+if ($line =~ m!<tmpr>\s*(-*[\d.]+)</tmpr><sensor>9</sensor>.*<imp>0*(\d+)</imp>!)
+{
+  $temp = $1;
+  $powerimp = $2;
+  print LOGFILE "$timestamp opti ${powerimp}cnt ${temp}C\n";
+  $output = `rrdtool update $rrddirectory/ccopticount.rrd $timestamp:$powerimp`;
+#  print TEMPLOG "rrdtool said $output\n";
+  $output = `rrdtool update $rrddirectory/cctemp.rrd $timestamp:$temp`;
+#  print TEMPLOG "rrdtool said $output\n";
 }
 close(SERIAL);
+}
 
