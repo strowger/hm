@@ -13,7 +13,10 @@ Not designed to be run at all - as it would wipe out all the data in the RRDs.
 power.pl 
 Gathers data from a Currentcost EnviR device's serial output.
 Writes to a logfile and to RRDs.
-Designed to be run on system boot by init.
+Designed to be run on system boot by init. In practice it appears to stop reading at some point between a few minutes and a few hours after being started. I've failed to understand why this is and resorted to restarting it every 5 minutes:
+
+getpower.sh
+Restarts power.pl. Designed to be run from cron every few minutes.
 
 ebusread.pl
 Gathers data from a running ebusd instance and logs to logfiles and RRDs.
