@@ -201,7 +201,7 @@ RRA:MAX:0.1:40320:393
 # every 10 minutes is plenty often enough for this
 rrdtool create boilerrmvdd.rrd --start 1435100000 --step 600 \
 DS:vdd:GAUGE:120:0:10 \
-RRA:LAST:0.5:1:15811200 \
+RRA:LAST:0.5:1:1581120 \
 RRA:AVERAGE:0.1:144:10980 \
 RRA:AVERAGE:0.1:1008:1569 \
 RRA:AVERAGE:0.1:4032:393 \
