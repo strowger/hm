@@ -22,3 +22,7 @@ ebusread.pl
 Gathers data from a running ebusd instance and logs to logfiles and RRDs.
 Designed to be run from cron - relies on the ebusd instance having been started.
 
+1wireread.pl
+Gathers data from 1-wire devices using owfs and logs to logfiles and RRDs.
+Designed to be run from cron - relies on the owfs owserver instance having been started.
+

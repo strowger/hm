@@ -18,8 +18,6 @@ exit 0
 #next - how many seconds between records
 #how many records to keep
 
-# TODO aren't these MIN/MAX all arse? 1440 = 24mins, 3650 times?
-
 # we want 30 years of data
 # once per minute = 1440 per day, 527040 per (366 day)year, 15811200 per 30 years
 
@@ -167,5 +165,49 @@ RRA:MAX:0.1:1440:10980 \
 RRA:MAX:0.1:10080:1569 \
 RRA:MAX:0.1:40320:393
 
+## 20150624
+## one-wire devices
 
+# sheepwalk humidity sensor, boiler room
+
+# boilerrmhum, boilerrmtemp, boilerrmvdd
+
+rrdtool create boilerrmtemp.rrd --start 1435100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
+rrdtool create boilerrmhum.rrd --start 1435100000 --step 60 \
+DS:hum:GAUGE:120:0:100 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
+rrdtool create boilerrmvdd.rrd --start 1435100000 --step 60 \
+DS:vdd:GAUGE:120:0:10 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
 
