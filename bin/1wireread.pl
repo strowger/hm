@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-# 1wireiread.pl - read values from ebus using ebusd's ebusctl utility and save
+# 1wireiread.pl - read values from 1-wire bus using owfs's owread utility and save
 # to log and rrd
 #
 # GH 2015-06-24
@@ -36,12 +36,12 @@ foreach $line (<CONFIG>)
   ($device, $value, $filename) = split(',',$line);
   # starts with hash means comment, so ignore
   # ignore if there isn't a value for all items
-  if (($device !~ /\#.*/) && (defined $device) && (defined $value) && (defined $filename) 
+  if (($device !~ /\#.*/) && (defined $device) && (defined $value) && (defined $filename))
   {
     # here is stuff we just do for each *valid* config line
     chomp $filename;
     print LOGFILE "$timestamp: reading $device $value $filename: ";
-    $output = `$owread /$device/$value`;
+    $output = `$owread /$device/$value|sed s/\\ //g`;
     print LOGFILE "$output\n";
 
     if (($output =~ /error/ ) || ($output =~ /ERR/ ))
