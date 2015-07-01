@@ -18,7 +18,7 @@ if ( -f $lockfile )
 
 open LOCKFILE, ">", $lockfile or die $!;
 
-$output = `rrdtool graph $graphdirectory/temps.png -a PNG -l 0 -y 5:1 --vertical-label "deg c" -s -36h -w 1024 -h 300 'DEF:inside='$rrddirectory/roomtemp.rrd:temp:LAST 'DEF:outside='$rrddirectory/outdoortemp.rrd:temp:LAST 'DEF:boilerrm='$rrddirectory/cctemp.rrd:temp:LAST  'LINE1:inside#ff0000:inside temperature' 'LINE1:outside#0400ff:outside temperature' 'LINE1:boilerrm#00dd00:boiler room temperature' `;
+$output = `rrdtool graph $graphdirectory/temps.png -a PNG -l 0 -y 5:1 --vertical-label "deg c" -s -36h -w 1024 -h 300 'DEF:inside='$rrddirectory/roomtemp.rrd:temp:LAST 'DEF:outside='$rrddirectory/outdoortemp.rrd:temp:LAST 'DEF:boilerrmcc='$rrddirectory/cctemp.rrd:temp:LAST 'DEF:boilerrm='$rrddirectory/boilerrmtemp.rrd:temp:LAST 'DEF:cellar='$rrddirectory/cellartemp.rrd:temp:LAST 'LINE1:inside#ff0000:kitchen temp' 'LINE1:outside#0400ff:outside temp' 'LINE1:boilerrmcc#00dd00:boiler room temp - cc' 'LINE1:boilerrm#00dddd:boiler room temp - swe3' 'LINE1:cellar#dd00dd:cellar temp' `;
 
 $output = `rrdtool graph $graphdirectory/chtemps.png -a PNG -l 0 -y 10:1 --vertical-label "deg c" -s -36h -w 1024 -h 300 'DEF:cyl='$rrddirectory/cylindertemp.rrd:temp:LAST 'DEF:flow='$rrddirectory/flowtemp.rrd:temp:LAST 'DEF:desflow='$rrddirectory/desiredflowtemp.rrd:temp:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'LINE1:cyl#ff0000:cylinder temperature' 'LINE1:flow#0400ff:flow temperature' 'LINE1:desflow#111111:desired flow temperature' 'LINE1:modtd#666666:desired modulation'`;
 

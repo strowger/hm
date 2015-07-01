@@ -170,8 +170,6 @@ RRA:MAX:0.1:40320:393
 
 # sheepwalk humidity sensor, boiler room
 
-# boilerrmhum, boilerrmtemp, boilerrmvdd
-
 rrdtool create boilerrmtemp.rrd --start 1435100000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200 \
@@ -211,4 +209,57 @@ RRA:MIN:0.1:4032:393 \
 RRA:MAX:0.1:144:10980 \
 RRA:MAX:0.1:1008:1569 \
 RRA:MAX:0.1:40320:393
+
+# 20150701 sheepwalk humidity sensor, main cellar
+
+rrdtool create cellartemp.rrd --start 1435700000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
+rrdtool create cellarhum.rrd --start 1435700000 --step 60 \
+DS:hum:GAUGE:120:0:100 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
+# every 10 minutes is plenty often enough for this
+rrdtool create cellarvdd.rrd --start 1435700000 --step 600 \
+DS:vdd:GAUGE:120:0:10 \
+RRA:LAST:0.5:1:1581120 \
+RRA:AVERAGE:0.1:144:10980 \
+RRA:AVERAGE:0.1:1008:1569 \
+RRA:AVERAGE:0.1:4032:393 \
+RRA:MIN:0.1:144:10980 \
+RRA:MIN:0.1:1008:1569 \
+RRA:MIN:0.1:4032:393 \
+RRA:MAX:0.1:144:10980 \
+RRA:MAX:0.1:1008:1569 \
+RRA:MAX:0.1:40320:393
+
+# 20150701 hobby-boards counter, gas and water meters
+# water meter counts in units of 10 litres
+rrdtool create watermeter.rrd --start 1435700000 --step 60 \
+DS:tenlitres:COUNTER:120:0:1000 \
+RRA:LAST:0.5:1:15811200
+
+# gas meter counts a pulse per dm3 of gas, which is 1/1000 of a m3; ~11Wh
+rrdtool create gasmeter.rrd --start 1435700000 --step 60 \
+DS:dmcubed:COUNTER:120:0:1000 \
+RRA:LAST:0.5:1:15811200
 
