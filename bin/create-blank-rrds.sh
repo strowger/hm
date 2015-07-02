@@ -107,7 +107,8 @@ RRA:MAX:0.1:1440:10980 \
 RRA:MAX:0.1:10080:1569 \
 RRA:MAX:0.1:40320:393 
 
-rrdtool create flowtemp.rrd --start 1434700000 --step 60 \
+# eb for ebus, we'll get a separate flow temp from 1wire
+rrdtool create ebflowtemp.rrd --start 1434700000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
