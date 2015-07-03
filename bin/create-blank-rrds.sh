@@ -253,6 +253,48 @@ RRA:MAX:0.1:144:10980 \
 RRA:MAX:0.1:1008:1569 \
 RRA:MAX:0.1:40320:393
 
+
+# 20150703 sheepwalk humidity sensor, office
+
+rrdtool create officetemp.rrd --start 1435900000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
+rrdtool create officehum.rrd --start 1435900000 --step 60 \
+DS:hum:GAUGE:120:0:100 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
+rrdtool create officevdd.rrd --start 1435900000 --step 600 \
+DS:vdd:GAUGE:120:0:10 \
+RRA:LAST:0.5:1:1581120 \
+RRA:AVERAGE:0.1:144:10980 \
+RRA:AVERAGE:0.1:1008:1569 \
+RRA:AVERAGE:0.1:4032:393 \
+RRA:MIN:0.1:144:10980 \
+RRA:MIN:0.1:1008:1569 \
+RRA:MIN:0.1:4032:393 \
+RRA:MAX:0.1:144:10980 \
+RRA:MAX:0.1:1008:1569 \
+RRA:MAX:0.1:40320:393
+
 # 20150702 1-wire temperature sensors on boiler flow & return
 
 rrdtool create boilerflow.rrd --start 1434700000 --step 60 \
@@ -260,6 +302,12 @@ DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
 rrdtool create boilerreturn.rrd --start 1434700000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+# 20150703 1-wire temperature sensor under office floor
+
+rrdtool create officeunderfloor.rrd --start 1434900000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
