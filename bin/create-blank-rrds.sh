@@ -253,6 +253,16 @@ RRA:MAX:0.1:144:10980 \
 RRA:MAX:0.1:1008:1569 \
 RRA:MAX:0.1:40320:393
 
+# 20150702 1-wire temperature sensors on boiler flow & return
+
+rrdtool create boilerflow.rrd --start 1434700000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create boilerreturn.rrd --start 1434700000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
 # 20150701 hobby-boards counter, gas and water meters
 # water meter counts in units of 10 litres
 rrdtool create watermeter.rrd --start 1435700000 --step 60 \
