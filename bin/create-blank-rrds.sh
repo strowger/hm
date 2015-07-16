@@ -322,3 +322,7 @@ rrdtool create gasmeter.rrd --start 1435700000 --step 60 \
 DS:dmcubed:COUNTER:120:0:1000 \
 RRA:LAST:0.5:1:15811200
 
+# repton's counter prototype
+rrdtool create reptonmeter.rrd --start 1435700000 --step 60 \
+DS:counts:COUNTER:120:0:1000 \
+RRA:LAST:0.5:1:15811200
