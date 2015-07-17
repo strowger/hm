@@ -37,6 +37,9 @@ foreach $time (@periods)
 
   $output = `rrdtool graph $graphdirectory/ionisationvolts${time}.png -a PNG --vertical-label "volts/modulation percentage" -s -${time} -w 1024 -h 300 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'LINE1:ion#ff0000:flame sensor ionisation volts' 'LINE1:modtd#666666:desired modulation'  `;
 
+  $output = `rrdtool graph $graphdirectory/busvolts${time}.png -a PNG --vertical-label "volts" -s -${time} -w 1024 -h 300 'DEF:boilerrm='$rrddirectory/boilerrmvdd.rrd:vdd:LAST 'DEF:cellar='$rrddirectory/cellarvdd.rrd:vdd:LAST 'DEF:office='$rrddirectory/officevdd.rrd:vdd:LAST 'LINE1:boilerrm#ff0000:boiler room' 'LINE1:cellar#00ff00:cellar' 'LINE1:office#0000ff:office'  `;
+
+
   $output = `rrdtool graph $graphdirectory/watermeter${time}.png -a PNG -y 0.1:1 --vertical-label "litres" -s -${time} -w 1024 -h 300 'DEF:tenlitrespersec='$rrddirectory/watermeter.rrd:tenlitres:LAST 'DEF:reptons='$rrddirectory/reptonmeter.rrd:counts:LAST 'CDEF:reptonspertenmin=reptons,60,*' 'CDEF:litrespertenmin=tenlitrespersec,60,*' 'LINE1:litrespertenmin#ff0000:water usage' 'LINE1:reptonspertenmin#00ff00:water usage repton meter' `;
 
   $output = `rrdtool graph $graphdirectory/gasmeter${time}.png -a PNG --vertical-label "kwh per hour" -s -${time} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'CDEF:kwhperhour=dm3persec,3960,*' 'LINE1:kwhperhour#ff0000:gas kwh per hour' `;
