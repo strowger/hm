@@ -366,6 +366,33 @@ rrdtool create zvhwflow.rrd --start 1437100000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
+# 20150719 1-wire temperature sensors on hw tank, and hot water flow/retrun
+
+rrdtool create hwtank0.rrd --start 1437100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+rrdtool create hwtank1.rrd --start 1437100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+rrdtool create hwtank2.rrd --start 1437100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+rrdtool create hwtank3.rrd --start 1437100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+rrdtool create hwtank4.rrd --start 1437100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+rrdtool create hwtank5.rrd --start 1437100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create hwfeed0.rrd --start 1437100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+rrdtool create hwsec0.rrd --start 1437100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
 
 # 20150701 hobby-boards counter, gas and water meters
 # water meter counts in units of 10 litres
