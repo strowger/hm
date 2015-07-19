@@ -26,3 +26,7 @@ Designed to be run from cron - relies on the ebusd instance having been started.
 Gathers data from 1-wire devices using owfs and logs to logfiles and RRDs.
 Designed to be run from cron - relies on the owfs owserver instance having been started.
 
+graph.pl
+Create graphs using the data stored in RRDs.
+Should be driven by a config file, but isn't.
+
