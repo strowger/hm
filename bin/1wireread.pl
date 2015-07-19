@@ -28,7 +28,8 @@ print LOGFILE "starting 1wireread at $timestamp\n";
 
 open CONFIG, "<", "$config" or die $!;
 
-$count = 0;
+$validcount = 0;
+$invalidcount = 0;
 foreach $line (<CONFIG>)
 {
   $timestamp = time();
@@ -57,25 +58,31 @@ foreach $line (<CONFIG>)
       if ( -f "$rrddirectory/${filename}.rrd" )
       {
         $output = `rrdtool update $rrddirectory/$filename.rrd $timestamp:$output`;
-        print LOGFILE "rrdtool said $output\n";
+        if (length $output)
+        {
+          print LOGFILE "rrdtool errored $output\n";
+        }
       }
       else
       {
         print LOGFILE "rrd for $filename doesn't exist, skipping update\n";
       }
     }
-    $count++;
+    $validcount++;
 
   }
   else 
   {
     # here is stuff we just do for each *invalid* config line
-    print LOGFILE "ignored invalid config line: $line";
+    $truncline = substr($line, 0, 26);
+    chomp $truncline;
+    print LOGFILE "ignored invalid config line: ${truncline}[...]\n";
+    $invalidcount++;
   }
   # stuff here happens each line even if the line was invalid
 }
 
-print LOGFILE "processed $count valid config items\n";
+print LOGFILE "processed $validcount valid config items, ignored $invalidcount invalid lines\n";
 print LOGFILE "exiting successfully\n\n";
 
 close LOCKFILE;
