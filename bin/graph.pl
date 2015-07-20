@@ -56,6 +56,8 @@ foreach $time (@periods)
 
   $output = `rrdtool graph $graphdirectory/watermeter${time}.png -a PNG -y 0.1:1 --vertical-label "litres" -s -${time} -w 1024 -h 300 'DEF:tenlitrespersec='$rrddirectory/watermeter.rrd:tenlitres:LAST 'CDEF:litrespertenmin=tenlitrespersec,60,*' 'LINE1:litrespertenmin#${col01}:water usage'  `;
 
+  $output = `rrdtool graph $graphdirectory/hwtank${time}.png -a PNG --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:t0='$rrddirectory/hwtank0.rrd:temp:LAST 'DEF:t1='$rrddirectory/hwtank1.rrd:temp:LAST 'DEF:t2='$rrddirectory/hwtank2.rrd:temp:LAST 'DEF:t3='$rrddirectory/hwtank3.rrd:temp:LAST 'DEF:t4='$rrddirectory/hwtank4.rrd:temp:LAST 'DEF:t5='$rrddirectory/hwtank5.rrd:temp:LAST 'DEF:fl='$rrddirectory/hwfeed0.rrd:temp:LAST 'DEF:rn='$rrddirectory/hwsec0.rrd:temp:LAST 'LINE1:t0#${col01}:position 0 - top' 'LINE1:t1#${col02}:position 1' 'LINE1:t2#${col03}:position 2' 'LINE1:t3#${col04}:position 3' 'LINE1:t4#${col05}:position 4' 'LINE1:t5#${col06}:position 5 - bottom' 'LINE1:fl#${col07}:hw feed' 'LINE1:rn#${col08}:hw rtn' `;
+
   $output = `rrdtool graph $graphdirectory/gasmeter${time}.png -a PNG --vertical-label "kwh per hour" -s -${time} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'CDEF:kwhperhour=dm3persec,3960,*' 'LINE1:kwhperhour#${col01}:gas kwh per hour' `;
 
 }
