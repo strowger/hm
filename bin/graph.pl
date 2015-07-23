@@ -7,7 +7,7 @@
 #
 
 # suggested cron entries:
-# */10 * * * * /data/hm/bin/graph.pl 1h > /data/hm/log/graph-run.log 2> /data/hm/log/graph-err.log && /data/hm/bin/upload-gh.sh > /data/hm/log/upload-run.log 2> /data/hm/log/upload-err.log
+# */10 * * * * /data/hm/bin/graph.pl 3h > /data/hm/log/graph-run.log 2> /data/hm/log/graph-err.log && /data/hm/bin/upload-gh.sh > /data/hm/log/upload-run.log 2> /data/hm/log/upload-err.log
 #
 # 13 * * * * /data/hm/bin/graph.pl 36h > /data/hm/log/graph-run.log 2> /data/hm/log/graph-err.log
 #
@@ -71,7 +71,21 @@ $output = `rrdtool graph $graphdirectory/watermeter${time}.png -a PNG -y 0.1:1 -
 
 $output = `rrdtool graph $graphdirectory/hwtank${time}.png -a PNG --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:t0='$rrddirectory/hwtank0.rrd:temp:LAST 'DEF:t1='$rrddirectory/hwtank1.rrd:temp:LAST 'DEF:t2='$rrddirectory/hwtank2.rrd:temp:LAST 'DEF:t3='$rrddirectory/hwtank3.rrd:temp:LAST 'DEF:t4='$rrddirectory/hwtank4.rrd:temp:LAST 'DEF:t5='$rrddirectory/hwtank5.rrd:temp:LAST 'DEF:fl='$rrddirectory/hwfeed0.rrd:temp:LAST 'DEF:rn='$rrddirectory/hwsec0.rrd:temp:LAST 'DEF:eb='$rrddirectory/cylindertemp.rrd:temp:LAST 'LINE1:t0#${col01}:position 0 - top' 'LINE1:t1#${col02}:position 1' 'LINE1:t2#${col03}:position 2' 'LINE1:t3#${col04}:position 3' 'LINE1:t4#${col05}:position 4' 'LINE1:t5#${col06}:position 5 - bottom' 'LINE1:eb#${col07}:ebus cylinder probe'  'LINE1:fl#${col08}:hw feed' 'LINE1:rn#${col09}:hw rtn' `;
 
-$output = `rrdtool graph $graphdirectory/gasmeter${time}.png -a PNG --vertical-label "kwh per hour" -s -${time} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'CDEF:kwhperhour=dm3persec,396,*' 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.18,*' 'LINE1:kwhperhour#${col01}:gas kwh per hour from meter' 'LINE1:modtdpc#${col02}:boiler ebus modulation percentage scaled to kW' `;
+# this probably deserves a bit of explanation
+# the boiler is an ecotec plus 618, nominally 18kW
+# manual says the gas rate is 1.97m3/h +5%/-10%
+# that's 22.385kW !!
+# SEDBUK 89.3% = 19.98kW useful output
+# modulation between 4.2 - 19.3kW with 50 flow/30 return
+# modulation between 3.8 - 18.5kW with 80 flow/60 return
+# guess we should work with the 22.385 figure - hence 'modtd' CDEF
+#
+# gas bill says kwh = m3 * 1.02264 * 40 (corr. factor, calorific value) / 3.6 
+# 1 m3 = 11.363kWh/m3
+# the gas meter gives a pulse per dm3, which is .001 m3
+# the 409 in the kw CDEF is from 6*60*11.363
+
+$output = `rrdtool graph $graphdirectory/gasmeter${time}.png -a PNG --vertical-label "kwh per hour" -s -${time} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'CDEF:kw=dm3persec,409,*' 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'LINE1:kw#${col01}:gas kwh per hour from meter' 'LINE1:modtdpc#${col02}:boiler ebus modulation percentage scaled to kW' `;
 
 $output = `rrdtool graph $graphdirectory/igntime${time}.png -a PNG --vertical-label "seconds" -s -${time} -w 1024 -h 300 'DEF:avg='$rrddirectory/igntimeavg.rrd:secs:LAST 'DEF:min='$rrddirectory/igntimemin.rrd:secs:LAST 'DEF:max='$rrddirectory/igntimemax.rrd:secs:LAST 'LINE1:avg#${col01}:average ignition time' 'LINE1:min#${col02}:minimum ignition time' 'LINE1:max#${col03}:maximum ignition time' `;
 
