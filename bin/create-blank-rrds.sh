@@ -166,6 +166,28 @@ RRA:MAX:0.1:1440:10980 \
 RRA:MAX:0.1:10080:1569 \
 RRA:MAX:0.1:40320:393
 
+# 20150722 think we might have found ebus return temp hiding under a silly name
+
+rrdtool create ebreturntemp.rrd --start 1437500000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+# 20150722 hourly measurement will still probably be far too often
+# heartbeat 2 hours, don't know what min/max values are sensible 
+
+rrdtool create igntimeavg.rrd --start 1437500000 --step 3600 \
+DS:secs:GAUGE:7200:U:U \
+RRA:LAST:0.5:1:90000
+
+rrdtool create igntimemin.rrd --start 1437500000 --step 3600 \
+DS:secs:GAUGE:7200:U:U \
+RRA:LAST:0.5:1:90000
+
+rrdtool create igntimemax.rrd --start 1437500000 --step 3600 \
+DS:secs:GAUGE:7200:U:U \
+RRA:LAST:0.5:1:90000
+
+
 ## 20150624
 ## one-wire devices
 
