@@ -416,6 +416,15 @@ rrdtool create hwsec0.rrd --start 1437100000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
+# 20150724 1-wire temperature sensors on the incoming water mains
+
+rrdtool create cwsh.rrd --start 1437700000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+rrdtool create cwsc.rrd --start 1437700000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
 # 20150701 hobby-boards counter, gas and water meters
 # water meter counts in units of 10 litres
 rrdtool create watermeter.rrd --start 1435700000 --step 60 \
