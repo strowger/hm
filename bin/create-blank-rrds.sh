@@ -416,13 +416,20 @@ rrdtool create hwsec0.rrd --start 1437100000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
-# 20150729 1-wire temperature sensors on hot water return branches
+# 20150729 1-wire temperature sensors on hot water return branches & upstairs
 # bathroms/upstairs branch
 rrdtool create hwsec1.rrd --start 1438100000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 # kitchens branch
 rrdtool create hwsec2.rrd --start 1438100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+# hw feed under office floor - note there are no hwfeed1/hwfeed2
+rrdtool create hwfeed3.rrd --start 1438100000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+rrdtool create hwsec3.rrd --start 1438100000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
