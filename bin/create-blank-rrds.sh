@@ -358,6 +358,47 @@ RRA:MAX:0.1:144:10980 \
 RRA:MAX:0.1:1008:1569 \
 RRA:MAX:0.1:40320:393
 
+# 20150817 sheepwalk humidity sensor, outside coal cellar
+
+rrdtool create os1temp.rrd --start 1439700000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
+rrdtool create os1hum.rrd --start 1439700000 --step 60 \
+DS:hum:GAUGE:120:0:100 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
+rrdtool create os1vdd.rrd --start 1439700000 --step 600 \
+DS:vdd:GAUGE:120:0:10 \
+RRA:LAST:0.5:1:1581120 \
+RRA:AVERAGE:0.1:144:10980 \
+RRA:AVERAGE:0.1:1008:1569 \
+RRA:AVERAGE:0.1:4032:393 \
+RRA:MIN:0.1:144:10980 \
+RRA:MIN:0.1:1008:1569 \
+RRA:MIN:0.1:4032:393 \
+RRA:MAX:0.1:144:10980 \
+RRA:MAX:0.1:1008:1569 \
+RRA:MAX:0.1:40320:393
+
 # 20150702 1-wire temperature sensors on boiler flow & return
 
 rrdtool create boilerflow.rrd --start 1434700000 --step 60 \
@@ -456,4 +497,14 @@ RRA:LAST:0.5:1:15811200
 # repton's counter prototype
 rrdtool create reptonmeter.rrd --start 1435700000 --step 60 \
 DS:counts:COUNTER:120:0:1000 \
+RRA:LAST:0.5:1:15811200
+
+# 20150816 hobby-boards 1-wire barometer
+# does temperature and pressure (in hundredths of kilopascals - ie /100 for mbar?)
+rrdtool create baromtemp.rrd --start 1439700000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create barompressure.rrd --start 1439700000 --step 60 \
+DS:pres:GAUGE:120:90000:110000 \
 RRA:LAST:0.5:1:15811200
