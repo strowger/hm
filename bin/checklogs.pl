@@ -1,0 +1,156 @@
+#! /usr/bin/perl -w
+#
+# checklogs.pl - alert on various undesirable conditions in logs
+#
+# GH 2015-10-06
+# begun
+#
+# TO-DO (short term)
+# humidity sensors showing >100
+# vdd out of range
+#
+$owconfig="/data/hm/conf/1wireread.conf";
+$ebconfig="/data/hm/conf/ebusread.conf";
+$rrddirectory="/data/hm/rrd";
+$logdirectory="/data/hm/log";
+$lockfile="/tmp/checklogs.lock";
+
+if ( -f $lockfile ) 
+{ die "Lockfile exists in $lockfile; exiting"; }
+
+open LOCKFILE, ">", $lockfile or die $!;
+
+open OWCONFIG, "<", "$owconfig" or die $!;
+open EBCONFIG, "<", "$ebconfig" or die $!;
+$validcount = 0;
+$invalidcount = 0;
+
+# hot water cylinder, from ebus
+$lastline = `tail -1 $logdirectory/cylindertemp.log`;
+($lasttime, $lastval) = split(' ',$lastline);
+if ($lastval < 50)
+{ print "hot water cylinder down to $lastval C\n"; }
+
+# the ebus devices from the config
+
+foreach $line (<EBCONFIG>)
+{
+  $timestamp = time();                                                          
+  # value read from ebus, field, circuit, filename
+  ($value, $field, $circuit, $filename) = split(',',$line);
+  # starts with hash means comment, so ignore
+  if (($value !~ /\#.*/) && (defined $field) && (defined $circuit) && (defined $filename))
+  {
+    # stuff we just do for each valid config line
+    $validcount++;
+    chomp $filename;
+    if ( ! -f "$rrddirectory/${filename}.rrd" )                                 
+    { print "$filename is in $ebconfig but has no RRD file\n"; }                
+    if ( ! -f "$logdirectory/${filename}.log" )                                 
+    { print "$filename is in $ebconfig but has no logfile\n"; }                 
+    # get last line of file - should use File::ReadBackwards really             
+    $lastline = `tail -1 $logdirectory/$filename.log`;                          
+    ($lasttime, $lastval) = split(' ',$lastline);                               
+    chomp $lastval;                                                             
+    $lastvalage = $timestamp-$lasttime;                                         
+    if ($lastvalage > 600)                                                      
+    { print "$filename hasn't updated for $lastvalage seconds\n"; }             
+    if ($lastval eq "")                                                         
+    { print "$filename has updated with null value\n"; } 
+  }
+  else
+  {
+    # stuff we just do for each *invalid* config line
+    # if the line is invalid and doesn't start with hash, something's wrong     
+    if ($value !~ /\#.*/)                                                      
+    { $invalidcount++; }  
+  }
+  # stuff here happens each time regardless
+}
+
+if ($invalidcount > 0)                                                          
+{ print "$invalidcount invalid un-commented lines in $ebconfig\n"; }  
+
+# the one-wire devices from the config
+
+$validcount = 0;                                                                
+$invalidcount = 0;
+
+foreach $line (<OWCONFIG>)
+{
+  $timestamp = time();
+  # device id, value to read, rrd filename
+  ($device, $value, $filename) = split(',',$line);
+  # starts with hash means comment, so ignore
+  if (($device !~ /\#.*/) && (defined $device) && (defined $value) && (defined $filename))
+  {
+    # here is stuff we just do for each *valid* config line
+    $validcount++;
+    chomp $filename;
+    if ( ! -f "$rrddirectory/${filename}.rrd" )
+    { print "$filename is in $owconfig but has no RRD file\n"; }
+    if ( ! -f "$logdirectory/${filename}.log" )                                 
+    { print "$filename is in $owconfig but has no logfile\n"; }
+    # get last line of file - should use File::ReadBackwards really 
+    $lastline = `tail -1 $logdirectory/$filename.log`;
+    ($lasttime, $lastval) = split(' ',$lastline);
+    chomp $lastval;
+    $lastvalage = $timestamp-$lasttime;
+    if ($lastvalage > 600)
+    { print "$filename hasn't updated for $lastvalage seconds\n"; }
+    if ($lastval eq "")
+    { print "$filename has updated with null value\n"; }
+  }
+  else 
+  {
+    # here is stuff we just do for each *invalid* config line
+    # if the line is invalid and doesn't start with hash, something's wrong
+    if ($device !~ /\#.*/)
+    { $invalidcount++; }
+  }
+  # stuff here happens each line regardless
+}
+
+if ($invalidcount > 0)                                                      
+{ print "$invalidcount invalid un-commented lines in $owconfig\n"; } 
+
+# for debug - i don't think we want to actually print unless something is wrong
+##print "processed $validcount valid config items, ignored $invalidcount invalid lines\n";
+
+# the currentcost
+$timestamp = time();                                                          
+
+# get last line of file - should use File::ReadBackwards really             
+$lastline = `tail -1 $logdirectory/power.log`;                          
+($lasttime) = split(' ',$lastline);                       
+$lastvalage = $timestamp-$lasttime;                                         
+if ($lastvalage > 600)                                                       
+{ print "currentcost hasn't output for $lastvalage seconds\n"; }                                                                           
+# check for 0W values which indicate a currentcost sensor fail of some sort
+$cclastzero = `grep \\ 0W $logdirectory/power.log|tail -1`;
+($lasttime) = split(' ',$cclastzero);
+$lastvalage = $timestamp-$lasttime;                   
+##print "currentcost last read zero $lastvalage secs ago\n";                          
+if ($lastvalage < 3700)
+{ print "currentcost has read zero watts within last hour\n"; }
+
+# whinge if one of the sensors hasn't read for an hour
+
+$cclastopti = `grep opti $logdirectory/power.log|tail -1`;
+($lasttime) = split(' ',$cclastopti);
+$lastvalage = $timestamp-$lasttime;
+##print "currentcost optical sensor last read $lastvalage secs ago\n";
+if ($lastvalage > 3700)                                                         
+{ print "currentcost optical sensor hasn't read for an hour\n"; } 
+
+$cclastclamp = `grep clamp $logdirectory/power.log|tail -1`;                    
+($lasttime) = split(' ',$cclastclamp);                                          
+$lastvalage = $timestamp-$lasttime;                                             
+##print "currentcost clamp sensor last read $lastvalage secs ago\n";  
+if ($lastvalage > 3700)                                                         
+{ print "currentcost clamp sensor hasn't read for an hour\n"; }
+
+close LOCKFILE;
+unlink $lockfile;
+
+
