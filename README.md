@@ -30,3 +30,8 @@ graph.pl
 Create graphs using the data stored in RRDs.
 Should be driven by a config file, but isn't.
 
+checklogs.pl
+Check log files for various errors and invalid values.
+Heavily hard-coded to my own house's setup.
+Terrible code with lots of lazy backticks.
+
