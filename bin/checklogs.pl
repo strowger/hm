@@ -2,6 +2,9 @@
 #
 # checklogs.pl - alert on various undesirable conditions in logs
 #
+# designed to be run periodically from cron and only reports on stdout 
+# if error conditions are noted
+#
 # GH 2015-10-06
 # begun
 #
