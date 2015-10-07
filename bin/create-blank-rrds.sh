@@ -194,7 +194,7 @@ rrdtool create fanhrs.rrd --start 1444200000 --step 3600 \
 DS:hrs:COUNTER:7200:U:U \
 RRA:LAST:0.5:1:90000
 
-rrdtool create hwchrs.rrd --start 1444200000 --step 3600 \
+rrdtool create hwchours.rrd --start 1444200000 --step 3600 \
 DS:hrs:COUNTER:7200:U:U \
 RRA:LAST:0.5:1:90000
 
