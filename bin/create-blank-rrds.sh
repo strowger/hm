@@ -187,6 +187,28 @@ rrdtool create igntimemax.rrd --start 1437500000 --step 3600 \
 DS:secs:GAUGE:7200:U:U \
 RRA:LAST:0.5:1:90000
 
+# 20151007 been gathering these for ages but not rrd'ing
+# these things all change slowly and are clearly not worth <1h resolution
+
+rrdtool create fanhrs.rrd --start 1444200000 --step 3600 \
+DS:hrs:COUNTER:7200:U:U \
+RRA:LAST:0.5:1:90000
+
+rrdtool create hwchrs.rrd --start 1444200000 --step 3600 \
+DS:hrs:COUNTER:7200:U:U \
+RRA:LAST:0.5:1:90000
+
+rrdtool create pumphrs.rrd --start 1444200000 --step 3600 \
+DS:hrs:COUNTER:7200:U:U \
+RRA:LAST:0.5:1:90000
+
+rrdtool create pumpstarts1.rrd --start 1444200000 --step 3600 \
+DS:count:COUNTER:7200:U:U \
+RRA:LAST:0.5:1:90000
+
+rrdtool create pumpstarts2.rrd --start 1444200000 --step 3600 \
+DS:count:COUNTER:7200:U:U \
+RRA:LAST:0.5:1:90000
 
 ## 20150624
 ## one-wire devices
