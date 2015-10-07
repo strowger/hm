@@ -210,6 +210,16 @@ rrdtool create pumpstarts2.rrd --start 1444200000 --step 3600 \
 DS:count:COUNTER:7200:U:U \
 RRA:LAST:0.5:1:90000
 
+# 20151007 the two different places we can read the heating curve from
+
+rrdtool create heatcurve1.rrd --start 1444200000 --step 3600 \
+DS:curve:GAUGE:7200:U:U \
+RRA:LAST:0.5:1:90000
+
+rrdtool create heatcurve2.rrd --start 1444200000 --step 3600 \
+DS:curve:GAUGE:7200:U:U \
+RRA:LAST:0.5:1:90000
+
 ## 20150624
 ## one-wire devices
 
