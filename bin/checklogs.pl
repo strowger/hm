@@ -30,6 +30,15 @@ $lastline = `tail -1 $logdirectory/cylindertemp.log`;
 if ($lastval < 50)
 { print "hot water cylinder down to $lastval C\n"; }
 
+# pressure in heating circuit. <1 bar is bad as will draw air in
+# not sure what the prv will lift at but we'll alert at 2.6bar
+$lastline = `tail -1 $logdirectory/waterpressure.log`;
+($lasttime, $lastval) = split(' ',$lastline);                                   
+if ($lastval < 1.1)
+{ print "water pressure in heating circuit down to $lastval bar\n"; }
+if ($lastval < 2.6)
+{ print "water pressure in heating circuit up to $lastval bar\n"; }  
+
 # the ebus devices from the config
 
 foreach $line (<EBCONFIG>)
