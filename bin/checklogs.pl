@@ -36,7 +36,7 @@ $lastline = `tail -1 $logdirectory/waterpressure.log`;
 ($lasttime, $lastval) = split(' ',$lastline);                                   
 if ($lastval < 1.1)
 { print "water pressure in heating circuit down to $lastval bar\n"; }
-if ($lastval < 2.6)
+if ($lastval > 2.6)
 { print "water pressure in heating circuit up to $lastval bar\n"; }  
 
 # the ebus devices from the config
