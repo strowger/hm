@@ -87,7 +87,13 @@ $output = `rrdtool graph $graphdirectory/hotwater${time}.png -a PNG --vertical-l
 # the gas meter gives a pulse per dm3, which is .001 m3
 # the 409 in the kw CDEF is from 6*60*11.363
 
-$output = `rrdtool graph $graphdirectory/gasmeter${time}.png -a PNG --vertical-label "kwh per hour" -s -${time} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'CDEF:kw=dm3persec,409,*' 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'LINE2:kw#${col01}:gas kwh per hour from meter' 'LINE2:modtdpc#${col02}:boiler ebus modulation percentage scaled to kW' `;
+# the calculation stuff uses rrd rpn syntax to bring the modulation line
+# down to zero if the flame ionisation sensor indicates the fire is out
+# otherwise it stays up at the last known value until the fire is re-lit
+# https://oss.oetiker.ch/rrdtool/tut/rpntutorial.en.html
+# the logic is "if ionisation > 65 then zero else modtdpc"
+
+$output = `rrdtool graph $graphdirectory/gasmeter${time}.png -a PNG --vertical-label "kwh per hour" -s -${time} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'CDEF:kw=dm3persec,409,*' 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'CDEF:modtdpcif=ion,65,GT,0,modtdpc,IF' 'LINE2:kw#${col01}:gas kwh per hour from meter' 'LINE2:modtdpcif#${col02}:boiler ebus modulation percentage scaled to kW' `;
 
 $output = `rrdtool graph $graphdirectory/igntime${time}.png -a PNG --vertical-label "seconds" -s -${time} -w 1024 -h 300 'DEF:avg='$rrddirectory/igntimeavg.rrd:secs:LAST 'DEF:min='$rrddirectory/igntimemin.rrd:secs:LAST 'DEF:max='$rrddirectory/igntimemax.rrd:secs:LAST 'LINE2:avg#${col01}:average ignition time' 'LINE2:min#${col02}:minimum ignition time' 'LINE2:max#${col03}:maximum ignition time' `;
 
