@@ -540,3 +540,15 @@ RRA:LAST:0.5:1:15811200
 rrdtool create barompressure.rrd --start 1439700000 --step 60 \
 DS:pres:GAUGE:120:90000:110000 \
 RRA:LAST:0.5:1:15811200
+
+# 20151012 1-wire temperature sensors in front porch and wall cavity
+
+rrdtool create porch1temp.rrd --start 1444600000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create cavity1temp.rrd --start 1444600000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+
