@@ -65,14 +65,6 @@ foreach $line (<EBCONFIG>)
     { print "$filename hasn't updated for $lastvalage seconds\n"; }             
     if ($lastval eq "")                                                         
     { print "$filename has updated with null value\n"; } 
-    # get last line of file - should use File::ReadBackwards really             
-    $lastline = `tail -1 $logdirectory/$filename.log`;                          
-    chomp $lastval;                                                             
-    $lastvalage = $timestamp-$lasttime;                                         
-    if ($lastvalage > 600)                                                      
-    { print "$filename hasn't updated for $lastvalage seconds\n"; }             
-    if ($lastval eq "")                                                         
-    { print "$filename has updated with null value\n"; } 
     if ($lastval =~ /error/)
     { print "$filename has an error value\n"; }
   }
