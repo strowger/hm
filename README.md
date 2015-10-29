@@ -35,3 +35,11 @@ Check log files for various errors and invalid values.
 Heavily hard-coded to my own house's setup.
 Terrible code with lots of lazy backticks.
 
+to-do
+
+we are gathering data from downstairs bathroom radiator flow/return but not graphing it
+
+is 1wdevicecount working or not?
+
+lots more data re the health of each 1-wire adaptor is available from owfs, we should graph errors
+
