@@ -21,6 +21,7 @@ if ( -f $lockfile )
 open LOCKFILE, ">", $lockfile or die $!;
 
 $timestamp = time();
+$starttime = $timestamp;
 
 open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
 
@@ -82,7 +83,38 @@ foreach $line (<CONFIG>)
   # stuff here happens each line even if the line was invalid
 }
 
-print LOGFILE "processed $validcount valid config items, ignored $invalidcount invalid lines\n";
+# count devices on each bus and record
+foreach $bus (0..1) 
+{
+  print LOGFILE "$timestamp: reading device count on bus $bus: ";
+  $buscount = `/opt/owfs/bin/owdir /bus.$bus|grep -v alarm|grep -v simultaneous|grep -v interface|wc -l`;
+  chomp $buscount;
+  print LOGFILE "$buscount\n";
+  open LINE, ">>", "$logdirectory/1wdevicecount$bus.log" or die $!;
+  print LINE "$timestamp $buscount\n";
+  close LINE;
+  # if the rrd doesn't exist, don't attempt to write
+  if ( -f "$rrddirectory/1wdevicecount$bus.rrd" )
+  {
+    $output = `rrdtool update $rrddirectory/1wdevicecount$bus.rrd $timestamp:$buscount`;
+    if (length $output)
+    {
+      print LOGFILE "rrdtool errored $output\n";
+    }
+  }
+  else
+  {
+    print LOGFILE "rrd for 1wdevicecount$bus doesn't exist, skipping update\n";
+  }
+}
+
+
+
+$endtime = time();
+$runtime = $endtime - $starttime;
+
+
+print LOGFILE "processed $validcount valid config items, ignored $invalidcount invalid lines in $runtime seconds\n";
 print LOGFILE "exiting successfully\n\n";
 
 close LOCKFILE;
