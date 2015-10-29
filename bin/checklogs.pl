@@ -115,7 +115,7 @@ foreach $line (<OWCONFIG>)
     { print "$filename has invalid humidity value $lastval\n"; }
     # out-of-spec vdd shows a bus problem
     if (($filename =~ /vdd$/) && ($lastval < 4.7))
-    { print "filename has low vdd $lastval\n"; }
+    { print "$filename has low vdd $lastval\n"; }
   }
   else 
   {
