@@ -583,6 +583,8 @@ rrdtool create dbath5.rrd --start 1446000000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
+# these should be "devs" not "curve" but i'd already started logging and making graphs...
+# if fixed, need to update graph.pl with the new DS name too
 rrdtool create 1wdevicecount0.rrd --start 1446000000 --step 3600 \
 DS:curve:GAUGE:7200:U:U \
 RRA:LAST:0.5:1:90000
@@ -590,4 +592,7 @@ RRA:LAST:0.5:1:90000
 rrdtool create 1wdevicecount1.rrd --start 1446000000 --step 3600 \
 DS:curve:GAUGE:7200:U:U \
 RRA:LAST:0.5:1:90000
+
+
+
 
