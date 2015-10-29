@@ -551,4 +551,43 @@ rrdtool create cavity1temp.rrd --start 1444600000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
+# 20151029 1-wire sensors on downstairs bath, radiator
+# count of devices on bus, hourly
+
+rrdtool create dbathradflow.rrd --start 1446000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create dbathradrtn.rrd --start 1446000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+# five sensors on bath, numbered from bottom upwards
+rrdtool create dbath1.rrd --start 1446000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create dbath2.rrd --start 1446000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create dbath3.rrd --start 1446000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create dbath4.rrd --start 1446000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create dbath5.rrd --start 1446000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create 1wdevicecount0.rrd --start 1446000000 --step 3600 \
+DS:curve:GAUGE:7200:U:U \
+RRA:LAST:0.5:1:90000
+
+rrdtool create 1wdevicecount1.rrd --start 1446000000 --step 3600 \
+DS:curve:GAUGE:7200:U:U \
+RRA:LAST:0.5:1:90000
 
