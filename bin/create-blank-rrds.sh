@@ -593,6 +593,12 @@ rrdtool create 1wdevicecount1.rrd --start 1446000000 --step 3600 \
 DS:curve:GAUGE:7200:U:U \
 RRA:LAST:0.5:1:90000
 
+# 20151030 small hall radiator
+rrdtool create hall1flow.rrd --start 1446300000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
 
-
+rrdtool create hall1rtn.rrd --start 1446300000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
 
