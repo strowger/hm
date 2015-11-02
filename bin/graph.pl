@@ -106,7 +106,7 @@ $output = `rrdtool graph $graphdirectory/dsbath${time}.png -a PNG --vertical-lab
 
 # 1-wire bus stuff
 # number of devices on each
-$output = `rrdtool graph $graphdirectory/1wdevicecount${time}.png -a PNG --vertical-label "devices" -s -${time} -w 1024 -h 300 'DEF:b0='$rrddirectory/1wdevicecount0.rrd:curve:LAST 'DEF:b1='$rrddirectory/1wdevicecount1.rrd:curve:LAST 'LINE2:b0#${col01}:bus 0' 'LINE2:b1#${col02}:bus 1':STACK -W "${datestamp}" -t "1-wire devices connected"`; 
+$output = `rrdtool graph $graphdirectory/1wdevicecount${time}.png -a PNG --vertical-label "devices" -s -${time} -w 1024 -h 300 'DEF:b0='$rrddirectory/1wdevicecount0.rrd:curve:LAST 'DEF:b1='$rrddirectory/1wdevicecount1.rrd:curve:LAST 'AREA:b0#${col01}:bus 0' 'AREA:b1#${col02}:bus 1':STACK -W "${datestamp}" -t "1-wire devices connected"`; 
 
 close LOCKFILE;
 unlink $lockfile;

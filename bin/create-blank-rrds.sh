@@ -602,3 +602,22 @@ rrdtool create hall1rtn.rrd --start 1446300000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
+# 20151101 downstairs bathroom
+
+rrdtool create dbathvoid1.rrd --start 1446400000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create dbathfeed1.rrd --start 1446400000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create dbathfeed2.rrd --start 1446400000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create ensuitedrain.rrd --start 1446400000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+
