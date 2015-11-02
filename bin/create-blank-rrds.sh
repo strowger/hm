@@ -620,4 +620,13 @@ rrdtool create ensuitedrain.rrd --start 1446400000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
+# 20151102 seconds to do reads - hourly
+
+rrdtool create runtime1w.rrd --start 1446400000 --step 3600 \
+DS:secs:GAUGE:7200:U:U \
+RRA:LAST:0.5:1:90000
+
+rrdtool create runtimeeb.rrd --start 1446400000 --step 3600 \
+DS:secs:GAUGE:7200:U:U \
+RRA:LAST:0.5:1:90000
 

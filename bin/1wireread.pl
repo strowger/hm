@@ -108,11 +108,24 @@ foreach $bus (0..1)
   }
 }
 
-
-
 $endtime = time();
 $runtime = $endtime - $starttime;
 
+open LINE, ">>", "$logdirectory/runtime1w.log" or die $!;
+print LINE "$timestamp $runtime\n";
+close LINE;
+if ( -f "$rrddirectory/runtime1w.rrd" )
+{
+  $output = `rrdtool update $rrddirectory/runtime1w.rrd $timestamp:$runtime`;
+  if (length $output)
+    {
+      print LOGFILE "rrdtool errored $output\n";
+    }
+}
+else
+{
+  print LOGFILE "rrd for runtime1w doesn't exist, skipping update\n";
+}
 
 print LOGFILE "processed $validcount valid config items, ignored $invalidcount invalid lines in $runtime seconds\n";
 print LOGFILE "exiting successfully\n\n";

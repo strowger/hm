@@ -20,6 +20,7 @@ if ( -f $lockfile )
 open LOCKFILE, ">", $lockfile or die $!;
 
 $timestamp = time();
+$starttime = $timestamp;
 
 open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
 
@@ -95,7 +96,26 @@ foreach $line (<CONFIG>)
   # stuff here happens each line even if the line was invalid
 }
 
-print LOGFILE "processed $validcount valid config items, ignored $invalidcount invalid lines\n";
+$endtime = time();
+$runtime = $endtime - $starttime;
+
+open LINE, ">>", "$logdirectory/runtimeeb.log" or die $!;
+print LINE "$timestamp $runtime\n";
+close LINE;
+if ( -f "$rrddirectory/runtimeeb.rrd" )
+{
+  $output = `rrdtool update $rrddirectory/runtimeeb.rrd $timestamp:$runtime`;
+  if (length $output)
+    {
+      print LOGFILE "rrdtool errored $output\n";
+    }
+}
+else
+{
+  print LOGFILE "rrd for runtimeeb doesn't exist, skipping update\n";
+}
+
+print LOGFILE "processed $validcount valid config items, ignored $invalidcount invalid lines in $runtime seconds\n";
 print LOGFILE "exiting successfully\n\n";
 
 close LOCKFILE;
