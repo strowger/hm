@@ -104,9 +104,9 @@ $output = `rrdtool graph $graphdirectory/igntime${time}.png -a PNG --vertical-la
 # downstairs bath, sensors are numbered bottom-to-top
 $output = `rrdtool graph $graphdirectory/dsbath${time}.png -a PNG --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:s1='$rrddirectory/dbath1.rrd:temp:LAST 'DEF:s2='$rrddirectory/dbath2.rrd:temp:LAST 'DEF:s3='$rrddirectory/dbath3.rrd:temp:LAST 'DEF:s4='$rrddirectory/dbath4.rrd:temp:LAST 'DEF:s5='$rrddirectory/dbath5.rrd:temp:LAST 'LINE2:s1#${col01}:bottom of bath' 'LINE2:s2#${col02}:first point up bath' 'LINE2:s3#${col03}:second point up bath' 'LINE2:s4#${col04}:third point up bath' 'LINE2:s5#${col05}:top of bath' -W "${datestamp}" -t "downstairs bath temperatures"`;
 
-# 1-wire bus stuff
+# bus stuff
 # number of devices on each
-$output = `rrdtool graph $graphdirectory/1wdevicecount${time}.png -a PNG --vertical-label "devices" -s -${time} -w 1024 -h 300 'DEF:b0='$rrddirectory/1wdevicecount0.rrd:curve:LAST 'DEF:b1='$rrddirectory/1wdevicecount1.rrd:curve:LAST 'AREA:b0#${col01}:bus 0' 'AREA:b1#${col02}:bus 1':STACK -W "${datestamp}" -t "1-wire devices connected"`; 
+$output = `rrdtool graph $graphdirectory/1wdevicecount${time}.png -a PNG --vertical-label "devices" -s -${time} -w 1024 -h 300 'DEF:b0='$rrddirectory/1wdevicecount0.rrd:curve:LAST 'DEF:b1='$rrddirectory/1wdevicecount1.rrd:curve:LAST 'DEF:owtime='$rrddirectory/runtime1w.rrd:secs:LAST  'AREA:b0#${col01}:bus 0' 'AREA:b1#${col02}:bus 1':STACK 'LINE2:owtime#${col03}:script runtime'  -W "${datestamp}" -t "1-wire devices connected"`; 
 
 close LOCKFILE;
 unlink $lockfile;
