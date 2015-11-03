@@ -630,3 +630,20 @@ rrdtool create runtimeeb.rrd --start 1446400000 --step 3600 \
 DS:secs:GAUGE:7200:U:U \
 RRA:LAST:0.5:1:90000
 
+# 20151103 1-wire error counters - hourly
+
+for i in 0 1
+do
+  rrdtool create bus${i}utilpercent.rrd --start 1446400000 --step 3600 \
+  DS:percent:GAUGE:7200:U:U \
+  RRA:LAST:0.5:1:90000 
+  
+  for j in close_errors detect_errors errors locks open_errors program_errors pullup_errors read_errors reconnect_errors reconnects reset_errors resets select_errors shorts status_errors timeouts unlocks 
+  do
+    rrdtool create bus${i}${j}.rrd --start 1446400000 --step 3600 \
+    DS:count:COUNTER:7200:U:U \
+    RRA:LAST:0.5:1:90000
+  done   
+done
+
+
