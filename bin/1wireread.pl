@@ -120,7 +120,7 @@ foreach $bus (0..1)
   $usedpercentrounded = sprintf "%.2f", $usedpercent;
   print LOGFILE "calculated utilisation $usedpercentrounded%\n";
   open LINE, ">>", "$logdirectory/bus${bus}utilpercent.log" or die $!;
-  print LINE "$timestamp $usedpercentrounded";
+  print LINE "$timestamp $usedpercentrounded\n";
   close LINE;
   if ( -f "$rrddirectory/bus${bus}utilpercent.rrd" )
   {
@@ -132,7 +132,7 @@ foreach $bus (0..1)
   }
   else
   {
-    print LOGFILE "rrd for bus${bus}utilpercentt doesn't exist, skipping update\n";
+    print LOGFILE "rrd for bus${bus}utilpercent doesn't exist, skipping update\n";
   }
 
   print LOGFILE "$timestamp: reading error counts on bus $bus: ";
@@ -144,6 +144,22 @@ foreach $bus (0..1)
     # this substitution removes leading whitespace
     $errorvalue =~ s/^\s+//;
     print LOGFILE "$errortype $errorvalue ";
+    open LINE, ">>", "$logdirectory/bus${bus}${errortype}.log" or die $!;
+    print LINE "$timestamp $errorvalue\n";
+    close LINE;
+    if ( -f "$rrddirectory/bus${bus}${errortype}.rrd" )
+    {
+      $output = `rrdtool update $rrddirectory/bus${bus}${errortype} $timestamp:$errorvalue`;
+      if (length $output)
+      {
+        print LOGFILE "rrdtool errored $output\n";
+      }
+    }
+    else
+    {
+      print LOGFILE "rrd for bus${bus}${errortype} doesn't exist, skipping update\n";
+    }
+
   }
   print LOGFILE "\n";
 }
