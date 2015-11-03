@@ -106,6 +106,46 @@ foreach $bus (0..1)
   {
     print LOGFILE "rrd for 1wdevicecount$bus doesn't exist, skipping update\n";
   }
+  print LOGFILE "$timestamp: reading times on bus $bus: ";
+  $bustime = `/opt/owfs/bin/owread /bus.$bus/interface/statistics/bus_time`;
+  chomp $bustime;
+  # this substitution removes leading whitespace
+  $bustime =~ s/^\s+//;
+  print LOGFILE "bustime $bustime,";
+  $uptime = `/opt/owfs/bin/owread /bus.$bus/interface/statistics/elapsed_time`;
+  chomp $uptime;
+  $uptime =~ s/^\s+//;
+  print LOGFILE "uptime $uptime, ";
+  $usedpercent = $bustime / $uptime * 100;
+  $usedpercentrounded = sprintf "%.2f", $usedpercent;
+  print LOGFILE "calculated utilisation $usedpercentrounded%\n";
+  open LINE, ">>", "$logdirectory/bus${bus}utilpercent.log" or die $!;
+  print LINE "$timestamp $usedpercentrounded";
+  close LINE;
+  if ( -f "$rrddirectory/bus${bus}utilpercent.rrd" )
+  {
+    $output = `rrdtool update $rrddirectory/bus${bus}utilpercent.rrd $timestamp:$usedpercentrounded`;
+    if (length $output)
+    {
+      print LOGFILE "rrdtool errored $output\n";
+    }
+  }
+  else
+  {
+    print LOGFILE "rrd for bus${bus}utilpercentt doesn't exist, skipping update\n";
+  }
+
+  print LOGFILE "$timestamp: reading error counts on bus $bus: ";
+  @errorvalues = qw(close_errors detect_errors errors locks open_errors program_errors pullup_errors read_errors reconnect_errors reconnects reset_errors resets select_errors shorts status_errors timeouts unlocks);
+  foreach $errortype (@errorvalues)
+  {
+    $errorvalue = `/opt/owfs/bin/owread /bus.$bus/interface/statistics/$errortype`;
+    chomp $errorvalue;
+    # this substitution removes leading whitespace
+    $errorvalue =~ s/^\s+//;
+    print LOGFILE "$errortype $errorvalue ";
+  }
+  print LOGFILE "\n";
 }
 
 $endtime = time();
