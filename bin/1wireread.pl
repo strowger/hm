@@ -149,7 +149,7 @@ foreach $bus (0..1)
     close LINE;
     if ( -f "$rrddirectory/bus${bus}${errortype}.rrd" )
     {
-      $output = `rrdtool update $rrddirectory/bus${bus}${errortype} $timestamp:$errorvalue`;
+      $output = `rrdtool update $rrddirectory/bus${bus}${errortype}.rrd $timestamp:$errorvalue`;
       if (length $output)
       {
         print LOGFILE "rrdtool errored $output\n";
