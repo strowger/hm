@@ -532,13 +532,13 @@ DS:counts:COUNTER:120:0:1000 \
 RRA:LAST:0.5:1:15811200
 
 # 20150816 hobby-boards 1-wire barometer
-# does temperature and pressure (in hundredths of kilopascals - ie /100 for mbar?)
+# 20151104 re-made for use with homechip/edsproducts barometer 
 rrdtool create baromtemp.rrd --start 1439700000 --step 60 \
 DS:temp:GAUGE:120:-50:110 \
 RRA:LAST:0.5:1:15811200
 
 rrdtool create barompressure.rrd --start 1439700000 --step 60 \
-DS:pres:GAUGE:120:90000:110000 \
+DS:pres:GAUGE:120:800:1200 \
 RRA:LAST:0.5:1:15811200
 
 # 20151012 1-wire temperature sensors in front porch and wall cavity
