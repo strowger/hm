@@ -69,8 +69,6 @@ $output = `rrdtool graph $graphdirectory/waterpressure${time}.png -a PNG -y 0.1:
 
 $output = `rrdtool graph $graphdirectory/ionisationvolts${time}.png -a PNG --vertical-label "volts/modulation percentage" -s -${time} -w 1024 -h 300 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'LINE2:ion#${col01}:flame sensor ionisation volts' 'LINE2:modtd#${col02}:desired modulation' -W "${datestamp}" -t "boiler flame detection (ionisation sensor)" `;
 
-$output = `rrdtool graph $graphdirectory/busvolts${time}.png -a PNG --vertical-label "volts" -s -${time} -w 1024 -h 300 'DEF:boilerrm='$rrddirectory/boilerrmvdd.rrd:vdd:LAST 'DEF:cellar='$rrddirectory/cellarvdd.rrd:vdd:LAST 'DEF:office='$rrddirectory/officevdd.rrd:vdd:LAST 'DEF:coal='$rrddirectory/coalvdd.rrd:vdd:LAST 'LINE2:boilerrm#${col01}:boiler room' 'LINE2:cellar#${col02}:cellar' 'LINE2:office#${col03}:office' 'LINE2:coal#${col04}:coal cellar' -W "${datestamp}" -t "1-wire bus voltages"`;
-
 $output = `rrdtool graph $graphdirectory/watermeter${time}.png -a PNG -y 0.1:1 --vertical-label "litres" -s -${time} -w 1024 -h 300 'DEF:tenlitrespersec='$rrddirectory/watermeter.rrd:tenlitres:LAST 'CDEF:litrespertenmin=tenlitrespersec,60,*' 'LINE2:litrespertenmin#${col01}:water usage' -W "${datestamp}" -t "water consumption"  `;
 
 $output = `rrdtool graph $graphdirectory/hwtank${time}.png -a PNG --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:t0='$rrddirectory/hwtank0.rrd:temp:LAST 'DEF:t1='$rrddirectory/hwtank1.rrd:temp:LAST 'DEF:t2='$rrddirectory/hwtank2.rrd:temp:LAST 'DEF:t3='$rrddirectory/hwtank3.rrd:temp:LAST 'DEF:t4='$rrddirectory/hwtank4.rrd:temp:LAST 'DEF:t5='$rrddirectory/hwtank5.rrd:temp:LAST 'DEF:fl='$rrddirectory/hwfeed0.rrd:temp:LAST 'DEF:rn='$rrddirectory/hwsec0.rrd:temp:LAST 'DEF:eb='$rrddirectory/cylindertemp.rrd:temp:LAST 'DEF:cwsh='$rrddirectory/cwsh.rrd:temp:LAST 'DEF:cwsc='$rrddirectory/cwsc.rrd:temp:LAST 'LINE2:t0#${col01}:position 0 - top' 'LINE2:t1#${col02}:position 1' 'LINE2:t2#${col03}:position 2' 'LINE2:t3#${col04}:position 3' 'LINE2:t4#${col05}:position 4' 'LINE2:t5#${col06}:position 5 - bottom' 'LINE2:eb#${col07}:ebus cylinder probe'  'LINE2:fl#${col08}:hw feed' 'LINE2:rn#${col09}:hw rtn' 'LINE2:cwsh#${col10}:cold feed - sh' 'LINE2:cwsc#${col11}:cold feed - sc' -W "${datestamp}" -t "hot water tank temperatures"`;
@@ -104,9 +102,14 @@ $output = `rrdtool graph $graphdirectory/igntime${time}.png -a PNG --vertical-la
 # downstairs bath, sensors are numbered bottom-to-top
 $output = `rrdtool graph $graphdirectory/dsbath${time}.png -a PNG --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:s1='$rrddirectory/dbath1.rrd:temp:LAST 'DEF:s2='$rrddirectory/dbath2.rrd:temp:LAST 'DEF:s3='$rrddirectory/dbath3.rrd:temp:LAST 'DEF:s4='$rrddirectory/dbath4.rrd:temp:LAST 'DEF:s5='$rrddirectory/dbath5.rrd:temp:LAST 'LINE2:s1#${col01}:bottom of bath' 'LINE2:s2#${col02}:first point up bath' 'LINE2:s3#${col03}:second point up bath' 'LINE2:s4#${col04}:third point up bath' 'LINE2:s5#${col05}:top of bath' -W "${datestamp}" -t "downstairs bath temperatures"`;
 
+# barometer
+$output = `rrdtool graph $graphdirectory/barometer${time}.png -a PNG --vertical-label "millibars" -s -${time} -w 1024 -h 300 'DEF:pres='$rrddirectory/barompressure.rrd:pres:LAST 'LINE2:pres#${col01}:barometric pressure' -W "${datestamp}" -t "barometer"`;
+
 # bus stuff
 # number of devices on each
-$output = `rrdtool graph $graphdirectory/1wdevicecount${time}.png -a PNG -l 0 --vertical-label "devices" -s -${time} -w 1024 -h 300 'DEF:b0='$rrddirectory/1wdevicecount0.rrd:curve:LAST 'DEF:b1='$rrddirectory/1wdevicecount1.rrd:curve:LAST 'DEF:owtime='$rrddirectory/runtime1w.rrd:secs:LAST  'AREA:b0#${col01}:bus 0' 'AREA:b1#${col02}:bus 1':STACK 'LINE2:owtime#${col03}:script runtime'  -W "${datestamp}" -t "1-wire devices connected"`; 
+$output = `rrdtool graph $graphdirectory/1wdevicecount${time}.png -a PNG -l 0 --vertical-label "devices" -s -${time} -w 1024 -h 300 'DEF:b0='$rrddirectory/1wdevicecount0.rrd:curve:LAST 'DEF:b1='$rrddirectory/1wdevicecount1.rrd:curve:LAST 'DEF:owtime='$rrddirectory/runtime1w.rrd:secs:LAST  'AREA:b0#${col01}:bus 0' 'AREA:b1#${col02}:bus 1':STACK 'LINE2:owtime#${col03}:script runtime'  -W "${datestamp}" -t "1-wire devices connected / seconds"`; 
+
+$output = `rrdtool graph $graphdirectory/busvolts${time}.png -a PNG --vertical-label "volts" -s -${time} -w 1024 -h 300 'DEF:boilerrm='$rrddirectory/boilerrmvdd.rrd:vdd:LAST 'DEF:cellar='$rrddirectory/cellarvdd.rrd:vdd:LAST 'DEF:office='$rrddirectory/officevdd.rrd:vdd:LAST 'DEF:coal='$rrddirectory/coalvdd.rrd:vdd:LAST 'LINE2:boilerrm#${col01}:boiler room' 'LINE2:cellar#${col02}:cellar' 'LINE2:office#${col03}:office' 'LINE2:coal#${col04}:coal cellar' -W "${datestamp}" -t "1-wire bus voltages"`;
 
 close LOCKFILE;
 unlink $lockfile;
