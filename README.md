@@ -39,7 +39,8 @@ to-do
 
 we are gathering data from downstairs bathroom radiator flow/return but not graphing it
 
-is 1wdevicecount working or not?
+we are not graphing the sensor in the void by the downstairs toilet cistern
 
-lots more data re the health of each 1-wire adaptor is available from owfs, we should graph errors
+the water meter data is not being collected until we get another counter board, and even then the graphing is unhelpful and needs updating (like for the gas?)
 
+we started to instrument the smaller kitchen radiator but the sensors are not yet connected
