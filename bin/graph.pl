@@ -105,6 +105,12 @@ $output = `rrdtool graph $graphdirectory/dsbath${time}.png -a PNG --vertical-lab
 # barometer
 $output = `rrdtool graph $graphdirectory/barometer${time}.png -a PNG --vertical-label "millibars" -s -${time} -w 1024 -h 300 'DEF:pres='$rrddirectory/barompressure.rrd:pres:LAST 'LINE2:pres#${col01}:barometric pressure' -W "${datestamp}" -t "barometer"`;
 
+# unknown boiler shit
+
+#$output = `rrdtool graph $graphdirectory/boilershit${time}.png -a PNG --vertical-label "counts" -s -${time} -w 1024 -h 300 'DEF:prhc1='$rrddirectory/prenergycounthc1.rrd:count:LAST 'LINE2:prhc1#${col01}:prenergycounthc1' 'DEF:prhwc1='$rrddirectory/prenergycounthwc1.rrd:count:LAST 'LINE2:prhwc1#${col02}:prenergycounthwc1' 'DEF:prshc1='$rrddirectory/prenergysumhc1.rrd:count:LAST 'LINE2:prshc1#${col03}:prenergysumhc1' 'DEF:prshwc1='$rrddirectory/prenergysumhwc1.rrd:count:LAST 'LINE2:prshwc1#${col04}:prenergysumhwc1'  -W "${datestamp}" -t "stuff on test"`;
+$output = `rrdtool graph $graphdirectory/boilershit${time}.png -a PNG --vertical-label "counts" -s -${time} -w 1024 -h 300 'DEF:prhc1='$rrddirectory/prenergycounthc1.rrd:count:LAST 'LINE2:prhc1#${col01}:prenergycounthc1' 'DEF:prhwc1='$rrddirectory/prenergycounthwc1.rrd:count:LAST -W "${datestamp}" -t "stuff on test"`;
+
+
 # bus stuff
 # number of devices on each
 $output = `rrdtool graph $graphdirectory/1wdevicecount${time}.png -a PNG -l 0 --vertical-label "devices" -s -${time} -w 1024 -h 300 'DEF:b0='$rrddirectory/1wdevicecount0.rrd:curve:LAST 'DEF:b1='$rrddirectory/1wdevicecount1.rrd:curve:LAST 'DEF:owtime='$rrddirectory/runtime1w.rrd:secs:LAST  'AREA:b0#${col01}:bus 0' 'AREA:b1#${col02}:bus 1':STACK 'LINE2:owtime#${col03}:script runtime'  -W "${datestamp}" -t "1-wire devices connected / seconds"`; 
