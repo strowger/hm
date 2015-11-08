@@ -646,4 +646,16 @@ do
   done   
 done
 
+# 20151108 3 more sensors in cellar
 
+rrdtool create kitchen1flow.rrd --start 1447018650 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create kitchen1rtn.rrd --start 1447018650 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create cellarwindow1.rrd --start 1447018650 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
