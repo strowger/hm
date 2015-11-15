@@ -111,7 +111,8 @@ foreach $line (<OWCONFIG>)
     if ($lastval eq "")
     { print "$filename has updated with null value\n"; }
     # humidity sensors have a failure mode where they return values >100
-    if (($filename =~ /hum$/) && ($lastval > 100))
+    # but they read up to 100.9999 when it's very damp
+    if (($filename =~ /hum$/) && ($lastval > 101))
     { print "$filename has invalid humidity value $lastval\n"; }
     # out-of-spec vdd shows a bus problem
     if (($filename =~ /vdd$/) && ($lastval < 4.7))
