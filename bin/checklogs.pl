@@ -12,6 +12,7 @@ $owconfig="/data/hm/conf/1wireread.conf";
 $ebconfig="/data/hm/conf/ebusread.conf";
 $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
+$owerrorlog="1wireread-errors.log";
 $lockfile="/tmp/checklogs.lock";
 
 if ( -f $lockfile ) 
@@ -166,6 +167,18 @@ $lastvalage = $timestamp-$lasttime;
 ##print "currentcost clamp sensor last read $lastvalage secs ago\n";  
 if ($lastvalage > 3700)                                                         
 { print "currentcost clamp sensor hasn't read for an hour\n"; }
+
+# if there are no owfs errors then that's all good, no need to warn 
+# that the file isn't there
+if (-f "$logdirectory/$owerrorlog" )
+{
+  open OWERRLOG, "<", "$logdirectory/$owerrorlog" or die $!;
+  foreach $errorline (<OWERRLOG>)
+    { print "$errorline"; }
+  close OWERRLOG;
+  # this might be race-y if the script is running?
+  unlink "$logdirectory/$owerrorlog";
+}
 
 close LOCKFILE;
 unlink $lockfile;

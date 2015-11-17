@@ -10,6 +10,7 @@ $config="/data/hm/conf/1wireread.conf";
 $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="1wireread.log";
+$errorlog="1wireread-errors.log";
 $lockfile="/tmp/1wireread.lock";
 $owread="/opt/owfs/bin/owread";
 
@@ -24,6 +25,7 @@ $timestamp = time();
 $starttime = $timestamp;
 
 open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
+open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;
 
 print LOGFILE "starting 1wireread at $timestamp\n";
 
@@ -31,6 +33,8 @@ open CONFIG, "<", "$config" or die $!;
 
 $validcount = 0;
 $invalidcount = 0;
+$owerrorcount = 0;
+@errordevices = ();
 foreach $line (<CONFIG>)
 {
   $timestamp = time();
@@ -43,12 +47,18 @@ foreach $line (<CONFIG>)
     # here is stuff we just do for each *valid* config line
     chomp $filename;
     print LOGFILE "$timestamp: reading $device $value $filename: ";
-    $output = `$owread /$device/$value|sed s/\\ //g`;
+    # redirect stderr
+    $output = `$owread /$device/$value 2>&1`;
+    # remove *leading* whitespace only - means we don't mangle the errors
+    $output =~ s/^\s+//;
+    chomp $output;
     print LOGFILE "$output\n";
 
     if (($output =~ /error/ ) || ($output =~ /ERR/ ))
     {
       print LOGFILE "got error in owread output - not saving\n";
+      $owerrorcount++;
+      push(@errordevices, $device);
     }
     else
     {
@@ -116,6 +126,7 @@ foreach $bus (0..1)
   chomp $uptime;
   $uptime =~ s/^\s+//;
   print LOGFILE "uptime $uptime, ";
+  # crashes the script with divide-by-zero error if we didn't read the value
   $usedpercent = $bustime / $uptime * 100;
   $usedpercentrounded = sprintf "%.2f", $usedpercent;
   print LOGFILE "calculated utilisation $usedpercentrounded%\n";
@@ -183,7 +194,14 @@ else
   print LOGFILE "rrd for runtime1w doesn't exist, skipping update\n";
 }
 
-print LOGFILE "processed $validcount valid config items, ignored $invalidcount invalid lines in $runtime seconds\n";
+# the hourly checklogs process will mail if it finds stuff here - we can't
+# have a mail every run, it's too spammy
+if ($owerrorcount > 0)
+{
+  print ERRORLOG "$timestamp had $owerrorcount 1-wire bus errors this run, devices @errordevices\n";
+}
+
+print LOGFILE "processed $validcount valid config items, ignored $invalidcount invalid lines, had $owerrorcount 1w bus errors in $runtime seconds\n";
 print LOGFILE "exiting successfully\n\n";
 
 close LOCKFILE;
