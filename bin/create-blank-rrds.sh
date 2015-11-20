@@ -632,7 +632,7 @@ RRA:LAST:0.5:1:90000
 
 # 20151103 1-wire error counters - hourly
 
-for i in 0 1
+for i in 0 1 2
 do
   rrdtool create bus${i}utilpercent.rrd --start 1446400000 --step 3600 \
   DS:percent:GAUGE:7200:U:U \
