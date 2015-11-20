@@ -94,7 +94,7 @@ foreach $line (<CONFIG>)
 }
 
 # count devices on each bus and record
-foreach $bus (0..1) 
+foreach $bus (0..2) 
 {
   print LOGFILE "$timestamp: reading device count on bus $bus: ";
   $buscount = `/opt/owfs/bin/owdir /bus.$bus|grep -v alarm|grep -v simultaneous|grep -v interface|wc -l`;
