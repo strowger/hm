@@ -41,7 +41,7 @@ $col06="FF9933"; # beige
 $col07="EEEE33"; # yellowish
 $col08="33FF00"; # hivis green
 $col09="00FFFF"; # lightish blue
-$col10="0000FF"; # darkish blue
+$col10="2222FF"; # darkish blue 
 $col11="FF3300"; # brightish orange
 $col12="000000"; # black
 
@@ -55,9 +55,9 @@ if ( -f $lockfile )
 open LOCKFILE, ">", $lockfile or die $!;
 
 
-$output = `rrdtool graph $graphdirectory/temps${time}.png -a PNG -l 0 -y 5:1 --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:inside='$rrddirectory/roomtemp.rrd:temp:LAST 'DEF:outside='$rrddirectory/os1temp.rrd:temp:LAST 'DEF:kitchen='$rrddirectory/kitchentemp.rrd:temp:LAST 'DEF:boilerrm='$rrddirectory/boilerrmtemp.rrd:temp:LAST 'DEF:cellar='$rrddirectory/cellartemp.rrd:temp:LAST 'DEF:office='$rrddirectory/officetemp.rrd:temp:LAST 'DEF:officeunderfloor='$rrddirectory/officeunderfloor.rrd:temp:LAST  'DEF:coal='$rrddirectory/coaltemp.rrd:temp:LAST 'DEF:cav='$rrddirectory/cavity1temp.rrd:temp:LAST 'DEF:porch='$rrddirectory/porch1temp.rrd:temp:LAST  'LINE2:inside#${col01}:kitchen temp - thermostat' 'LINE2:outside#${col02}:outside temp' 'LINE2:kitchen#${col03}:kitchen temp - swe3' 'LINE2:boilerrm#${col04}:boiler room temp - swe3' 'LINE2:cellar#${col05}:cellar temp' 'LINE2:office#${col06}:office temp' 'LINE2:officeunderfloor#${col07}:office underfloor temp' 'LINE2:coal#${col08}:coal cellar temp' 'LINE2:cav#${col09}:wall cavity temp' 'LINE2:porch#${col10}:porch temp' -W "${datestamp}" -t "household temperatures" `;
+$output = `rrdtool graph $graphdirectory/temps${time}.png -a PNG -l 0 -y 5:1 --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:inside='$rrddirectory/roomtemp.rrd:temp:LAST 'DEF:outside='$rrddirectory/os1temp.rrd:temp:LAST 'DEF:kitchen='$rrddirectory/kitchentemp.rrd:temp:LAST 'DEF:boilerrm='$rrddirectory/boilerrmtemp.rrd:temp:LAST 'DEF:cellar='$rrddirectory/cellartemp.rrd:temp:LAST 'DEF:office='$rrddirectory/officetemp.rrd:temp:LAST 'DEF:officeunderfloor='$rrddirectory/officeunderfloor.rrd:temp:LAST  'DEF:coal='$rrddirectory/coaltemp.rrd:temp:LAST 'DEF:cav='$rrddirectory/cavity1temp.rrd:temp:LAST 'DEF:porch='$rrddirectory/porch1temp.rrd:temp:LAST 'DEF:landing='$rrddirectory/landingtemp.rrd:temp:LAST 'LINE2:inside#${col01}:kitchen temp - thermostat' 'LINE2:outside#${col02}:outside temp' 'LINE2:kitchen#${col03}:kitchen temp - swe3' 'LINE2:boilerrm#${col04}:boiler room temp' 'LINE2:cellar#${col05}:cellar temp' 'LINE2:office#${col06}:office temp' 'LINE2:officeunderfloor#${col07}:office underfloor temp' 'LINE2:coal#${col08}:coal cellar temp' 'LINE2:cav#${col09}:wall cavity temp' 'LINE2:porch#${col10}:porch temp' 'LINE2:landing#${col11}:landing temp' -W "${datestamp}" -t "household temperatures" `;
 
-$output = `rrdtool graph $graphdirectory/humidity${time}.png -a PNG -l 0 -y 5:1 --vertical-label "percent rh" -s -${time} -w 1024 -h 300 'DEF:boilerrm='$rrddirectory/boilerrmhum.rrd:hum:LAST 'DEF:cellar='$rrddirectory/cellarhum.rrd:hum:LAST 'DEF:office='$rrddirectory/officehum.rrd:hum:LAST 'DEF:coal='$rrddirectory/coalhum.rrd:hum:LAST 'DEF:outside='$rrddirectory/os1hum.rrd:hum:LAST 'DEF:kitchen='$rrddirectory/kitchenhum.rrd:hum:LAST  'LINE2:cellar#${col01}:cellar' 'LINE2:boilerrm#${col02}:boiler room' 'LINE2:office#${col03}:office' 'LINE2:coal#${col04}:coal cellar' 'LINE2:outside#${col05}:outside' 'LINE2:kitchen#${col06}:kitchen' -W "${datestamp}" -t "humidity"`;
+$output = `rrdtool graph $graphdirectory/humidity${time}.png -a PNG -l 0 -y 5:1 --vertical-label "percent rh" -s -${time} -w 1024 -h 300 'DEF:boilerrm='$rrddirectory/boilerrmhum.rrd:hum:LAST 'DEF:cellar='$rrddirectory/cellarhum.rrd:hum:LAST 'DEF:office='$rrddirectory/officehum.rrd:hum:LAST 'DEF:coal='$rrddirectory/coalhum.rrd:hum:LAST 'DEF:outside='$rrddirectory/os1hum.rrd:hum:LAST 'DEF:kitchen='$rrddirectory/kitchenhum.rrd:hum:LAST 'DEF:landing='$rrddirectory/landinghum.rrd:hum:LAST   'LINE2:cellar#${col01}:cellar' 'LINE2:boilerrm#${col02}:boiler room' 'LINE2:office#${col03}:office' 'LINE2:coal#${col04}:coal cellar' 'LINE2:outside#${col05}:outside' 'LINE2:kitchen#${col06}:kitchen' 'LINE2:landing#${col07}:landing'  -W "${datestamp}" -t "humidity"`;
 
 # RPN IF to make modulation be zero if the fire is out, as explained in comment below, for the gasmeter graph
 # this one has upper limit specified as 80 - no temperature should exceed this, but the modulation percentage does (which is ok). we also specify -r to disable auto-scaling.
@@ -105,6 +105,9 @@ $output = `rrdtool graph $graphdirectory/dsbath${time}.png -a PNG --vertical-lab
 # barometer
 $output = `rrdtool graph $graphdirectory/barometer${time}.png -a PNG --vertical-label "millibars" -s -${time} -w 1024 -h 300 'DEF:pres='$rrddirectory/barompressure.rrd:pres:LAST 'LINE2:pres#${col01}:barometric pressure' -W "${datestamp}" -t "barometer"`;
 
+# 20151118 taaralabs thermocouple - stove
+$output = `rrdtool graph $graphdirectory/stove${time}.png -a PNG --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:sto1='$rrddirectory/stovetemp1.rrd:temp:LAST 'LINE2:sto1#${col01}:stove temperature' -W "${datestamp}" -t "stove"`;
+
 # unknown boiler shit
 
 #$output = `rrdtool graph $graphdirectory/boilershit${time}.png -a PNG --vertical-label "counts" -s -${time} -w 1024 -h 300 'DEF:prhc1='$rrddirectory/prenergycounthc1.rrd:count:LAST 'LINE2:prhc1#${col01}:prenergycounthc1' 'DEF:prhwc1='$rrddirectory/prenergycounthwc1.rrd:count:LAST 'LINE2:prhwc1#${col02}:prenergycounthwc1' 'DEF:prshc1='$rrddirectory/prenergysumhc1.rrd:count:LAST 'LINE2:prshc1#${col03}:prenergysumhc1' 'DEF:prshwc1='$rrddirectory/prenergysumhwc1.rrd:count:LAST 'LINE2:prshwc1#${col04}:prenergysumhwc1'  -W "${datestamp}" -t "stuff on test"`;
@@ -116,7 +119,7 @@ $output = `rrdtool graph $graphdirectory/boilershit${time}.png -a PNG --vertical
 $output = `rrdtool graph $graphdirectory/1wdevicecount${time}.png -a PNG -l 0 --vertical-label "devices" -s -${time} -w 1024 -h 300 'DEF:b0='$rrddirectory/1wdevicecount0.rrd:curve:LAST 'DEF:b1='$rrddirectory/1wdevicecount1.rrd:curve:LAST 'DEF:owtime='$rrddirectory/runtime1w.rrd:secs:LAST  'AREA:b0#${col01}:bus 0' 'AREA:b1#${col02}:bus 1':STACK 'LINE2:owtime#${col03}:script runtime'  -W "${datestamp}" -t "1-wire devices connected / seconds"`; 
 
 # volts (at humidity sensors)
-$output = `rrdtool graph $graphdirectory/busvolts${time}.png -a PNG --vertical-label "volts" -s -${time} -w 1024 -h 300 'DEF:boilerrm='$rrddirectory/boilerrmvdd.rrd:vdd:LAST 'DEF:cellar='$rrddirectory/cellarvdd.rrd:vdd:LAST 'DEF:office='$rrddirectory/officevdd.rrd:vdd:LAST 'DEF:coal='$rrddirectory/coalvdd.rrd:vdd:LAST 'DEF:kitchen='$rrddirectory/kitchenvdd.rrd:vdd:LAST 'LINE2:boilerrm#${col01}:boiler room' 'LINE2:cellar#${col02}:cellar' 'LINE2:office#${col03}:office' 'LINE2:coal#${col04}:coal cellar' 'LINE2:kitchen#${col05}:kitchen' -W "${datestamp}" -t "1-wire bus voltages"`;
+$output = `rrdtool graph $graphdirectory/busvolts${time}.png -a PNG --vertical-label "volts" -s -${time} -w 1024 -h 300 'DEF:boilerrm='$rrddirectory/boilerrmvdd.rrd:vdd:LAST 'DEF:cellar='$rrddirectory/cellarvdd.rrd:vdd:LAST 'DEF:office='$rrddirectory/officevdd.rrd:vdd:LAST 'DEF:coal='$rrddirectory/coalvdd.rrd:vdd:LAST 'DEF:kitchen='$rrddirectory/kitchenvdd.rrd:vdd:LAST 'DEF:landing='$rrddirectory/landingvdd.rrd:vdd:LAST  'LINE2:boilerrm#${col01}:boiler room' 'LINE2:cellar#${col02}:cellar' 'LINE2:office#${col03}:office' 'LINE2:coal#${col04}:coal cellar' 'LINE2:kitchen#${col05}:kitchen' 'LINE2:landing#${col06}:landing'  -W "${datestamp}" -t "1-wire bus voltages"`;
 
 # errors
 foreach $bus (0..1)
