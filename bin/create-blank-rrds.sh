@@ -751,3 +751,20 @@ RRA:MAX:0.1:144:10980 \
 RRA:MAX:0.1:1008:1569 \
 RRA:MAX:0.1:40320:393
 
+# 20151121 temp sensors on big rads in kitchen and hall
+rrdtool create kitchen2flow.rrd --start 1448000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create kitchen2rtn.rrd --start 1448000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create hall2flow.rrd --start 1448000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
+rrdtool create hall2rtn.rrd --start 1448000000 --step 60 \
+DS:temp:GAUGE:120:-50:110 \
+RRA:LAST:0.5:1:15811200
+
