@@ -35,63 +35,15 @@ $validcount = 0;
 $invalidcount = 0;
 $owerrorcount = 0;
 @errordevices = ();
-foreach $line (<CONFIG>)
-{
-  $timestamp = time();
-# device id, value to read, rrd filename
-  ($device, $value, $filename) = split(',',$line);
-  # starts with hash means comment, so ignore
-  # ignore if there isn't a value for all items
-  if (($device !~ /\#.*/) && (defined $device) && (defined $value) && (defined $filename))
-  {
-    # here is stuff we just do for each *valid* config line
-    chomp $filename;
-    print LOGFILE "$timestamp: reading $device $value $filename: ";
-    # redirect stderr
-    $output = `$owread /$device/$value 2>&1`;
-    # remove *leading* whitespace only - means we don't mangle the errors
-    $output =~ s/^\s+//;
-    chomp $output;
-    print LOGFILE "$output\n";
 
-    if (($output =~ /error/ ) || ($output =~ /ERR/ ))
-    {
-      print LOGFILE "got error in owread output - not saving\n";
-      $owerrorcount++;
-      push(@errordevices, $device);
-    }
-    else
-    {
-      open LINE, ">>", "$logdirectory/$filename.log" or die $!;
-      print LINE "$timestamp $output\n";
-      close LINE;
-      # if the rrd doesn't exist, don't attempt to write
-      if ( -f "$rrddirectory/${filename}.rrd" )
-      {
-        $output = `rrdtool update $rrddirectory/$filename.rrd $timestamp:$output`;
-        if (length $output)
-        {
-          print LOGFILE "rrdtool errored $output\n";
-        }
-      }
-      else
-      {
-        print LOGFILE "rrd for $filename doesn't exist, skipping update\n";
-      }
-    }
-    $validcount++;
+# store list of devices on each bus to use later in generating error messages
 
-  }
-  else 
-  {
-    # here is stuff we just do for each *invalid* config line
-    $truncline = substr($line, 0, 26);
-    chomp $truncline;
-    print LOGFILE "ignored invalid config line: ${truncline}[...]\n";
-    $invalidcount++;
-  }
-  # stuff here happens each line even if the line was invalid
-}
+$output = `/opt/owfs/bin/owget /bus.0|grep -v alarm|grep -v simultaneous|grep -v interface|sed 's/\\/bus.0\\///'`;
+@bus0members = split(' ',$output);
+$output = `/opt/owfs/bin/owget /bus.1|grep -v alarm|grep -v simultaneous|grep -v interface|sed 's/\\/bus.1\\///'`;
+@bus1members = split(' ',$output);
+$output = `/opt/owfs/bin/owget /bus.2|grep -v alarm|grep -v simultaneous|grep -v interface|sed 's/\\/bus.2\\///'`;
+@bus2members = split(' ',$output);
 
 # count devices on each bus and record
 foreach $bus (0..2) 
@@ -175,6 +127,65 @@ foreach $bus (0..2)
   print LOGFILE "\n";
 }
 
+
+foreach $line (<CONFIG>)
+{
+  $timestamp = time();
+# device id, value to read, rrd filename
+  ($device, $value, $filename) = split(',',$line);
+  # starts with hash means comment, so ignore
+  # ignore if there isn't a value for all items
+  if (($device !~ /\#.*/) && (defined $device) && (defined $value) && (defined $filename))
+  {
+    # here is stuff we just do for each *valid* config line
+    chomp $filename;
+    print LOGFILE "$timestamp: reading $device $value $filename: ";
+    # redirect stderr
+    $output = `$owread /$device/$value 2>&1`;
+    # remove *leading* whitespace only - means we don't mangle the errors
+    $output =~ s/^\s+//;
+    chomp $output;
+    print LOGFILE "$output\n";
+
+    if (($output =~ /error/ ) || ($output =~ /ERR/ ))
+    {
+      print LOGFILE "got error in owread output - not saving\n";
+      $owerrorcount++;
+      push(@errordevices, $device);
+    }
+    else
+    {
+      open LINE, ">>", "$logdirectory/$filename.log" or die $!;
+      print LINE "$timestamp $output\n";
+      close LINE;
+      # if the rrd doesn't exist, don't attempt to write
+      if ( -f "$rrddirectory/${filename}.rrd" )
+      {
+        $output = `rrdtool update $rrddirectory/$filename.rrd $timestamp:$output`;
+        if (length $output)
+        {
+          print LOGFILE "rrdtool errored $output\n";
+        }
+      }
+      else
+      {
+        print LOGFILE "rrd for $filename doesn't exist, skipping update\n";
+      }
+    }
+    $validcount++;
+
+  }
+  else 
+  {
+    # here is stuff we just do for each *invalid* config line
+    $truncline = substr($line, 0, 26);
+    chomp $truncline;
+    print LOGFILE "ignored invalid config line: ${truncline}[...]\n";
+    $invalidcount++;
+  }
+  # stuff here happens each line even if the line was invalid
+}
+
 $endtime = time();
 $runtime = $endtime - $starttime;
 
@@ -198,7 +209,18 @@ else
 # have a mail every run, it's too spammy
 if ($owerrorcount > 0)
 {
-  print ERRORLOG "$timestamp had $owerrorcount 1-wire bus errors this run, devices @errordevices\n";
+  print ERRORLOG "$timestamp had $owerrorcount 1-wire bus errors this run, devices: ";
+  foreach $errordevice (@errordevices)
+  {
+    print ERRORLOG "$errordevice ";
+    if (grep /$errordevice/, @bus0members)
+      { print ERRORLOG "(bus 0) "; }
+    if (grep /$errordevice/, @bus1members)
+      { print ERRORLOG "(bus 1) "; }
+    if (grep /$errordevice/, @bus2members)
+      { print ERRORLOG "(bus 2) "; }
+  }
+  print ERRORLOG "\n";
 }
 
 print LOGFILE "processed $validcount valid config items, ignored $invalidcount invalid lines, had $owerrorcount 1w bus errors in $runtime seconds\n";
