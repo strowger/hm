@@ -45,6 +45,10 @@ $output = `/opt/owfs/bin/owget /bus.1|grep -v alarm|grep -v simultaneous|grep -v
 $output = `/opt/owfs/bin/owget /bus.2|grep -v alarm|grep -v simultaneous|grep -v interface|sed 's/\\/bus.2\\///'`;
 @bus2members = split(' ',$output);
 
+print LOGFILE "bus0 members: @bus0members\n";
+print LOGFILE "bus1 members: @bus1members\n";
+print LOGFILE "bus2 members: @bus2members\n";
+
 # count devices on each bus and record
 foreach $bus (0..2) 
 {
