@@ -771,6 +771,6 @@ RRA:LAST:0.5:1:15811200
 # 20151125 a quick hack, a barometer on the internet in hx to compare
 # 10-minute'ly only
 rrdtool create barompressure2.rrd --start 1448000000 --step 600 \
-DS:pres:GAUGE:120:800:1200 \
+DS:pres:GAUGE:600:800:1200 \
 RRA:LAST:0.5:1:1581120
 
