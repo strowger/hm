@@ -118,6 +118,9 @@ foreach $line (<OWCONFIG>)
     # out-of-spec vdd shows a bus problem
     if (($filename =~ /vdd$/) && ($lastval < 4.7))
     { print "$filename has low vdd $lastval\n"; }
+    # taaralabs thermocouples read this value if they are open-circuit
+    if ($lastval == 2047.75)
+    { print "$filename has suspicious last value 2047.75 - thermocouple fault?"; }
   }
   else 
   {
