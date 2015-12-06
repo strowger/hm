@@ -774,3 +774,7 @@ rrdtool create barompressure2.rrd --start 1448000000 --step 600 \
 DS:pres:GAUGE:600:800:1200 \
 RRA:LAST:0.5:1:1581120
 
+# 20151205 second taaralabs thermocouple on stove
+rrdtool create stovetemp2.rrd --start 1449300000 --step 60 \
+DS:temp:GAUGE:120:-50:600 \
+RRA:LAST:0.5:1:15811200

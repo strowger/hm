@@ -111,8 +111,8 @@ $output = `rrdtool graph $graphdirectory/dsbath${time}.png -a PNG --vertical-lab
 # explicitly specify limits and alt-Y otherwise the scaling is wrong, use X0 so y axis labels printed as ".99k" etc
 $output = `rrdtool graph $graphdirectory/barometer${time}.png -a PNG -u 1025 -l 975 -Y -X0 -r --vertical-label "millibars" -s -${time} -w 1024 -h 300 'DEF:pres='$rrddirectory/barompressure.rrd:pres:LAST  'DEF:pres2='$rrddirectory/barompressure2.rrd:pres:LAST '${linetype}:pres#${col01}:barometric pressure - sensor' '${linetype}:pres2#${col02}:barometric pressure - read from website' -W "${datestamp}" -t "barometer"`;
 
-# 20151118 taaralabs thermocouple - stove
-$output = `rrdtool graph $graphdirectory/stove${time}.png -a PNG --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:sto1='$rrddirectory/stovetemp1.rrd:temp:LAST '${linetype}:sto1#${col01}:stove temperature' -W "${datestamp}" -t "stove"`;
+# 20151118 taaralabs thermocouples - stove
+$output = `rrdtool graph $graphdirectory/stove${time}.png -a PNG --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:sto1='$rrddirectory/stovetemp1.rrd:temp:LAST 'DEF:sto2='$rrddirectory/stovetemp2.rrd:temp:LAST '${linetype}:sto1#${col01}:stovepipe temperature' '${linetype}:sto2#${col02}:stove body temperature' -W "${datestamp}" -t "stove"`;
 
 # unknown boiler shit
 
