@@ -26,7 +26,7 @@ else
 
 $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
-$graphdirectory="/data/hm/graph";
+$graphdirectory="/root/Dropbox/Public/styes-graphs";
 $logfile="graph.log";
 $lockfile="/tmp/graph.lock";
 $datestamp = `date +%F\\ %R\\ %z`;                                                   
