@@ -113,8 +113,8 @@ foreach $line (<OWCONFIG>)
     { print "$filename has updated with null value\n"; }
     # humidity sensors have a failure mode where they return values >100
     # but they read up to 100.9999 when it's very damp
-    if (($filename =~ /hum$/) && ($lastval > 101))
-    { print "$filename has invalid humidity value $lastval\n"; }
+#    if (($filename =~ /hum$/) && ($lastval > 101))
+#    { print "$filename has invalid humidity value $lastval\n"; }
     # out-of-spec vdd shows a bus problem
     if (($filename =~ /vdd$/) && ($lastval < 4.7))
     { print "$filename has low vdd $lastval\n"; }
@@ -175,10 +175,21 @@ if ($lastvalage > 3700)
 # that the file isn't there
 if (-f "$logdirectory/$owerrorlog" )
 {
+  $errorlinecount = 0;
+  @errorlines = ();
   open OWERRLOG, "<", "$logdirectory/$owerrorlog" or die $!;
+# there are too many errors to print them all every time; print only if there are lots
   foreach $errorline (<OWERRLOG>)
-    { print "$errorline"; }
+  { 
+    $errorlinecount++; 
+    push(@errorlines, $errorline);
+  }  
   close OWERRLOG;
+  if ($errorlinecount > 5)
+  {
+    print "More than 5 owread runs with errors in last hour:\n";
+    print "@errorlines";
+  }
   # this might be race-y if the script is running?
   unlink "$logdirectory/$owerrorlog";
 }
