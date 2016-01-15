@@ -100,7 +100,10 @@ $output = `rrdtool graph $graphdirectory/hotwater${time}.png -a PNG --vertical-l
 # https://oss.oetiker.ch/rrdtool/tut/rpntutorial.en.html
 # the logic is "if ionisation > 65 then zero else modtdpc"
 
-$output = `rrdtool graph $graphdirectory/gasmeter${time}.png -a PNG --vertical-label "kwh per hour" -s -${time} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'CDEF:kw=dm3persec,409,*' 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'CDEF:modtdpcif=ion,65,GT,0,modtdpc,IF' '${linetype}:kw#${col01}:gas kwh per hour from meter' '${linetype}:modtdpcif#${col02}:boiler ebus modulation percentage scaled to kW' -W "${datestamp}" -t "gas consumption" `;
+# stop graphing the gas meter as it's nonsense, pending investigation
+#$output = `rrdtool graph $graphdirectory/gasmeter${time}.png -a PNG --vertical-label "kwh per hour" -s -${time} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'CDEF:kw=dm3persec,409,*' 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'CDEF:modtdpcif=ion,65,GT,0,modtdpc,IF' '${linetype}:kw#${col01}:gas kwh from meter' '${linetype}:modtdpcif#${col02}:boiler ebus modulation percentage scaled to kW' -W "${datestamp}" -t "gas consumption" `;
+
+$output = `rrdtool graph $graphdirectory/gasmeter${time}.png -a PNG --vertical-label "kwh per hour" -s -${time} -w 1024 -h 300 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'CDEF:modtdpcif=ion,65,GT,0,modtdpc,IF' '${linetype}:modtdpcif#${col02}:boiler ebus modulation percentage scaled to kW' -W "${datestamp}" -t "gas consumption" `;
 
 $output = `rrdtool graph $graphdirectory/igntime${time}.png -a PNG --vertical-label "seconds" -s -${time} -w 1024 -h 300 'DEF:avg='$rrddirectory/igntimeavg.rrd:secs:LAST 'DEF:min='$rrddirectory/igntimemin.rrd:secs:LAST 'DEF:max='$rrddirectory/igntimemax.rrd:secs:LAST '${linetype}:avg#${col01}:average ignition time' '${linetype}:min#${col02}:minimum ignition time' '${linetype}:max#${col03}:maximum ignition time' -W "${datestamp}" -t "boiler igntion times"`;
 
