@@ -185,9 +185,9 @@ if (-f "$logdirectory/$owerrorlog" )
     push(@errorlines, $errorline);
   }  
   close OWERRLOG;
-  if ($errorlinecount > 5)
+  if ($errorlinecount > 7)
   {
-    print "More than 5 owread runs with errors in last hour:\n";
+    print "More than 7 owread runs with errors in last hour:\n";
     print "@errorlines";
   }
   # this might be race-y if the script is running?
