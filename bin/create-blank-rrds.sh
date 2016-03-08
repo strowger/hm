@@ -778,3 +778,12 @@ RRA:LAST:0.5:1:1581120
 rrdtool create stovetemp2.rrd --start 1449300000 --step 60 \
 DS:temp:GAUGE:120:-50:600 \
 RRA:LAST:0.5:1:15811200
+
+# 20160307 adsl link speeds from the vdsl cpe - 10 minute'ly only
+# unsure what maximums could be, just know minimum is zero
+rrdtool create wan0down.rrd --start 1457300000 --step 600 \
+DS:kbit:GAUGE:600:0:U \
+RRA:LAST:0.5:1:1581120
+rrdtool create wan0up.rrd --start 1457300000 --step 600 \
+DS:kbit:GAUGE:600:0:U \
+RRA:LAST:0.5:1:1581120
