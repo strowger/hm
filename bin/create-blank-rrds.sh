@@ -787,3 +787,7 @@ RRA:LAST:0.5:1:1581120
 rrdtool create wan0up.rrd --start 1457300000 --step 600 \
 DS:kbit:GAUGE:600:0:U \
 RRA:LAST:0.5:1:1581120
+# 20160308 nat table entries (i think)
+rrdtool create wan0nat.rrd --start 1457300000 --step 600 \
+DS:nats:GAUGE:600:0:U \
+RRA:LAST:0.5:1:1581120
