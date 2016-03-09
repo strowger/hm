@@ -37,7 +37,7 @@ $lastline = `tail -1 $logdirectory/waterpressure.log`;
 ($lasttime, $lastval) = split(' ',$lastline);                                   
 if ($lastval < 1.1)
 { print "water pressure in heating circuit down to $lastval bar\n"; }
-if ($lastval > 2.7)
+if ($lastval > 2.8)
 { print "water pressure in heating circuit up to $lastval bar\n"; }  
 
 # the ebus devices from the config
@@ -185,9 +185,9 @@ if (-f "$logdirectory/$owerrorlog" )
     push(@errorlines, $errorline);
   }  
   close OWERRLOG;
-  if ($errorlinecount > 7)
+  if ($errorlinecount > 9)
   {
-    print "More than 7 owread runs with errors in last hour:\n";
+    print "More than 9 owread runs with errors in last hour:\n";
     print "@errorlines";
   }
   # this might be race-y if the script is running?
