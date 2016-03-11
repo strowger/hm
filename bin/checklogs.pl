@@ -13,6 +13,7 @@ $ebconfig="/data/hm/conf/ebusread.conf";
 $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $owerrorlog="1wireread-errors.log";
+$routererrorlog="router-errors.log";
 $lockfile="/tmp/checklogs.lock";
 
 if ( -f $lockfile ) 
@@ -192,6 +193,26 @@ if (-f "$logdirectory/$owerrorlog" )
   }
   # this might be race-y if the script is running?
   unlink "$logdirectory/$owerrorlog";
+}
+
+# same as above but for router errors not owfs errors
+if (-f "$logdirectory/$routererrorlog" )
+{
+  $errorlinecount = 0;
+  @errorlines = ();
+  open ROUTERERRLOG, "<", "$logdirectory/$routererrorlog" or die $!;
+  foreach $errorline (<ROUTERERRLOG>)
+  {
+    $errorlinecount++;
+    push(@errorlines, $errorline);
+  }
+  close ROUTERERRLOG;
+  if ($errorlinecount > 2)
+  {
+    print "More than 2 owread runs with errors in last hour:\n";
+    print "@errorlines";
+  }
+  unlink "$logdirectory/$routererrorlog";
 }
 
 close LOCKFILE;

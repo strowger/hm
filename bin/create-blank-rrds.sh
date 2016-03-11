@@ -791,3 +791,13 @@ RRA:LAST:0.5:1:1581120
 rrdtool create wan0nat.rrd --start 1457300000 --step 600 \
 DS:nats:GAUGE:600:0:U \
 RRA:LAST:0.5:1:1581120
+
+# 20160311 router.pl polls the house router
+# for each interface we record in & out octets
+for i in asus-wan0 asus-wifi24 asus-wifi5 asus-lan asus-bridge asus-wifi24-guest asus-wifi5-guest asus-wan1 
+do
+  rrdtool create ${i}.rrd --start 1457600000 --step 60 \
+  DS:in:COUNTER:120:0:U \
+  DS:out:COUNTER:120:0:U \
+  RRA:LAST:0.5:1:15811200  
+done
