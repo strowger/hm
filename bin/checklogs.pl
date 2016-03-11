@@ -209,7 +209,7 @@ if (-f "$logdirectory/$routererrorlog" )
   close ROUTERERRLOG;
   if ($errorlinecount > 2)
   {
-    print "More than 2 owread runs with errors in last hour:\n";
+    print "More than 2 snmpget runs with errors in last hour:\n";
     print "@errorlines";
   }
   unlink "$logdirectory/$routererrorlog";
