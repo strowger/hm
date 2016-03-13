@@ -148,6 +148,15 @@ $output = `rrdtool graph $graphdirectory/wan-nat${time}.png -a PNG --vertical-la
 
 $output = `rrdtool graph $graphdirectory/router${time}.png -a PNG --vertical-label "traffic - bytes" -s -${time} -w 1024 -h 300 'DEF:wan0i='$rrddirectory/asus-wan0.rrd:in:LAST 'DEF:wan0o='$rrddirectory/asus-wan0.rrd:out:LAST 'DEF:wifi24i='$rrddirectory/asus-wifi24.rrd:in:LAST 'DEF:wifi24o='$rrddirectory/asus-wifi24.rrd:out:LAST 'DEF:wifi5i='$rrddirectory/asus-wifi5.rrd:in:LAST 'DEF:wifi5o='$rrddirectory/asus-wifi5.rrd:out:LAST 'DEF:lani='$rrddirectory/asus-lan.rrd:in:LAST 'DEF:lano='$rrddirectory/asus-lan.rrd:out:LAST 'DEF:wan1i='$rrddirectory/asus-wan1.rrd:in:LAST 'DEF:wan1o='$rrddirectory/asus-wan1.rrd:out:LAST 'DEF:wifi24guesti='$rrddirectory/asus-wifi24-guest.rrd:in:LAST 'DEF:wifi24guesto='$rrddirectory/asus-wifi24-guest.rrd:out:LAST 'DEF:wifi5guesti='$rrddirectory/asus-wifi5-guest.rrd:in:LAST 'DEF:wifi5guesto='$rrddirectory/asus-wifi5-guest.rrd:out:LAST '${linetype}:wan0i#${col01}:wan0 in' '${linetype}:wan0o#${col01}:wan0 out:dashes' '${linetype}:lani#${col02}:lan in' '${linetype}:lano#${col02}:lan out:dashes' '${linetype}:wifi24i#${col03}:wifi24 in' '${linetype}:wifi24o#${col03}:wifi24 out:dashes' '${linetype}:wifi5i#${col04}:wifi5 in' '${linetype}:wifi5o#${col04}:wifi5 out:dashes' '${linetype}:wifi24guesti#${col05}:wifi24-guest in' '${linetype}:wifi24guesto#${col05}:wifi24-guest out:dashes' '${linetype}:wifi5guesti#${col06}:wifi5-guest in' '${linetype}:wifi5guesto#${col06}:wifi5-guest out:dashes' '${linetype}:wan1i#${col07}:wan1 in' '${linetype}:wan1o#${col07}:wan1 out:dashes' -W "${datestamp}" -t "network traffic"`; 
 
+# 20160313 co2 iaq pm tvoc - air quality graphs
+$output = `rrdtool graph $graphdirectory/co2${time}.png -a PNG --vertical-label "parts per million" -s -${time} -w 1024 -h 300 'DEF:kitchen='$rrddirectory/airkitchen-co2.rrd:val:LAST '${linetype}:kitchen#${col01}:kitchen co2 concentration' -W "${datestamp}" -t "co2"`;
+
+$output = `rrdtool graph $graphdirectory/iaq${time}.png -a PNG --vertical-label "index" -s -${time} -w 1024 -h 300 'DEF:kitchen='$rrddirectory/airkitchen-iaq.rrd:val:LAST '${linetype}:kitchen#${col01}:kitchen' -W "${datestamp}" -t "air quality index"`;
+
+$output = `rrdtool graph $graphdirectory/pm${time}.png -a PNG --vertical-label "micrograms per cubic metre" -s -${time} -w 1024 -h 300 'DEF:kitchen25='$rrddirectory/airkitchen-pm25.rrd:val:LAST 'DEF:kitchen10='$rrddirectory/airkitchen-pm10.rrd:val:LAST '${linetype}:kitchen25#${col01}:kitchen pm2.5' '${linetype}:kitchen10#${col02}:kitchen pm10' -W "${datestamp}" -t "particulate matter concentration"`;
+
+$output = `rrdtool graph $graphdirectory/tvoc${time}.png -a PNG --vertical-label "parts per billion" -s -${time} -w 1024 -h 300 'DEF:kitchen='$rrddirectory/airkitchen-tvoc.rrd:val:LAST '${linetype}:kitchen#${col01}:kitchen voc concentration' -W "${datestamp}" -t "total volatile organic compound concentration"`;
+
 # errors
 foreach $bus (0..2)
 {

@@ -172,6 +172,13 @@ $lastvalage = $timestamp-$lasttime;
 if ($lastvalage > 3700)                                                         
 { print "currentcost clamp sensor hasn't read for an hour\n"; }
 
+# check the kitchen air sensor is logging
+$lastline = `tail -1 $logdirectory/airkitchen-co2.log`;
+($lasttime) = split(' ',$lastline);
+$lastvalage = $timestamp-$lasttime;
+if ($lastvalage > 600)
+{ print "kitchen air sensor hasn't output for $lastvalage seconds\n"; }
+
 # if there are no owfs errors then that's all good, no need to warn 
 # that the file isn't there
 if (-f "$logdirectory/$owerrorlog" )
