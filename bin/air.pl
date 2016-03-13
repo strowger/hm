@@ -30,14 +30,13 @@ if ( -f $lockfile )
 #open LOCKFILE, ">", $lockfile or die $!;
 
 $timestamp = time();
-$starttime = $timestamp;
 
 open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
-print LOGFILE "starting air.pl at $timestamp\n";
+print LOGFILE "\nstarting air.pl at $timestamp\n";
 
 open CONFIG, "<", "$config" or die $!;
 
-# we just get the MAC from the config at the moment
+# we just get the MAC and a name for the rrds and logs from the config at the moment
 
 foreach $configline (<CONFIG>)
 {
@@ -56,6 +55,11 @@ if ((! defined $macaddress) || (! defined $devicename))
 
 # the mac occurs backwards in the packets as-captured
 @mac = reverse (split(":","$macaddress"));
+
+# we'll track the last time we had a packet of each type so we don't
+# thrash the system constantly calling rrdtool
+$lastpt1packet = 0;
+$lastpt2packet = 0;
 
 while (<STDIN>)
 {
@@ -95,13 +99,14 @@ while (<STDIN>)
     # comparing arrays is hard, we coerce them in to strings and lowercase them
     if (($packetlength == "46") && (lc "@mac" eq lc "@packetmac"))
     {
-      $advlen2 = $packetraw[33];
-      $advmanufdata = $packetraw[34];
+#      $advlen2 = $packetraw[33];
+#      $advmanufdata = $packetraw[34];
       $dataheader1 = $packetraw[35];
-      $dataheader2 = $packetraw[36];
+#      $dataheader2 = $packetraw[36];
       if ( ($dataheader1 == 11) || ($dataheader1 == 21) || ($dataheader1 == 31) )
       { 
-        print "sensor data part 1 packet: "; 
+        $timestamp = time();
+        print LOGFILE "$timestamp sensor pt 1 packet: "; 
         # these are 16-bit numbers
         $co2hi = $packetdec[37];
         $co2lo = $packetdec[38];
@@ -112,24 +117,62 @@ while (<STDIN>)
         $pm10hi = $packetdec[41];
         $pm10lo = $packetdec[42];
         $pm10 = ($pm10hi * 256) + $pm10lo;
-        # these aren't implemented and should be zero?
-        $cohi = $packetdec[43];
-        $colo = $packetdec[44];
-        $co = ($cohi * 256) + $colo;
-        # documentation is contradictory about whether o3 is 8-bit or 16 - but
-        # there are no more values in the packet after this one... also it
-        # flaps like crazy - probably it's a crc?
-        $o3 = $packetdec[45];
-        print "co2 ppme: $co2,";
-        print "pm2.5 micrograms per m3: $pm25,";
-        print "pm10 micrograms per m3: $pm10\n";
-#        print "co values raw: $cohi $colo, cacluated value: $co\n";
-#        print "o3 value: $o3\n";
-        
+        # these aren't implemented and should be zero
+        $co = $packetdec[43];
+        $o3 = $packetdec[44];
+#        $crc = $packetdec[45];
+        print LOGFILE "co2: $co2,";
+        print LOGFILE "pm25: $pm25,";
+        print LOGFILE "pm10: $pm10,";
+        print LOGFILE "co: $co,";
+        print LOGFILE "o3: $o3";
+#        print "crc: $crc\n";
+        if (($timestamp - $lastpt1packet) < 50)
+        {
+          # less than 50 seconds since the last update, don't write
+          print LOGFILE "\n";
+        }
+        else
+        {
+          $lastpt1packet = $timestamp;
+          print LOGFILE " - writing to rrd and log ";
+          # co2
+          open LINE, ">>", "$logdirectory/air${devicename}-co2.log" or die $!;
+          print LINE "$timestamp $co2\n";
+          close LINE;
+          if ( -f "$rrddirectory/air${devicename}-co2.rrd" )
+          {
+            $output = `rrdtool update $rrddirectory/air${devicename}-co2.rrd $timestamp:$co2`;
+            if (length $output) { print LOGFILE "rrdtool errored $output"; }  
+          }
+          else { print LOGFILE "rrd for air${devicename}-co2 doesn't exist, skipping update"; }
+          # pm2.5
+          open LINE, ">>", "$logdirectory/air${devicename}-pm25.log" or die $!;
+          print LINE "$timestamp $pm25\n";
+          close LINE;
+          if ( -f "$rrddirectory/air${devicename}-pm25.rrd" )
+          {
+            $output = `rrdtool update $rrddirectory/air${devicename}-pm25.rrd $timestamp:$pm25`;
+            if (length $output) { print LOGFILE "rrdtool errored $output"; }
+          }
+          else { print LOGFILE "rrd for air${devicename}-pm25 doesn't exist, skipping update"; }          
+          # pm10
+          open LINE, ">>", "$logdirectory/air${devicename}-pm10.log" or die $!;
+          print LINE "$timestamp $pm10\n";
+          close LINE;
+          if ( -f "$rrddirectory/air${devicename}-pm10.rrd" )
+          {
+            $output = `rrdtool update $rrddirectory/air${devicename}-pm10.rrd $timestamp:$pm10`;
+            if (length $output) { print LOGFILE "rrdtool errored $output"; }
+          }
+          else { print LOGFILE "rrd for air${devicename}-pm10 doesn't exist, skipping update"; }          
+          print LOGFILE "\n"; 
+        }
       }
       if ( ($dataheader1 == 12) || ($dataheader1 == 22) || ($dataheader1 == 32) )
       { 
-        print "sensor data part 2 packet: "; 
+        $timestamp = time();
+        print LOGFILE "$timestamp sensor pt2 packet: "; 
         $tvochi = $packetdec[37];
         $tvoclo = $packetdec[38];
         $tvoc = ($tvochi * 256) + $tvoclo;
@@ -140,27 +183,59 @@ while (<STDIN>)
         $proctemp = ($temp - 4000) * 0.01; 
         $deltatemp = $packetdec[41];
         $realtemp = $proctemp - ($deltatemp * 0.1);
-        $humidity = $packetdec[42];
+# the humidity values i get don't make sense to me, or match the phone app
+#        $humidity = $packetdec[42];
 # wtf! it's in their doc but it makes fuck-all sense to me
-        $fact1 = ($temp * 17.62) / ($temp + 243.12);
-        $fact2 = ($realtemp * 17.62) / ($realtemp + 243.12);
-        $realhumidity = $humidity * ($fact1 / $fact2);
+#        $fact1 = ($temp * 17.62) / ($temp + 243.12);
+#        $fact2 = ($realtemp * 17.62) / ($realtemp + 243.12);
+#        $realhumidity = $humidity * ($fact1 / $fact2);
         $iaqhi = $packetdec[43];
         $iaqlo = $packetdec[44];
         $iaq = ($iaqhi * 256) + $iaqlo;        
-        $crc = $packetdec[45];
+#        $crc = $packetdec[45];
 
-        print "tvoc ppb $tvoc,";
-        print "temperature $realtemp,"; 
+        print LOGFILE "tvoc: $tvoc,";
+        print LOGFILE "temp: $realtemp,"; 
 #        print "humidity value: $humidity, processed humidity: $realhumidity\n";
-        print "iaq $iaq\n";
+        print LOGFILE "iaq: $iaq";
 #        print "crc $crc\n";
+        if (($timestamp - $lastpt2packet) < 50)
+        {
+        # less than 50 seconds since the last update, don't write
+          print LOGFILE "\n";
+        }
+        else
+        {
+          $lastpt2packet = $timestamp;
+          print LOGFILE " - writing to rrd and log ";
+          # tvoc
+          open LINE, ">>", "$logdirectory/air${devicename}-tvoc.log" or die $!;
+          print LINE "$timestamp $tvoc\n";
+          close LINE;
+          if ( -f "$rrddirectory/air${devicename}-tvoc.rrd" )
+          {
+            $output = `rrdtool update $rrddirectory/air${devicename}-tvoc.rrd $timestamp:$tvoc`;
+            if (length $output) { print LOGFILE "rrdtool errored $output"; }
+          }
+          else { print LOGFILE "rrd for air${devicename}-tvoc doesn't exist, skipping update"; }
+          # iaq
+          open LINE, ">>", "$logdirectory/air${devicename}-iaq.log" or die $!;
+          print LINE "$timestamp $iaq\n";
+          close LINE;
+          if ( -f "$rrddirectory/air${devicename}-iaq.rrd" )
+          {
+            $output = `rrdtool update $rrddirectory/air${devicename}-iaq.rrd $timestamp:$iaq`;
+            if (length $output) { print LOGFILE "rrdtool errored $output"; }
+          }
+          else { print LOGFILE "rrd for air${devicename}-iaq doesn't exist, skipping update"; }
+          print LOGFILE "\n";
+        }
       }
     }
-    else { print LOGFILE "Ignored a packet\n"; }
+    else { print LOGFILE "Ignored a packet\n"; } # FIXME print its mac or something at least
     ## finish manipulating the packet here and move on
     @packetraw = ();
-    print "\n\n";
+    print ".";
   }
   push (@packetraw, @lineitems);
 }

@@ -801,3 +801,12 @@ do
   DS:out:COUNTER:120:0:U \
   RRA:LAST:0.5:1:15811200  
 done
+
+# 20160313 air.pl records air quality data
+for i in airkitchen-co2 airkitchen-tvoc airkitchen-iaq airkitchen-pm25 airkitchen-pm10
+do
+  rrdtool create ${i}.rrd --start 1457800000 --step 60 \
+  DS:val:GAUGE:120:0:U \
+  RRA:LAST:0.5:1:15811200
+done
+
