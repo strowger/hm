@@ -46,7 +46,7 @@ foreach $configline (<CONFIG>)
   if (($macaddress !~ /\#.*/) && (defined $macaddress) && (defined $devicename))
   {
     chomp $devicename;
-    print "$timestamp: read mac $macaddress, name $devicename from config\n";
+    print LOGFILE "$timestamp: read mac $macaddress, name $devicename from config\n";
   }
 }
 
@@ -235,7 +235,9 @@ while (<STDIN>)
     else { print LOGFILE "Ignored a packet\n"; } # FIXME print its mac or something at least
     ## finish manipulating the packet here and move on
     @packetraw = ();
-    print ".";
+# just prints (to std out, where we won't normally see it) a dot per packet as an indicator that
+# the program is alive - as the logfile output is buffered so tail isn't a great guide to activity
+#    print ".";
   }
   push (@packetraw, @lineitems);
 }
