@@ -10,7 +10,8 @@
 #
 # To run this script, pipe the "hcidump" output in to it, while 
 # "hcitool lescan" is running. Note that these must be done as root otherwise
-# the hcidump command will produce no output.
+# the hcidump command will produce no output. Usually need to "hciconfig hci0 up"
+# at boot-time before all this will work.
 #
 # sudo hcidump -i hci0 -R|./am.pl
 # sudo hcidump -i hci0 -XR is friendlier for manual (shows ascii too, and rssi)
