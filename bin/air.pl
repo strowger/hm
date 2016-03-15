@@ -118,15 +118,15 @@ while (<STDIN>)
         $pm10hi = $packetdec[41];
         $pm10lo = $packetdec[42];
         $pm10 = ($pm10hi * 256) + $pm10lo;
-        # these aren't implemented and should be zero
-        $co = $packetdec[43];
-        $o3 = $packetdec[44];
+        # co and o3 aren't implemented and should be zero
+#        $co = $packetdec[43];
+#        $o3 = $packetdec[44];
 #        $crc = $packetdec[45];
         print LOGFILE "co2: $co2,";
         print LOGFILE "pm25: $pm25,";
         print LOGFILE "pm10: $pm10,";
-        print LOGFILE "co: $co,";
-        print LOGFILE "o3: $o3";
+#        print LOGFILE "co: $co,";
+#        print LOGFILE "o3: $o3";
 #        print "crc: $crc\n";
         if (($timestamp - $lastpt1packet) < 50)
         {
