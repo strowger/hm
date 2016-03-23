@@ -30,7 +30,15 @@ $invalidcount = 0;
 $lastline = `tail -1 $logdirectory/cylindertemp.log`;
 ($lasttime, $lastval) = split(' ',$lastline);
 if ($lastval < 50)
-{ print "hot water cylinder down to $lastval C\n"; }
+{
+  # only alert if the cylinder is cold *and* not being heated up right now
+  $lastline = `tail -1 $logdirectory/zvhwflow.log`; 
+  ($lasttime, $lastval2) = split(' ',$lastline);
+  if ($lastval2 < 50)
+  {
+      print "hot water cylinder down to $lastval C and flow temp to tank is $lastval2 C\n"; 
+  }
+}
 
 # pressure in heating circuit. <1 bar is bad as will draw air in
 # not sure what the prv will lift at but we'll alert at 2.6bar
@@ -193,9 +201,9 @@ if (-f "$logdirectory/$owerrorlog" )
     push(@errorlines, $errorline);
   }  
   close OWERRLOG;
-  if ($errorlinecount > 9)
+  if ($errorlinecount > 15)
   {
-    print "More than 9 owread runs with errors in last hour:\n";
+    print "More than 15 owread runs with errors in last hour:\n";
     print "@errorlines";
   }
   # this might be race-y if the script is running?
