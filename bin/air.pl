@@ -95,7 +95,7 @@ while (<STDIN>)
 # but as per comment at start of script, we don't
 #    $vendorstring = join('',@packetascii[19..32]);
     $packetlength = scalar (@packetraw);
-#    if (( $vendorstring eq "Air Mentor Pro") && ($packetlength == "46"))
+#    if (( $vendorstring eq "xxx xxxxxx xxx") && ($packetlength == "46"))
     # instead, we'll check the length and the mac
     # comparing arrays is hard, we coerce them in to strings and lowercase them
     if (($packetlength == "46") && (lc "@mac" eq lc "@packetmac"))
