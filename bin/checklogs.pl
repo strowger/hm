@@ -231,7 +231,7 @@ if (-f "$logdirectory/$routererrorlog" )
 }
 
 # disk space - assumes we're just using /root
-$diskpercentused = `df -h|grep root|cut -d " " -f 10 |sed "s/\%//"`;
+$diskpercentused = `df -h|grep root|cut -d " " -f 12 |sed "s/\%//"`;
 if ($diskpercentused > 85)
   { print "Disk utilisation ${diskpercentused}%"; }
 
