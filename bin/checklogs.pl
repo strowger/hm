@@ -36,7 +36,7 @@ if ($lastval < 50)
   ($lasttime, $lastval2) = split(' ',$lastline);
   if ($lastval2 < 50)
   {
-      print "hot water cylinder down to $lastval C and flow temp to tank is $lastval2 C\n"; 
+#      print "hot water cylinder down to $lastval C and flow temp to tank is $lastval2 C\n"; 
   }
 }
 
@@ -231,7 +231,8 @@ if (-f "$logdirectory/$routererrorlog" )
 }
 
 # disk space - assumes we're just using /root
-$diskpercentused = `df -h|grep root|cut -d " " -f 12 |sed "s/\%//"`;
+# from df loses a space
+$diskpercentused = `df -Ph|grep root|cut -d " " -f 11 |sed "s/\%//"`;
 if ($diskpercentused > 85)
   { print "Disk utilisation ${diskpercentused}%"; }
 
