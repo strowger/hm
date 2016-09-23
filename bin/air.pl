@@ -55,7 +55,7 @@ if ((! defined $macaddress) || (! defined $devicename))
 { die ("haven't got a device mac and name from config"); }
 
 # the mac occurs backwards in the packets as-captured
-@mac = reverse (split(":","$macaddress"));
+@revmac = reverse (split(":","$macaddress"));
 
 # we'll track the last time we had a packet of each type so we don't
 # thrash the system constantly calling rrdtool
@@ -90,7 +90,8 @@ while (<STDIN>)
       push (@packetascii, $asciibyte);
     }
     # get the MAC - remember it's reversed
-    @packetmac = @packetraw[7..12];
+    @revpacketmac = @packetraw[7..12];
+    @packetmac = reverse @revpacketmac;
 # the device's name - we should check for this in the packets as it does appear
 # but as per comment at start of script, we don't
 #    $vendorstring = join('',@packetascii[19..32]);
@@ -98,7 +99,7 @@ while (<STDIN>)
 #    if (( $vendorstring eq "xxx xxxxxx xxx") && ($packetlength == "46"))
     # instead, we'll check the length and the mac
     # comparing arrays is hard, we coerce them in to strings and lowercase them
-    if (($packetlength == "46") && (lc "@mac" eq lc "@packetmac"))
+    if (($packetlength == "46") && (lc "@revmac" eq lc "@revpacketmac"))
     {
 #      $advlen2 = $packetraw[33];
 #      $advmanufdata = $packetraw[34];
@@ -233,7 +234,7 @@ while (<STDIN>)
         }
       }
     }
-    else { print LOGFILE "Ignored a packet\n"; } # FIXME print its mac or something at least
+    else { print LOGFILE "Ignored a packet from MAC @packetmac \n"; } 
     ## finish manipulating the packet here and move on
     @packetraw = ();
 # just prints (to std out, where we won't normally see it) a dot per packet as an indicator that
