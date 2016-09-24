@@ -94,7 +94,9 @@ while (<STDIN>)
     $packetlength = scalar (@packetraw);
 
     # comparing arrays is hard, we coerce them in to strings and lowercase them
-    if (($packetlength == "46") && (lc "@revmac" eq lc "@revpacketmac"))
+##    if (($packetlength == "46") && (lc "@revmac" eq lc "@revpacketmac"))
+# not all teh frames are the right length d'oh
+    if ((lc "@revmac" eq lc "@revpacketmac"))
     {
 #      print "yay got a frame from our beloved's mac $macaddress\n";
       # SUPPOSEDLY the last 3 bytes are a CRC, the first 7 are "preamble", "access address", and "pdu header", which i think never change and then the next 6 are our mac
@@ -104,7 +106,7 @@ while (<STDIN>)
       # 02
       # 03
       # 04
-      # 05
+      # 05 position maybe? or position broadcasts enabled?
       # 06
       # 07-12 related to service 0x180A characteristic 0x2a23 ?
       # 08 
@@ -142,7 +144,7 @@ while (<STDIN>)
       # $powervalue = $packdec[43]; # really uninteresting
       $batterylevel = $packetdec[44];
       
-      print "mac @packetmac, uuid $uuid, major values $majorhi $majorlo, minor values $minorhi $minorlo, battery % $batterylevel\n";
+#      print "mac @packetmac, uuid $uuid, major values $majorhi $majorlo, minor values $minorhi $minorlo, battery % $batterylevel\n";
     }
     else
     {
