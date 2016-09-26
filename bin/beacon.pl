@@ -134,7 +134,7 @@ while (<STDIN>)
       $minorhi = $packetdec[41];                                                                       
       $minorlo = $packetdec[42]; 
 
-      # euan did this bit
+      # euan did this bit, i don't understand it
       $major   = sprintf('%016b', hex( $packetraw[39].$packetraw[40]));
       $majordec = oct( "0b$major" );
       $minor   = sprintf('%016b', hex( $packetraw[41].$packetraw[42]));
@@ -143,36 +143,23 @@ while (<STDIN>)
       # $powervalue = $packdec[43]; # really uninteresting
       $batterylevel = $packetdec[44];
 
-      # euan did this bit too
-      $egdata     = sprintf('%032b', hex( join('', @packetraw[39..42])));
-      $egdatadec  = oct( "0b$egdata" );
-  
-      # Most Significant 8 bits of Major (or go get the right byte), but don't shift 
-      # as we've got the MSB *8 of a 2 byte value.
-      $eghumraw    = (($majordec & 0xFF00) >> 0);
-      # It's the next 10 bits, but only MSB of a 2 byte value
-      # (so it's mask the right 10, then move 14 places, minus the 6 missing bits)
-      $egtempraw   = (($egdatadec & 0x00FFC000) >> 8); 
-      # Mask the rest, uses Least Significant 14bits.
-      $egrealminor = (($egdatadec & 0x00000CFF) >> 0); 
-
+      $egdata      = hex( join('', @packetraw[39..42]));
+      $eghumraw    = (($egdata & 0xFF000000) >> 16); #Apply Mask, 8bits of 16, so right shift to be rightmost 2 bytes
+      $egtempraw   = (($egdata & 0x00FFC000) >> 8);  #Apply Mark, 10bits of 16, so right shift to be rightmost 2 bytes (move 14 right, then 6 left (the missing 6 bits))
+      $egrealminor = (($egdata & 0x00000CFF) >> 0);  #Mask the rest, use Least Significant 14bits.
       $egtempmaths = -46.85 + 175.72 * ($egtempraw/2**16);
       $eghummaths  = -6 + 125 * ($eghumraw/2**16);
-      # 01111101 01100101 00000000 00000001 (Data (example)
-      # 00000000 11111111 11000000 00000000 (Mask for Temp)     = 00FFC000
-      # 11111111 00000000 00000000 00000000 (Mask for Humid)    = FF000000
-      # 00000000 00000000 00111111 11111111 (Mask for RealMinor)= 00003FFF 
-      # So the humidity: uint16_t Humidity = Major & 0xFF00;
-      # The temperature: uint16_t temperature = ((Major & 0x00FF) << 8 ) & ((Minor & 0xC000) >> 8);
-      # The really Minor: uint16_t ReallyMinor = Minor & 0x03FF;
-      #
-##      print "mac @packetmac, uuid $uuid, DATA $egdata $egdatadec\n";
-##      print "major values $major $majordec\n" ;
-##      print "minor values $minor $minordec\n" ;
-##      print "battery % $batterylevel\n";
-##      print "Humidity (Raw/Calc)  $eghumraw : $eghummaths %\n";
-##      print "Temperature (Raw/Calc) $egtempraw : $egtempmaths C\n";
-##      print "Minor (real) $egrealminor\n";
+
+      $powervalue   = $packetdec[43] - 256 ; # "calibrated" expected RSSI at 1 meter.
+      $batterylevel = $packetdec[44]       ;
+      $rssi         = $packetdec[45] - 256 ;
+
+      print "uuid=$uuid,minor=$egrealminor,battery=$batterylevel,humidity=";
+      printf '%.1f', $eghummaths;
+      print ",temperature=";
+      printf '%.1f', $egtempmaths;
+      print ",txpower=$powervalue,rssi=$rssi\n";
+
      
 #      print "mac @packetmac, uuid $uuid, major values $majorhi $majorlo, minor values $minorhi $minorlo, battery % $batterylevel\n";
     }
