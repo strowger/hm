@@ -108,12 +108,7 @@ while (<STDIN>)
       # 04
       # 05 position maybe? or position broadcasts enabled?
       # 06
-      # 07-12 related to service 0x180A characteristic 0x2a23 ?
-      # 08 
-      # 09
-      # 10
-      # 11
-      # 12
+      # 07-12 mac address, in reverse order
       # 13
       # 14
       # 15
@@ -171,13 +166,13 @@ while (<STDIN>)
       # The temperature: uint16_t temperature = ((Major & 0x00FF) << 8 ) & ((Minor & 0xC000) >> 8);
       # The really Minor: uint16_t ReallyMinor = Minor & 0x03FF;
       #
-      print "mac @packetmac, uuid $uuid, DATA $egdata $egdatadec\n";
-      print "major values $major $majordec\n" ;
-      print "minor values $minor $minordec\n" ;
-      print "battery % $batterylevel\n";
-      print "Humidity (Raw/Calc)  $eghumraw : $eghummaths %\n";
-      print "Temperature (Raw/Calc) $egtempraw : $egtempmaths C\n";
-      print "Minor (real) $egrealminor\n";
+##      print "mac @packetmac, uuid $uuid, DATA $egdata $egdatadec\n";
+##      print "major values $major $majordec\n" ;
+##      print "minor values $minor $minordec\n" ;
+##      print "battery % $batterylevel\n";
+##      print "Humidity (Raw/Calc)  $eghumraw : $eghummaths %\n";
+##      print "Temperature (Raw/Calc) $egtempraw : $egtempmaths C\n";
+##      print "Minor (real) $egrealminor\n";
      
 #      print "mac @packetmac, uuid $uuid, major values $majorhi $majorlo, minor values $minorhi $minorlo, battery % $batterylevel\n";
     }
@@ -185,7 +180,36 @@ while (<STDIN>)
     # the "accbeacon" format frames with the acceleration/position data are 34 bytes long 
     if (($packetlength == "34") && (lc "@revmac" eq lc "@revpacketmac")) 
     {
-      print "yay got a frame from our beloved's mac $macaddress, in accbeacon format\n";
+##      print "yay got a frame from our beloved's mac $macaddress, in accbeacon format\n";
+      # 00
+      # 01
+      # 02
+      # 03
+      # 04
+      # 05
+      # 06
+      # 07-12 mac address in reverse order
+      # 13
+      # 14
+      # 15
+      # 16
+      # 17
+      # 18
+      # 19
+      # 20
+      # 21
+      # 22
+      # 23
+      # 24
+      # 25
+      # 26
+      # 27
+      # 28
+      # 29
+      # 30
+      # 31
+      # 32
+      # 33 changes even when nothing else on the line has changed - suggests is not crc
       print "@packetraw[0..33] length $packetlength \n"; # whole frame
     }
 
