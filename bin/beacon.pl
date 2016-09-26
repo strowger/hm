@@ -126,7 +126,7 @@ while (<STDIN>)
       # 42 spec says is 2-byte minor no; seems to change if i warm it up
       # 43 power level value configured (measured power - defaults to 203 / 0xCB)
       # 44 battery level as percentage? ref https://www.beaconzone.co.uk/blog/getting-the-ankhmaway-battery-level-from-advertising-data/
-      # 45 changes even when nothing else on the line has changed - suggests is not crc
+      # 45 euan says this is rssi from the receiving end (see calculation below)
       #
       $uuid = join('', @packetraw[23..26]) . "-" . join('', @packetraw[27..28]) . "-" . join('', @packetraw[29..30]) . "-" . join('', @packetraw[31..32]) . "-" . join('', @packetraw[33..38]);
       # $majorhi = $packetdec[39];
@@ -154,27 +154,27 @@ while (<STDIN>)
       $batterylevel = $packetdec[44]       ;
       $rssi         = $packetdec[45] - 256 ;
 
-      print "uuid=$uuid,minor=$egrealminor,battery=$batterylevel,humidity=";
-      printf '%.1f', $eghummaths;
-      print ",temperature=";
-      printf '%.1f', $egtempmaths;
-      print ",txpower=$powervalue,rssi=$rssi\n";
+#      print "uuid=$uuid,minor=$egrealminor,battery=$batterylevel,humidity=";
+#      printf '%.1f', $eghummaths;
+#      print ",temperature=";
+#      printf '%.1f', $egtempmaths;
+#      print ",txpower=$powervalue,rssi=$rssi\n";
 
-     
-#      print "mac @packetmac, uuid $uuid, major values $majorhi $majorlo, minor values $minorhi $minorlo, battery % $batterylevel\n";
+      print "@packetraw[0..45]"; # whole frame
+
     }
     
     # the "accbeacon" format frames with the acceleration/position data are 34 bytes long 
     if (($packetlength == "34") && (lc "@revmac" eq lc "@revpacketmac")) 
     {
 ##      print "yay got a frame from our beloved's mac $macaddress, in accbeacon format\n";
-      # 00
-      # 01
-      # 02
-      # 03
-      # 04
-      # 05
-      # 06
+      # 00 don't know but is same as in ibeacon broadcasts |
+      # 01  "                                              | 
+      # 02                                                 | the manufacturer documentation
+      # 03 don't know but it same as in ibeacon broadcasts | (which is shit)
+      # 04 "                                               | says that all these are
+      # 05 "                                               | "state value"
+      # 06 "                                               |
       # 07-12 mac address in reverse order
       # 13
       # 14
@@ -191,13 +191,17 @@ while (<STDIN>)
       # 25
       # 26
       # 27
-      # 28
-      # 29
-      # 30
-      # 31
-      # 32
-      # 33 changes even when nothing else on the line has changed - suggests is not crc
-      print "@packetraw[0..33] length $packetlength \n"; # whole frame
+      # 28 spec sheet suggests this might be "power" - matches "battery status" in the ibeacon frames
+      #     seems to go down on big movements maybe?
+      # 29 position data - changes if we move the beacon
+      # 30  "
+      # 31  "
+      # 32  "
+      # 33  "
+      print "@packetraw[0..33]\n"; # whole frame
+
+
+      $rssi = $packetdec[33] - 256;
     }
 
 #    else
