@@ -68,8 +68,8 @@ while (<STDIN>)
   chomp $line;
   # 20 things per line + a ">" at the start of a new packet
   @lineitems = split (" ", $line);
-  # ignore the two preamble lines hcidump produces on startup
-  if ( ($lineitems[0] eq "HCI") || ($lineitems[0] eq "device:"))
+  # ignore the two preamble lines hcidump produces on startup, and our tx frames
+  if ( ($lineitems[0] eq "HCI") || ($lineitems[0] eq "device:") || ($lineitems[0] eq "<"))
   { next; }
 
   # new packet marker in the hcidump output is a > at start of line
@@ -234,7 +234,13 @@ while (<STDIN>)
         }
       }
     }
-    else { print LOGFILE "Ignored a packet from MAC @packetmac \n"; } 
+    else 
+    {
+      print LOGFILE "Ignored a packet "; 
+# doesn't work
+#      if (@packetmac) { print LOGFILE "from MAC @packetmac "; }
+      print LOGFILE "\n";
+    }
     ## finish manipulating the packet here and move on
     @packetraw = ();
 # just prints (to std out, where we won't normally see it) a dot per packet as an indicator that
