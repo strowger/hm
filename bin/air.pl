@@ -15,7 +15,9 @@
 #
 # sudo hcidump -i hci0 -R|./am.pl
 # sudo hcidump -i hci0 -XR is friendlier for manual (shows ascii too, and rssi)
- 
+#
+## TODO: what i thought was crc is actually rssi, fix the variable name and capture it
+#
 $config="/data/hm/conf/air.conf";
 $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";

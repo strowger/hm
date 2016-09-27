@@ -185,12 +185,7 @@ while (<STDIN>)
       # 19
       # 20
       # 21
-      # 22
-      # 23
-      # 24
-      # 25
-      # 26
-      # 27
+      # 22-27 mac address in reverse order (again)
       # 28 spec sheet suggests this might be "power" - matches "battery status" in the ibeacon frames
       #     seems to go down on big movements maybe?
       # 29 position data - changes if we move the beacon
@@ -200,13 +195,12 @@ while (<STDIN>)
       # 33 rssi as per ibeacon 
       print "@packetraw[0..33]\n"; # whole frame
 
-
       $rssi = $packetdec[33] - 256;
     }
 
-#    else
+#  if (lc "@revmac" ne lc "@revpacketmac")
 #    {
-###      print "ignored a frame from some other fucker who has mac @packetmac\n";
+#      print "ignored a frame from some other fucker who has mac @packetmac\n";
 #    }
     ## finish manipulating the packet here and move on
     @packetraw = ();
