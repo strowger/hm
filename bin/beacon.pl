@@ -197,7 +197,7 @@ while (<STDIN>)
       # 30  "
       # 31  "
       # 32  "
-      # 33  "
+      # 33 rssi as per ibeacon 
       print "@packetraw[0..33]\n"; # whole frame
 
 
