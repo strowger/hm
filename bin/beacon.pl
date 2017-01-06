@@ -98,7 +98,7 @@ while (<STDIN>)
     # comparing arrays is hard, we coerce them in to strings and lowercase them
     if (($packetlength == "46") && (lc "@revmac" eq lc "@revpacketmac"))
     {
-#      print "yay got a frame from our beloved's mac $macaddress, in ibeacon format\n";
+      print "yay got a frame from our beloved's mac $macaddress, in ibeacon format\n";
       # SUPPOSEDLY the last 3 bytes are a CRC, the first 7 are "preamble", "access address", and "pdu header", which i think never change and then the next 6 are our mac
       # in practice it looks like
       # 00
@@ -154,20 +154,20 @@ while (<STDIN>)
       $batterylevel = $packetdec[44]       ;
       $rssi         = $packetdec[45] - 256 ;
 
-#      print "uuid=$uuid,minor=$egrealminor,battery=$batterylevel,humidity=";
-#      printf '%.1f', $eghummaths;
-#      print ",temperature=";
-#      printf '%.1f', $egtempmaths;
-#      print ",txpower=$powervalue,rssi=$rssi\n";
+      print "uuid=$uuid,minor=$egrealminor,battery=$batterylevel,humidity=";
+      printf '%.1f', $eghummaths;
+      print ",temperature=";
+      printf '%.1f', $egtempmaths;
+      print ",txpower=$powervalue,rssi=$rssi\n";
 
-      print "@packetraw[0..45]"; # whole frame
+      print "@packetraw[0..45]\n"; # whole frame
 
     }
     
     # the "accbeacon" format frames with the acceleration/position data are 34 bytes long 
     if (($packetlength == "34") && (lc "@revmac" eq lc "@revpacketmac")) 
     {
-##      print "yay got a frame from our beloved's mac $macaddress, in accbeacon format\n";
+      print "yay got a frame from our beloved's mac $macaddress, in accbeacon format\n";
       # 00 don't know but is same as in ibeacon broadcasts |
       # 01  "                                              | 
       # 02                                                 | the manufacturer documentation
@@ -195,7 +195,11 @@ while (<STDIN>)
       # 33 rssi as per ibeacon 
       print "@packetraw[0..33]\n"; # whole frame
 
+      $batterylevel = $packetdec[28]; 
       $rssi = $packetdec[33] - 256;
+
+##      print "battery=$batterylevel,rssi=$rssi\n";                           
+
     }
 
 #  if (lc "@revmac" ne lc "@revpacketmac")
