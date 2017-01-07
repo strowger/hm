@@ -810,3 +810,37 @@ do
   RRA:LAST:0.5:1:15811200
 done
 
+# 20170107 nissan leaf stuff
+# assuming an absolute maximum imaginable lifetime of 15 years,
+# so *just for car stuff* will have half the number of datapoints
+
+# let's allow for some negative percentages, and for it to exceed 100
+rrdtool create leafbattpc.rrd --start 1483700000 --step 60 \
+DS:pc:GAUGE:120:-50:150 \
+RRA:LAST:0.5:1:7905600
+# battery bars - min 0 max 12
+rrdtool create leafbattbars.rrd --start 1483700000 --step 60 \
+DS:bars:GAUGE:120:-1:13 \
+RRA:LAST:0.5:1:7905600
+
+# battery capacity measures only change every few months so once per day is ample
+# max is 12, min is 0
+
+rrdtool create leafbattcap1.rrd --start 1483700000 --step 86400 \
+DS:bars:GAUGE:120:-1:13 \
+RRA:LAST:0.5:1:5490
+
+rrdtool create leafbattcap2.rrd --start 1483700000 --step 86400 \
+DS:bars:GAUGE:120:-1:13 \
+RRA:LAST:0.5:1:5490
+
+rrdtool create leafbattcap3.rrd --start 1483700000 --step 86400 \
+DS:bars:GAUGE:120:-1:13 \
+RRA:LAST:0.5:1:5490
+
+# how long script takes to run - will allow for it to be every min one day
+
+rrdtool create runtimeleaf.rrd --start 1483700000 --step 60 \
+DS:secs:GAUGE:120:U:U \
+RRA:LAST:0.5:1:7905600
+
