@@ -165,7 +165,7 @@ foreach $bus (0..2)
 
 # 20170307 nissan leaf stuff
 #TODO: runtime (ie API responsiveness), capacity bars, battery bars
-$output = `rrdtool graph $graphdirectory/leafbatt${time}.png -a PNG -y 0.1:1 --vertical-label "percent" -s -${time} -w 1024 -h 300 'DEF:pc='$rrddirectory/leafbattpc.rrd:pc:LAST '${linetype}:pc#${col01}:traction battery percent charged' -W "${datestamp}" -t "nissan leaf battery"`;
+$output = `rrdtool graph $graphdirectory/leafbatt${time}.png -a PNG --vertical-label "percent" -s -${time} -w 1024 -h 300 'DEF:pc='$rrddirectory/leafbattpc.rrd:pc:LAST '${linetype}:pc#${col01}:traction battery percent charged' -W "${datestamp}" -t "nissan leaf battery"`;
 
 close LOCKFILE;
 unlink $lockfile;
