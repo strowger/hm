@@ -26,7 +26,7 @@ l = s.get_leaf()
 
 result_key = l.request_update()
 ##print "start sleep 10"
-time.sleep(20) # sleep 60 seconds to give request time to process
+time.sleep(20) # sleep 20 seconds to give request time to process
 ##print "end sleep 10"
 battery_status = l.get_status_from_update(result_key)
 while battery_status is None:
