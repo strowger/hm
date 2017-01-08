@@ -14,18 +14,10 @@ $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="leaf.log";
 #$errorlog="leaf-errors.log";
-$lockfile="/tmp/leaf.lock";
 $carwings="/data/hm/bin/leaf.py";
 # where the shit that comes out of the python program goes, will probably end up
 # erasing this quite frequently
 $templogfile="leaftemp.log";
-
-if ( -f $lockfile ) 
-{
-  die "Lockfile exists in $lockfile; exiting";
-}
-
-open LOCKFILE, ">", $lockfile or die $!;
 
 $timestamp = time();
 $starttime = $timestamp;
@@ -35,6 +27,25 @@ open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
 open TEMPLOGFILE, ">>", "$logdirectory/$templogfile" or die $!;
 
 print LOGFILE "starting leaf.pl at $timestamp\n";
+
+# we used to do a load of fannying around with lockfiles, but as the python
+# program hangs indefinitely quite often, we'll just murder any old processes
+# and print a warning
+
+$numprocs = `ps aux|grep leaf.pl|grep -v grep|wc -l`;
+chomp $numprocs;
+if ( $numprocs > 2 )
+  { die "FATAL: more than 1 previous leaf.pl process running, something is very wrong"; }
+if ( $numprocs == 2)
+{
+  $oldpid = `ps aux|grep leaf.pl|grep -v grep|grep -v $$`;
+  print LOGFILE "found an old leaf.pl process at pid $oldpid...";
+  kill 'KILL', $oldpid;
+  print LOGFILE "killed\n";
+}
+$numprocs = `ps aux|grep leaf.pl|grep -v grep|wc -l`;
+if ( $numprocs > 1)
+  { die "FATAL: tried to kill a previous leaf.pl process but there are still >1 running"; }
 
 $carwingsoutput = `${carwings}`;
 
@@ -179,5 +190,3 @@ else
 print LOGFILE "leaf.pl ran for $runtime seconds\n";
 print LOGFILE "exiting successfully\n\n";
 
-close LOCKFILE;
-unlink $lockfile;
