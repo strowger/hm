@@ -25,9 +25,9 @@ else
 }
 
 $rrddirectory="/data/hm/rrd";
-$logdirectory="/data/hm/log";
+#$logdirectory="/data/hm/log";
 $graphdirectory="/root/Dropbox/Public/styes-graphs";
-$logfile="graph.log";
+#$logfile="graph.log";
 $lockfile="/tmp/graph.lock";
 $datestamp = `date +%F\\ %R\\ %z`;                                                   
 
@@ -164,12 +164,14 @@ foreach $bus (0..2)
 }
 
 # 20170307 nissan leaf stuff
-#TODO: runtime (ie API responsiveness), capacity bars
+#TODO: capacity bars
 # -u 100: upper y-axis limit 100; -l 0: lower y-axis limit 0
 #
 # we plot the percentage calculated from the number of bars 
 # left (out of 12) which ought to match the percentage
 $output = `rrdtool graph $graphdirectory/leafbatt${time}.png -a PNG -u 100 -l 0 -r -y 10:1 --vertical-label "percent" -s -${time} -w 1024 -h 300 'DEF:pc='$rrddirectory/leafbattpc.rrd:pc:LAST 'DEF:bars='$rrddirectory/leafbattbars.rrd:bars:LAST 'CDEF:barspc=bars,0.12,/' '${linetype}:pc#${col01}:traction battery percent charged' '${linetype}:barspc#${col02}:traction battery bars remaining' -W "${datestamp}" -t "nissan leaf battery"`;
+
+$output = `rrdtool graph $graphdirectory/leafruntime${time}.png -a PNG  --vertical-label "seconds" -s -${time} -w 1024 -h 300 'DEF:secs='$rrddirectory/runtimeleaf.rrd:secs:LAST  '${linetype}:secs#${col01}:leaf monitoring script run time'  -W "${datestamp}" -t "time taken to retrieve data from car"`;
 
 close LOCKFILE;
 unlink $lockfile;
