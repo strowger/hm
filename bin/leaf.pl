@@ -13,7 +13,7 @@
 $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="leaf.log";
-#$errorlog="leaf-errors.log";
+$errorlog="leaf-errors.log";
 $carwings="/data/hm/bin/leaf.py";
 # where the shit that comes out of the python program goes, will probably end up
 # erasing this quite frequently
@@ -23,7 +23,7 @@ $timestamp = time();
 $starttime = $timestamp;
 
 open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
-#open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;
+open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;
 open TEMPLOGFILE, ">>", "$logdirectory/$templogfile" or die $!;
 
 print LOGFILE "starting leaf.pl at $timestamp\n";
@@ -32,14 +32,14 @@ print LOGFILE "starting leaf.pl at $timestamp\n";
 # program hangs indefinitely quite often, we'll just murder any old processes
 # and print a warning
 
-$numprocs = `ps aux|grep leaf.pl|grep -v grep|wc -l`;
+$numprocs = `ps aux|grep leaf.pl|grep -v grep|grep -v vim|wc -l`;
 chomp $numprocs;
 if ( $numprocs > 2 )
   { die "FATAL: more than 1 previous leaf.pl process running, something is very wrong"; }
 if ( $numprocs == 2)
 {
   # $$ means "our own pid"
-  $oldpid = `ps aux|grep leaf.pl|grep -v grep|grep -v $$|awk '{print \$2}'`;
+  $oldpid = `ps aux|grep leaf.pl|grep -v grep|grep -v vim|grep -v $$|awk '{print \$2}'`;
   print LOGFILE "found an old leaf.pl process at pid $oldpid...";
   kill 'KILL', $oldpid;
   print LOGFILE "killed...";
@@ -53,13 +53,13 @@ if ( $numprocs == 2)
     kill 'KILL', $oldpid;
     print LOGFILE "killed...";
   }
-  print LOGFILE "\n";
+  print LOGFILE "continuing...\n";
 }
 $numprocs = `ps aux|grep leaf.pl|grep -v grep|wc -l`;
 if ( $numprocs > 1)
   { die "FATAL: tried to kill a previous leaf.pl process but there are still >1 running"; }
 
-$carwingsoutput = `${carwings}`;
+$carwingsoutput = `${carwings} 2>&1`;
 
 print TEMPLOGFILE "$carwingsoutput";
 # splitting on space splits on any kind of whitespace incl newline
@@ -71,13 +71,11 @@ print TEMPLOGFILE "$carwingsoutput";
 #  if this errors often then the mails from cron will get annoying - in which 
 #  case, like the 1wire script, write to teh errorlog and have that parsed
 if ( $cwoutputlines[0] ne "date" )
-{ die "wrong output format in carwings output from $carwings"; }
-
-# this was just for dev/debug
-#foreach $line (@cwoutputlines)
-#{
-#  print "$line \n";
-#}
+{ 
+  print ERRORLOG "FATAL: got a bad output from pycarwings\n";
+  print LOGFILE "FATAL: got a bad output from pycarwings\n";
+  die; 
+}
 
 # there are 2 times, one appears to be localtime (in GMT) and the other an
 # hour ahead (CET?), one is possibly api-call time and the other possibly
