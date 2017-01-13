@@ -157,6 +157,10 @@ $output = `rrdtool graph $graphdirectory/pm${time}.png -a PNG --vertical-label "
 
 $output = `rrdtool graph $graphdirectory/tvoc${time}.png -a PNG --vertical-label "parts per billion" -s -${time} -w 1024 -h 300 'DEF:kitchen='$rrddirectory/airkitchen-tvoc.rrd:val:LAST '${linetype}:kitchen#${col01}:kitchen voc concentration' -W "${datestamp}" -t "total volatile organic compound concentration"`;
 
+# 20170113 rssi of frames from air quality device
+$output = `rrdtool graph $graphdirectory/rssi-kitchen${time}.png -a PNG --vertical-label "rssi" -s -${time} -w 1024 -h 300 'DEF:rssi='$rrddirectory/rssi-kitchen.rrd:rssi:LAST '${linetype}:rssi#${col01}:rssi' -W "${datestamp}" -t "air quality monitor frame rssi"`;
+
+
 # errors
 foreach $bus (0..2)
 {
