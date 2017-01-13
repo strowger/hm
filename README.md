@@ -35,6 +35,24 @@ Check log files for various errors and invalid values.
 Heavily hard-coded to my own house's setup.
 Terrible code with lots of lazy backticks.
 
+router.pl
+Reads data from asus home router and logs to lgofiles and RRDs.
+Not useful as the router does not expose most needed values over snmp - instead an alternative method using ssh is necessary and not implemented.
+
+air.pl
+Reads data expressed as bluetooth low energy broadcasts from a popular air quality measurement device. Logs to logfiles and RRDs.
+
+beacon.pl
+Reads data expressed as bluetooth low energy broadcasts from ankhmaway bluetooth sensor beacon. Abandoned before logging etc was properly implemented out of frustration with the impossiblity of extracting useful information from the beacon's accelerometer outputs.
+
+leaf.pl
+Queries the Nissan Carwings (aka NissanConnect) API to gather data from a Nissan Leaf electric vehicle using the leaf.py script (below) from pycarwings2, and logs to logfiles and RRDs.
+
+leaf.py
+Python script from the 'pycarwings2' project which does the hard work of interacting with Nissan. using the leaf.py script (below) from pycarwings2.
+
+
+
 to-do
 
 we are gathering data from downstairs bathroom radiator flow/return but not graphing it
