@@ -14,6 +14,7 @@ $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $owerrorlog="1wireread-errors.log";
 $routererrorlog="router-errors.log";
+$leaferrorlog="leaf-errors.log";
 $lockfile="/tmp/checklogs.lock";
 
 if ( -f $lockfile ) 
@@ -228,6 +229,29 @@ if (-f "$logdirectory/$routererrorlog" )
     print "@errorlines";
   }
   unlink "$logdirectory/$routererrorlog";
+}
+
+# same as above but for nissan leaf monitoring errors - we only poll 4 times
+# per hour so for now we care if we get even a single one - later we'll care 
+# less and probably reduce this
+
+if (-f "$logdirectory/$leaferrorlog" )
+{
+  $errorlinecount = 0;
+  @errorlines = ();
+  open LEAFERRLOG, "<", "$logdirectory/$leaferrorlog" or die $!;
+  foreach $errorline (<LEAFERRLOG>)
+  {
+    $errorlinecount++;
+    push(@errorlines, $errorline);
+  }
+  close LEAFERRLOG;
+  if ($errorlinecount > 1)
+  {
+    print "More than 1 leaf.pl runs with errors in last hour:\n";
+    print "@errorlines";
+  }
+  unlink "$logdirectory/$leaferrorlog";
 }
 
 # disk space - assumes we're just using /root
