@@ -31,7 +31,7 @@ time.sleep(20) # sleep 20 seconds to give request time to process
 battery_status = l.get_status_from_update(result_key)
 while battery_status is None:
 ##        print "not update"
-        time.sleep(10)
+        time.sleep(8)
         battery_status = l.get_status_from_update(result_key)
 
 ##pprint.pprint(battery_status.answer)
