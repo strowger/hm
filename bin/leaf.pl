@@ -38,10 +38,22 @@ if ( $numprocs > 2 )
   { die "FATAL: more than 1 previous leaf.pl process running, something is very wrong"; }
 if ( $numprocs == 2)
 {
-  $oldpid = `ps aux|grep leaf.pl|grep -v grep|grep -v $$`;
+  # $$ means "our own pid"
+  $oldpid = `ps aux|grep leaf.pl|grep -v grep|grep -v $$|awk '{print \$2}'`;
   print LOGFILE "found an old leaf.pl process at pid $oldpid...";
   kill 'KILL', $oldpid;
-  print LOGFILE "killed\n";
+  print LOGFILE "killed...";
+# we have to kill the leaf.py child it leaves behind otherwise we get a zombie
+  $oldpid = `ps aux|grep leaf.py|grep -v grep|awk '{print \$2}'`;
+  if ( $oldpid eq "" )
+  { print LOGFILE "no leaf.py process found..."; }
+  else
+  {
+    print LOGFILE "found an old leaf.py process at pid $oldpid...";
+    kill 'KILL', $oldpid;
+    print LOGFILE "killed...";
+  }
+  print LOGFILE "\n";
 }
 $numprocs = `ps aux|grep leaf.pl|grep -v grep|wc -l`;
 if ( $numprocs > 1)
