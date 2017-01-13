@@ -812,7 +812,8 @@ done
 
 # 20170113 air.pl rssi data
 # no idea what the limits should be, rssi is arbitrary
-rrdtool create rssi-air.rrd --start 1484300000 --step 60 \
+# name 'kitchen' is from the air.conf file
+rrdtool create rssi-kitchen.rrd --start 1484300000 --step 60 \
 DS:rssi:GAUGE:120:U:U \
 RRA:LAST:0.5:1:15811200
 
