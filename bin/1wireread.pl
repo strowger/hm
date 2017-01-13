@@ -14,9 +14,12 @@ $errorlog="1wireread-errors.log";
 $lockfile="/tmp/1wireread.lock";
 $owread="/opt/owfs/bin/owread";
 
+open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;
+
 if ( -f $lockfile ) 
 {
-  die "Lockfile exists in $lockfile; exiting";
+  print ERRORLOG "FATAL: lockfile exists, exiting";
+  die;
 }
 
 open LOCKFILE, ">", $lockfile or die $!;
@@ -25,7 +28,6 @@ $timestamp = time();
 $starttime = $timestamp;
 
 open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
-open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;
 
 print LOGFILE "starting 1wireread at $timestamp\n";
 
