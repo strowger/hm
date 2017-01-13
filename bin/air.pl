@@ -16,7 +16,6 @@
 # sudo hcidump -i hci0 -R|./am.pl
 # sudo hcidump -i hci0 -XR is friendlier for manual (shows ascii too, and rssi)
 #
-## TODO: what i thought was crc is actually rssi, fix the variable name and capture it
 #
 $config="/data/hm/conf/air.conf";
 $rrddirectory="/data/hm/rrd";
@@ -124,13 +123,13 @@ while (<STDIN>)
         # co and o3 aren't implemented and should be zero
 #        $co = $packetdec[43];
 #        $o3 = $packetdec[44];
-#        $crc = $packetdec[45];
+        $rssi = $packetdec[45] - 256;
         print LOGFILE "co2: $co2,";
         print LOGFILE "pm25: $pm25,";
         print LOGFILE "pm10: $pm10,";
+        print LOGFILE "rssi: $rssi";
 #        print LOGFILE "co: $co,";
 #        print LOGFILE "o3: $o3";
-#        print "crc: $crc\n";
         if (($timestamp - $lastpt1packet) < 50)
         {
           # less than 50 seconds since the last update, don't write
@@ -170,7 +169,17 @@ while (<STDIN>)
             if (length $output) { print LOGFILE "rrdtool errored $output"; }
           }
           else { print LOGFILE "rrd for air${devicename}-pm10 doesn't exist, skipping update"; }          
-          print LOGFILE "\n"; 
+          # rssi
+          open LINE, ">>", "$logdirectory/rssi-${devicename}.log" or die $!;
+          print LINE "$timestamp $rssi\n";
+          close LINE;
+          if ( -f "$rrddirectory/rssi-${devicename}.rrd" )
+          {
+            $output = `rrdtool update $rrddirectory/rssi-${devicename}.rrd $timestamp:$rssi`;
+            if (length $output) { print LOGFILE "rrdtool errored $output"; }
+          }
+          else { print LOGFILE "rrd for rssi-${devicename} doesn't exist, skipping update"; }
+          print LOGFILE "\n";
         }
       }
       if ( ($dataheader1 == 12) || ($dataheader1 == 22) || ($dataheader1 == 32) )
@@ -196,13 +205,13 @@ while (<STDIN>)
         $iaqhi = $packetdec[43];
         $iaqlo = $packetdec[44];
         $iaq = ($iaqhi * 256) + $iaqlo;        
-#        $crc = $packetdec[45];
+        $rssi = $packetdec[45] - 256;
 
         print LOGFILE "tvoc: $tvoc,";
         print LOGFILE "temp: $realtemp,"; 
 #        print "humidity value: $humidity, processed humidity: $realhumidity\n";
-        print LOGFILE "iaq: $iaq";
-#        print "crc $crc\n";
+        print LOGFILE "iaq: $iaq,";
+        print LOGFILE "rssi: $rssi"; 
         if (($timestamp - $lastpt2packet) < 50)
         {
         # less than 50 seconds since the last update, don't write
@@ -232,6 +241,16 @@ while (<STDIN>)
             if (length $output) { print LOGFILE "rrdtool errored $output"; }
           }
           else { print LOGFILE "rrd for air${devicename}-iaq doesn't exist, skipping update"; }
+          # rssi
+          open LINE, ">>", "$logdirectory/rssi-${devicename}.log" or die $!;
+          print LINE "$timestamp $rssi\n";
+          close LINE;
+          if ( -f "$rrddirectory/rssi-${devicename}.rrd" )
+          {
+            $output = `rrdtool update $rrddirectory/rssi-${devicename}.rrd $timestamp:$rssi`;
+            if (length $output) { print LOGFILE "rrdtool errored $output"; }
+          }
+          else { print LOGFILE "rrd for rssi-${devicename} doesn't exist, skipping update"; }
           print LOGFILE "\n";
         }
       }
