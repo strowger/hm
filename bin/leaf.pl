@@ -74,7 +74,7 @@ if ( $cwoutputlines[0] ne "date" )
 { 
   print ERRORLOG "FATAL: got a bad output from pycarwings\n";
   print LOGFILE "FATAL: got a bad output from pycarwings\n";
-  die; 
+  exit 2; 
 }
 
 # there are 2 times, one appears to be localtime (in GMT) and the other an
