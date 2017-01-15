@@ -19,7 +19,7 @@ open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;
 if ( -f $lockfile ) 
 {
   print ERRORLOG "FATAL: lockfile exists, exiting";
-  die;
+  exit 2;
 }
 
 open LOCKFILE, ">", $lockfile or die $!;
