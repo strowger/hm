@@ -51,7 +51,8 @@ Queries the Nissan Carwings (aka NissanConnect) API to gather data from a Nissan
 leaf.py
 Python script from the 'pycarwings2' project which does the hard work of interacting with Nissan. using the leaf.py script (below) from pycarwings2.
 
-
+leafspy.pl
+Parses log lines from the Android/IOS Leafspy app, which logs data from a Nissan Leaf using the obd2 interface
 
 to-do
 
