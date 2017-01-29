@@ -56,9 +56,11 @@ while (<>)
   # units of 80Wh of energy left in pack
   $gids = $line[5];
   # pack percent charged * 10000
-  $soc = $line[6];
+  $socstupid = $line[6];
+  $soc = $socstupid / 10000;
   # pack capacity in amp-hours * 10000
-  $amphr = $line[7];
+  $amphrstupid = $line[7];
+  $amphr = $amphrstupid / 10000;
   $packvolts = $line[8];
   # current draw, negative indicated regen or charging
   $packamps = $line[9];
@@ -80,7 +82,7 @@ while (<>)
   # leaf counts cps from 1, this array from 0 - so $cp[5] is cellpair 6 etc
   @cp = @line[23..118];
   # la = leadacid - our car doesn't have this value, it's gen1 only
-  $voltsla = $line[119];
+  $ampsla = $line[119];
   $vin = $line[120];
   $packhealth = $line[121];
   # leadacid again
