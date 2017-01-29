@@ -87,8 +87,8 @@ while (<>)
   $packhealth = $line[121];
   # leadacid again
   $voltsla = $line[122];
-  $odometerkm = $line[123];
-  $odometermiles = $odometerkm * 0.621371;
+  $odomkm = $line[123];
+  $odom = $odomkm * 0.621371;
   $quickcharges = $line[124];
   $slowcharges = $line[125];
   # tyre pressures frontleft/frontright/rearright/rearleft - read 0 if no data
@@ -152,7 +152,7 @@ while (<>)
   print "gids $gids state-of-charge $soc amp capacity $amphr volts (3 readings) $packvolts $packvolts2 $packvolts3 amps $packamps\n";
   print "cellpairs max $maxcpmv min $mincpmv avg $avgcpmv biggest difference $cpmvdiff judgementval $judgementval\n";
   print "pack temps $packtemp1 $packtemp2 $packtemp3 $packtemp4 health1 $packhealth health2 $packhealth2 quickcharges $quickcharges slowcharges $slowcharges\n";
-  print "vin $vin odometer miles $odometermiles 12v volts $voltsla outside temp $ambienttemp\n";
+  print "vin $vin odometer miles $odom 12v volts $voltsla outside temp $ambienttemp\n";
   print "tyre presures front left $tpfl front right $tpfr rear left $tprl rear right $tprr\n";
   print "regenwh $regenwh drive motor $drivemotor W aux $auxpower W\n";
   print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";

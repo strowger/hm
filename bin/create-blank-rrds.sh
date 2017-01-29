@@ -851,3 +851,75 @@ rrdtool create runtimeleaf.rrd --start 1483700000 --step 60 \
 DS:secs:GAUGE:3600:U:U \
 RRA:LAST:0.5:1:7905600
 
+# 20170129 leafspy stuff
+# we only have data for these while the vehicle is powered-up to use
+
+# these are things which change rapidly enough that a sub-minute resolution 
+# is not a complete waste. we keep:
+# 2 weeks of every 5 seconds (5 secs is 12 times/min: 12*60*24*14=241920)
+# 15 years of daily min/max/average 
+#  (there are 12*60*24 = 17280 5sec values in a day)
+#  (and 366*15 = 5500 days in 15 years)
+#DS - name, counter/gauge type, time without a value before entering "nothing" in rrd, min value, max value                                                                                                 
+#RRA - name, type (GAUGE/COUNTER), xff, step, rows
+#  xff is proportion (0 to 1) of values which can be unknown before the rra just holds 'unknown
+#    - we might not drive much but we still want to record something!
+#  step is number of 'DS' values to run the 'type' over (eg take average of 'step' steps)
+#  rows is number of those to keep                                                                                                     
+#next - how many seconds between records                                                              
+#how many records to keep  
+
+for i in speed packamps drivemotor auxpower acpower acpres acpower2 heatpower chargepower
+do
+rrdtool create ls-${i}.rrd --start 1485400000 --step 5 \
+DS:${i}:GAUGE:60:U:U \
+RRA:LAST:0.001:1:241920 \
+RRA:AVERAGE:0.001:17280:5500 \
+RRA:MAX:0.001:17280:5500 \
+RRA:MIN:0.001:17280:5500
+done
+
+# for these, which change more slowly, we just need once a minute, then the same 
+# 15 years daily min/max/avg
+# once a minute is 1440 times/day, 20160 times in 2 weeks
+for i in elevation gids soc amphr packvolts packvolts2 packvolts3 maxcpmv mincpmv avgcpmv cpmvdiff judgementval packtemp1 packtemp2 packtemp4 voltsla packhealth packhealth2 ambienttemp phonebatt
+do
+rrdtool create ls-${i}.rrd --start 1485400000 --step 60 \
+DS:${i}:GAUGE:120:U:U \
+RRA:LAST:0.001:1:20160 \
+RRA:AVERAGE:0.001:1440:5500 \
+RRA:MAX:0.001:1440:5500 \
+RRA:MIN:0.001:1440:5500
+done
+
+# 96 cell pairs, same intervals as above
+for i in `seq1 96`
+do
+rrdtool create ls-cp${i}.rrd --start 1485400000 --step 60 \
+DS:v:GAUGE:120:U:U \
+RRA:LAST:0.001:1:20160 \
+RRA:AVERAGE:0.001:1440:5500 \
+RRA:MAX:0.001:1440:5500 \
+RRA:MIN:0.001:1440:5500 
+done
+
+# these ones are counters not gauges, otherwise same rules as above
+
+for i in regenwh odom
+do                                                                                                    
+rrdtool create ls-${i}.rrd --start 1485400000 --step 60 \
+DS:${i}:COUNTER:120:U:U \
+RRA:LAST:0.001:1:20160 \
+RRA:AVERAGE:0.001:1440:5500 \
+RRA:MAX:0.001:1440:5500 \
+RRA:MIN:0.001:1440:5500
+done 
+
+# daily values for 15 years only - counters not gauges
+for i in quickcharges slowcharges
+do
+rrdtool create ls-${i}.rrd --start 1485400000 --step 86400 \
+DS:${i}:COUNTER:86400:U:U \
+RRA:LAST:0.001:1:5500
+done
+
