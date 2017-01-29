@@ -893,7 +893,7 @@ RRA:MIN:0.001:1440:5500
 done
 
 # 96 cell pairs, same intervals as above
-for i in `seq1 96`
+for i in `seq 1 96`
 do
 rrdtool create ls-cp${i}.rrd --start 1485400000 --step 60 \
 DS:v:GAUGE:120:U:U \
