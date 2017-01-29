@@ -2,24 +2,42 @@
 #
 # leafspy.pl - parse datafiles from leafspy
 #
+# this writes to rrds but not to any new logfiles, and is therefore
+# safe to repeatedly re-run over the same data, as when leafspy appends
+# new lines to an existing file
+#
 # GH 2017-01-28
 # begun
 #
-##$rrddirectory="/data/hm/rrd";
-##$logdirectory="/data/hm/log";
-##$logfile="leafspy.log";
-##$errorlog="leafspy-errors.log";
 
-$timestamp = time();
-#$starttime = $timestamp;
+# for calculating epoch from logfile values
+use Time::Local;
 
-#open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
-#open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;
-#open TEMPLOGFILE, ">>", "$logdirectory/$templogfile" or die $!;
+# symbolic references don't 'count' so we get a load of 'only used once' warnings
+no warnings 'once';
 
-#print LOGFILE "starting leafspy.pl at $timestamp\n";
+$rrddirectory="/data/hm/rrd";
+$logdirectory="/data/hm/log";
+$logfile="leafspy.log";
+#$errorlog="leafspy-errors.log";
+$lockfile="/tmp/leafspy.lock";
 
-# FIXME locking?
+#open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;                                             
+
+if ( -f $lockfile ) 
+{
+  print "FATAL: lockfile exists, exiting";
+  exit 2;
+}
+open LOCKFILE, ">", $lockfile or die $!;
+
+$timestamp = time();                                                                                  
+$starttime = $timestamp;
+
+open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;                                               
+
+print LOGFILE "starting leafspy.pl at $timestamp\n";
+
 
 # FIXME how do we get the latest file:
 #  - we get one file per day, which grows
@@ -47,6 +65,10 @@ while (<>)
   ($date,$time) = split(" ",$datetime);
   ($month,$day,$year) = split("/",$date);
   ($hour,$minute,$second) = split(":",$time);
+# need to form epoch from these to update rrds with
+# timegm requires months in range 0-11 (!)
+  $stupidmonth = $month -1;
+  $linetime = timegm($second, $minute, $hour, $day, $stupidmonth, $year);
   $lat = $line[1];
   $long = $line[2];
   # in units determined by the android device, from android gps
@@ -89,6 +111,9 @@ while (<>)
   $voltsla = $line[122];
   $odomkm = $line[123];
   $odom = $odomkm * 0.621371;
+  # rrdtool will choke on decimal places in the odometer value 
+  #  because it's a COUNTER not a GAUGE
+  $odom = int $odom;
   $quickcharges = $line[124];
   $slowcharges = $line[125];
   # tyre pressures frontleft/frontright/rearright/rearleft - read 0 if no data
@@ -100,7 +125,9 @@ while (<>)
   $ambienttemp = ($ambienttempf - 32) * 5/9;
   # is this just a rounded version of packhealth1?
   $packhealth2 = $line[131];
+  # we get negative numbers out of this which make rrdtool choke
   $regenwh = $line[132];
+  $regenwh = abs $regenwh;
   # phone battery in %
   $phonebatt = $line[133];
   $epochtime = $line[134];
@@ -145,24 +172,74 @@ while (<>)
   # 1 if obc ecu read else 0
   $obcecu = $line[150];
   $debuginfo = $line[151];
+  chomp $debuginfo; # last field so contains newline
 
-  print "log line summary:\n";
-  print "$year $month $day $hour $minute $second epoch $epochtime\n";
-  print "lat $lat long $long elevation $elevation speed $speed\n";
-  print "gids $gids state-of-charge $soc amp capacity $amphr volts (3 readings) $packvolts $packvolts2 $packvolts3 amps $packamps\n";
-  print "cellpairs max $maxcpmv min $mincpmv avg $avgcpmv biggest difference $cpmvdiff judgementval $judgementval\n";
-  print "pack temps $packtemp1 $packtemp2 $packtemp3 $packtemp4 health1 $packhealth health2 $packhealth2 quickcharges $quickcharges slowcharges $slowcharges\n";
-  print "vin $vin odometer miles $odom 12v volts $voltsla outside temp $ambienttemp\n";
-  print "tyre presures front left $tpfl front right $tpfr rear left $tprl rear right $tprr\n";
-  print "regenwh $regenwh drive motor $drivemotor W aux $auxpower W\n";
-  print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";
-  print "phone battery $phonebatt\n";
+print LOGFILE "processing line from $linetime\n";
+
+@rrds = ("speed", "packamps", "drivemotor", "auxpower", "acpower", "acpres", "acpower2", "heatpower", "chargepower", "elevation", "gids", "soc", "amphr", "packvolts", "packvolts2", "packvolts3", "maxcpmv", "mincpmv", "avgcpmv", "cpmvdiff", "judgementval", "packtemp1", "packtemp2", "packtemp4", "voltsla", "packhealth", "packhealth2", "ambienttemp", "phonebatt", "regenwh", "odom", "quickcharges", "slowcharges");
+
+foreach $rrd (@rrds)
+{
+  print LOGFILE "updating rrd for $rrd...";
+  if ( -f "$rrddirectory/ls-$rrd.rrd" )
+  {
+    # this uses a symbolic reference and is naughty
+    $output = `rrdtool update $rrddirectory/ls-$rrd.rrd $linetime:$$rrd`;
+    if (length $output)
+    { 
+      chomp $output;
+      print LOGFILE "got error $output..."; 
+    }
+    print LOGFILE "done";
+  }
+  else
+  {
+    print LOGFILE "not found; skipping..."
+  }
+  print LOGFILE "\n";
+}
+
+# cellpairs in the @cp array are 0..95 but in the car are 1..96
+foreach $cellpairstupid (0..95)
+{
+  $cellpair = $cellpairstupid + 1;
+  print LOGFILE "updating rrd for cp$cellpair...";
+  if ( -f "$rrddirectory/ls-cp$cellpair.rrd" )
+  {
+    $output = `rrdtool update $rrddirectory/ls-cp$cellpair.rrd $linetime:$cp[$cellpairstupid]`;
+    if (length $output)
+    {
+      chomp $output;
+      print LOGFILE "got error $output...";
+    }
+    print LOGFILE "done";
+  }
+  else
+  {
+    print LOGFILE "not found; skipping..."
+  }
+  print LOGFILE "\n";
+}
+
+#  print "log line summary:\n";
+# print "$year $month $day $hour $minute $second epoch $epochtime calculated epoch $linetime\n";
+#  print "lat $lat long $long elevation $elevation speed $speed\n";
+#  print "gids $gids state-of-charge $soc amp capacity $amphr volts (3 readings) $packvolts $packvolts2 $packvolts3 amps $packamps\n";
+#  print "cellpairs max $maxcpmv min $mincpmv avg $avgcpmv biggest difference $cpmvdiff judgementval $judgementval\n";
+#  print "pack temps $packtemp1 $packtemp2 $packtemp3 $packtemp4 health1 $packhealth health2 $packhealth2 quickcharges $quickcharges slowcharges $slowcharges\n";
+#  print "vin $vin odometer miles $odom 12v volts $voltsla outside temp $ambienttemp\n";
+#  print "tyre presures front left $tpfl front right $tpfr rear left $tprl rear right $tprr\n";
+#  print "regenwh $regenwh drive motor $drivemotor W aux $auxpower W\n";
+#  print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";
+#  print "phone battery $phonebatt\n";
 
 }
 
-##print TEMPLOGFILE "$carwingsoutput";
-### splitting on space splits on any kind of whitespace incl newline
-##@cwoutputlines = split(" ",$carwingsoutput);
+$endtime = time();
+$runtime = $endtime - $startime;
 
-#print LOGFILE "exiting successfully\n\n";
+print LOGFILE "exiting successfully after $runtime seconds \n\n";
+close LOCKFILE;
+unlink $lockfile;
+
 
