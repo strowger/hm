@@ -177,8 +177,11 @@ $output = `rrdtool graph $graphdirectory/leafbatt${time}.png -a PNG -u 100 -l 0 
 
 $output = `rrdtool graph $graphdirectory/leafruntime${time}.png -a PNG  --vertical-label "seconds" -s -${time} -w 1024 -h 300 'DEF:secs='$rrddirectory/runtimeleaf.rrd:secs:LAST  '${linetype}:secs#${col01}:leaf monitoring script run time'  -W "${datestamp}" -t "time taken to retrieve data from car"`;
 
-# battery capacity - 3 measures - don't expect it to change more than once or twice a year
-$output = `rrdtool graph $graphdirectory/leafbattcap${time}.png -a PNG -u 100 -l 0 -r -y 10:1 --vertical-label "percent" -s -${time} -w 1024 -h 300 'DEF:cap1='$rrddirectory/leafbattcap1.rrd:bars:LAST 'DEF:cap2='$rrddirectory/leafbattcap2.rrd:bars:LAST 'DEF:cap3='$rrddirectory/leafbattcap3.rrd:bars:LAST  'CDEF:cap1pc=cap1,0.12,/' 'CDEF:cap2pc=cap1,0.12,/' 'CDEF:cap3pc=cap1,0.12,/' '${linetype}:cap1pc#${col01}:traction battery capacity 1' '${linetype}:cap2pc#${col02}:traction battery capacity 2' '${linetype}:cap3pc#${col03}:traction battery capacity 3' -W "${datestamp}" -t "nissan leaf battery capacity"`;
+# this doesn't work
+## battery capacity - 3 measures - don't expect it to change more than once or twice a year
+#$output = `rrdtool graph $graphdirectory/leafbattcap${time}.png -a PNG -u 100 -l 0 -r -y 10:1 --vertical-label "percent" -s -${time} -w 1024 -h 300 'DEF:cap1='$rrddirectory/leafbattcap1.rrd:bars:LAST 'DEF:cap2='$rrddirectory/leafbattcap2.rrd:bars:LAST 'DEF:cap3='$rrddirectory/leafbattcap3.rrd:bars:LAST  'CDEF:cap1pc=cap1,0.12,/' 'CDEF:cap2pc=cap1,0.12,/' 'CDEF:cap3pc=cap1,0.12,/' '${linetype}:cap1pc#${col01}:traction battery capacity 1' '${linetype}:cap2pc#${col02}:traction battery capacity 2' '${linetype}:cap3pc#${col03}:traction battery capacity 3' -W "${datestamp}" -t "nissan leaf battery capacity"`;
+
+# 20170129 leafspy stuff
 
 
 close LOCKFILE;

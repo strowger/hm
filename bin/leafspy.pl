@@ -236,7 +236,7 @@ foreach $cellpairstupid (0..95)
 }
 
 $endtime = time();
-$runtime = $endtime - $startime;
+$runtime = $endtime - $starttime;
 
 print LOGFILE "exiting successfully after $runtime seconds \n\n";
 close LOCKFILE;
