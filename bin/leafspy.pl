@@ -174,6 +174,17 @@ while (<>)
   $debuginfo = $line[151];
   chomp $debuginfo; # last field so contains newline
 
+  # some stuff to fix up stupid shit that leafspy has put in logs
+
+  # we've had some spikes of this to 95C / 203F, which fucks up the graphs
+  #  writing "U" to the rrd is a special value which will just enter an unknown
+  if ($ambienttemp > 50 ) 
+    { $ambienttemp = "U" };
+
+  # had some bad lines were both of these were set to the same crazy value, one negative
+  if ( abs ($packvolts) == abs ($packamps) )
+    { $packvolts = "U"; $packamps = "U"; }
+
 print LOGFILE "processing line from $linetime\n";
 
 @rrds = ("speed", "packamps", "drivemotor", "auxpower", "acpower", "acpres", "acpower2", "heatpower", "chargepower", "elevation", "gids", "soc", "amphr", "packvolts", "packvolts2", "packvolts3", "maxcpmv", "mincpmv", "avgcpmv", "cpmvdiff", "judgementval", "packtemp1", "packtemp2", "packtemp4", "voltsla", "packhealth", "packhealth2", "ambienttemp", "phonebatt", "regenwh", "odom", "quickcharges", "slowcharges");
@@ -220,19 +231,20 @@ foreach $cellpairstupid (0..95)
   }
   print LOGFILE "\n";
 }
-
-#  print "log line summary:\n";
-# print "$year $month $day $hour $minute $second epoch $epochtime calculated epoch $linetime\n";
-#  print "lat $lat long $long elevation $elevation speed $speed\n";
-#  print "gids $gids state-of-charge $soc amp capacity $amphr volts (3 readings) $packvolts $packvolts2 $packvolts3 amps $packamps\n";
-#  print "cellpairs max $maxcpmv min $mincpmv avg $avgcpmv biggest difference $cpmvdiff judgementval $judgementval\n";
-#  print "pack temps $packtemp1 $packtemp2 $packtemp3 $packtemp4 health1 $packhealth health2 $packhealth2 quickcharges $quickcharges slowcharges $slowcharges\n";
-#  print "vin $vin odometer miles $odom 12v volts $voltsla outside temp $ambienttemp\n";
-#  print "tyre presures front left $tpfl front right $tpfr rear left $tprl rear right $tprr\n";
-#  print "regenwh $regenwh drive motor $drivemotor W aux $auxpower W\n";
-#  print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";
-#  print "phone battery $phonebatt\n";
-
+=pod
+  print "log line summary:\n";
+ print "$year $month $day $hour $minute $second epoch $epochtime calculated epoch $linetime\n";
+  print "lat $lat long $long elevation $elevation speed $speed\n";
+  print "gids $gids state-of-charge $soc amp capacity $amphr\n";
+  print "volts (3 readings) $packvolts $packvolts2 $packvolts3 amps $packamps\n";
+  print "cellpairs max $maxcpmv min $mincpmv avg $avgcpmv biggest difference $cpmvdiff judgementval $judgementval\n";
+  print "pack temps $packtemp1 $packtemp2 $packtemp3 $packtemp4 health1 $packhealth health2 $packhealth2 quickcharges $quickcharges slowcharges $slowcharges\n";
+  print "vin $vin odometer miles $odom 12v volts $voltsla outside temp $ambienttemp c $ambienttempf f\n";
+  print "tyre presures front left $tpfl front right $tpfr rear left $tprl rear right $tprr\n";
+  print "regenwh $regenwh drive motor $drivemotor W aux $auxpower W\n";
+  print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";
+  print "phone battery $phonebatt\n";
+=cut
 }
 
 $endtime = time();
