@@ -104,8 +104,14 @@ $output = `rrdtool graph $graphdirectory/leafpackvolts${filename}.png -a PNG --v
 # 12v battery voltage
 $output = `rrdtool graph $graphdirectory/leafauxbatt${filename}.png -a PNG --vertical-label "volts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-voltsla.rrd:voltsla:LAST '${linetype}:p1#${col01}:12v battery voltage' -W "${datestamp}" -t "nissan leaf auxiliary/12v battery voltage"`;
 
-#  pack amps
+# pack amps
 $output = `rrdtool graph $graphdirectory/leafpackamps${filename}.png -a PNG --vertical-label "amps" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packamps.rrd:packamps:LAST '${linetype}:p1#${col01}:nissan leaf traction battery amps' -W "${datestamp}" -t "nissan leaf traction battery current"`;
+
+# charging power
+$output = `rrdtool graph $graphdirectory/leafchargepower${filename}.png -a PNG --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-chargepower.rrd:chargepower:LAST '${linetype}:p1#${col01}:nissan leaf charging power' -W "${datestamp}" -t "nissan leaf charging power"`;
+
+# pack health
+$output = `rrdtool graph $graphdirectory/leafpackhealth${filename}.png -a PNG --vertical-label "percent" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packhealth.rrd:packhealth:LAST 'DEF:p2='$rrddirectory/ls-packhealth2.rrd:packhealth2:LAST '${linetype}:p1#${col01}:nissan leaf pack health measure 1' '${linetype}:p2#${col02}:nissan leaf pack health measure 2' -W "${datestamp}" -t "nissan leaf battery pack health"`;
 
 close LOCKFILE;
 unlink $lockfile;
