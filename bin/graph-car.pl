@@ -75,7 +75,7 @@ open LOCKFILE, ">", $lockfile or die $!;
 # this is the old one which just used the api data
 #$output = `rrdtool graph $graphdirectory/leafbatt${filename}.png -a PNG -u 100 -l 0 -r -y 10:1 --vertical-label "percent" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:pc='$rrddirectory/leafbattpc.rrd:pc:LAST 'DEF:bars='$rrddirectory/leafbattbars.rrd:bars:LAST 'CDEF:barspc=bars,0.12,/' '${linetype}:pc#${col01}:traction battery percent charged' '${linetype}:barspc#${col02}:traction battery bars remaining' -W "${datestamp}" -t "nissan leaf battery"`;
 
-$output = `rrdtool graph $graphdirectory/leafruntime${filename}.png -a PNG  --vertical-label "seconds" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:secs='$rrddirectory/runtimeleaf.rrd:secs:LAST  '${linetype}:secs#${col01}:leaf monitoring script run time'  -W "${datestamp}" -t "time taken to retrieve data from car"`;
+$output = `rrdtool graph $graphdirectory/leafruntime${filename}.png -a PNG  --vertical-label "seconds" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:secs='$rrddirectory/runtimeleaf.rrd:secs:LAST  '${linetype}:secs#${col01}:leaf monitoring script run time'  -W "${datestamp}" -t "time taken to retrieve data from api"`;
 
 # this doesn't work
 ## battery capacity - 3 measures - don't expect it to change more than once or twice a year
@@ -87,7 +87,10 @@ $output = `rrdtool graph $graphdirectory/leafbatt${filename}.png -a PNG -u 100 -
 
 # speed, traction and regen power
 # regen and motor are both stored in watts but graphed in kW
-$output = `rrdtool graph $graphdirectory/leafspeedpower${filename}.png -a PNG --vertical-label "kilowatts/mph" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:sp='$rrddirectory/ls-speed.rrd:speed:LAST 'DEF:mpw='$rrddirectory/ls-drivemotor.rrd:drivemotor:LAST 'DEF:rew='$rrddirectory/ls-regenwh.rrd:regenwh:LAST 'CDEF:re=rew,1000,/' 'CDEF:mp=mpw,1000,/' '${linetype}:sp#${col01}:vehicle speed mph' '${linetype}:mp#${col02}:motor power kW' '${linetype}:re#${col03}:regen power kW' -W "${datestamp}" -t "nissan leaf - speed and power"`;
+#$output = `rrdtool graph $graphdirectory/leafspeedpower${filename}.png -a PNG --vertical-label "kilowatts/mph" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:sp='$rrddirectory/ls-speed.rrd:speed:LAST 'DEF:mpw='$rrddirectory/ls-drivemotor.rrd:drivemotor:LAST 'DEF:rew='$rrddirectory/ls-regenwh.rrd:regenwh:LAST 'CDEF:re=rew,1000,/' 'CDEF:mp=mpw,1000,/' '${linetype}:sp#${col01}:vehicle speed mph' '${linetype}:mp#${col02}:motor power kW' '${linetype}:re#${col03}:regen power kW' -W "${datestamp}" -t "nissan leaf - speed and power"`;
+
+# above without regen, which is bollocksed
+$output = `rrdtool graph $graphdirectory/leafspeedpower${filename}.png -a PNG --vertical-label "kilowatts/mph" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:sp='$rrddirectory/ls-speed.rrd:speed:LAST 'DEF:mpw='$rrddirectory/ls-drivemotor.rrd:drivemotor:LAST 'CDEF:mp=mpw,1000,/' '${linetype}:sp#${col01}:vehicle speed mph' '${linetype}:mp#${col02}:motor power kW' -W "${datestamp}" -t "nissan leaf - speed and power"`;
 
 # temperatures - pack and ambient
 $output = `rrdtool graph $graphdirectory/leaftemps${filename}.png -a PNG --vertical-label "deg c" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packtemp1.rrd:packtemp1:LAST 'DEF:p2='$rrddirectory/ls-packtemp2.rrd:packtemp2:LAST 'DEF:p4='$rrddirectory/ls-packtemp4.rrd:packtemp4:LAST 'DEF:amb='$rrddirectory/ls-ambienttemp.rrd:ambienttemp:LAST '${linetype}:p1#${col01}:battery sensor 1' '${linetype}:p2#${col02}:battery sensor 2' '${linetype}:p4#${col03}:battery sensor 4' '${linetype}:amb#${col04}:ambient sensor' -W "${datestamp}" -t "nissan leaf temperatures"`; 
@@ -100,6 +103,9 @@ $output = `rrdtool graph $graphdirectory/leafpackvolts${filename}.png -a PNG --v
 
 # 12v battery voltage
 $output = `rrdtool graph $graphdirectory/leafauxbatt${filename}.png -a PNG --vertical-label "volts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-voltsla.rrd:voltsla:LAST '${linetype}:p1#${col01}:12v battery voltage' -W "${datestamp}" -t "nissan leaf auxiliary/12v battery voltage"`;
+
+#  pack amps
+$output = `rrdtool graph $graphdirectory/leafpackamps${filename}.png -a PNG --vertical-label "amps" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packamps.rrd:packamps:LAST '${linetype}:p1#${col01}:nissan leaf traction battery amps' -W "${datestamp}" -t "nissan leaf traction battery current"`;
 
 close LOCKFILE;
 unlink $lockfile;
