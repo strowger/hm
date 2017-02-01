@@ -201,13 +201,13 @@ foreach $rrd (@rrds)
       chomp $output;
       print LOGFILE "got error $output..."; 
     }
-    print LOGFILE "done";
+    print LOGFILE "ok";
   }
   else
   {
     print LOGFILE "not found; skipping..."
   }
-  print LOGFILE "\n";
+  print LOGFILE "; ";
 }
 
 # cellpairs in the @cp array are 0..95 but in the car are 1..96
@@ -223,14 +223,17 @@ foreach $cellpairstupid (0..95)
       chomp $output;
       print LOGFILE "got error $output...";
     }
-    print LOGFILE "done";
+    print LOGFILE "ok";
   }
   else
   {
     print LOGFILE "not found; skipping..."
   }
-  print LOGFILE "\n";
+  print LOGFILE "; ";
 }
+
+print LOGFILE "\n";
+
 =pod
   print "log line summary:\n";
  print "$year $month $day $hour $minute $second epoch $epochtime calculated epoch $linetime\n";
