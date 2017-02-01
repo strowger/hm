@@ -247,9 +247,9 @@ if (-f "$logdirectory/$leaferrorlog" )
     push(@errorlines, $errorline);
   }
   close LEAFERRLOG;
-  if ($errorlinecount > 1)
+  if ($errorlinecount > 2)
   {
-    print "More than 1 leaf.pl runs with errors in last hour:\n";
+    print "More than 2 leaf.pl runs with errors in last hour:\n";
     print "@errorlines";
   }
   unlink "$logdirectory/$leaferrorlog";
