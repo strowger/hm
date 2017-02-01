@@ -160,6 +160,9 @@ while (<>)
   if ( abs ($packvolts) == abs ($packamps) )
     { $packvolts = "U"; $packamps = "U"; }
 
+  # had some lines where packhealth2 gets set to 0
+  if ($packhealth2 == 0) { $packhealth2 = "U"; }
+
 #  print "log line summary:\n";
 # print "$year $month $day $hour $minute $second epoch $epochtime calculated epoch $linetime\n";
 #  print "lat $lat long $long elevation $elevation speed $speed\n";

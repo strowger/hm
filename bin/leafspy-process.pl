@@ -173,12 +173,14 @@ while (<>)
 
   # we've had some spikes of this to 95C / 203F, which fucks up the graphs
   #  writing "U" to the rrd is a special value which will just enter an unknown
-  if ($ambienttemp > 50 ) 
-    { $ambienttemp = "U" };
+  if ($ambienttemp > 50 ) { $ambienttemp = "U" };
 
   # had some bad lines were both of these were set to the same crazy value, one negative
   if ( abs ($packvolts) == abs ($packamps) )
     { $packvolts = "U"; $packamps = "U"; }
+
+  # had some lines where packhealth2 gets set to 0
+  if ($packhealth2 == 0) { $packhealth2 = "U"; }
 
 print LOGFILE "processing line from $linetime\n";
 
