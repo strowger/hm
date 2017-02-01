@@ -16,6 +16,7 @@ $owerrorlog="1wireread-errors.log";
 $routererrorlog="router-errors.log";
 $leaferrorlog="leaf-errors.log";
 $lockfile="/tmp/checklogs.lock";
+$leafspylog="leafspy.log";
 
 if ( -f $lockfile ) 
 { die "Lockfile exists in $lockfile; exiting"; }
@@ -254,6 +255,16 @@ if (-f "$logdirectory/$leaferrorlog" )
   unlink "$logdirectory/$leaferrorlog";
 }
 
+# the leafspy log import script runs every minute and exits silently if a
+#  lockfile exists - we just alert here if it hasn't run successfully recently
+
+$timestamp = time();
+$leaflast = `grep exiting $logdirectory/$leafspylog|tail -1|awk '{print \$3}'`;
+$lastvalage = $timestamp-$leaflast;
+if ($lastvalage > 1200)
+{
+  print "leafspy import script hasn't run successfully for 20 minutes";
+}
 # disk space - assumes we're just using /root
 # from df loses a space
 $diskpercentused = `df -Ph|grep root|cut -d " " -f 12 |sed "s/\%//"`;
