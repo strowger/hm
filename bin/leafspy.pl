@@ -3,6 +3,9 @@
 # leafspy.pl - gather datafiles dropped in dropbox by leafspy,
 #  send them for processing if there are new ones, store them.
 #
+# intended to be run from cron at short intervals as checking for
+#   new or updated files is cheap/quick.
+#
 # GH 2017-01-28
 # begun
 #
