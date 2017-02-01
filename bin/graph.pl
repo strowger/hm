@@ -191,6 +191,10 @@ $output = `rrdtool graph $graphdirectory/leafruntime${time}.png -a PNG  --vertic
 # batteries - car from api and leafspy, car phone/logger
 $output = `rrdtool graph $graphdirectory/leafbatt${time}.png -a PNG -u 100 -l 0 -r -y 10:1 --vertical-label "percent" -s -${time} -w 1024 -h 300 'DEF:api='$rrddirectory/leafbattpc.rrd:pc:LAST 'DEF:ls='$rrddirectory/ls-soc.rrd:soc:LAST 'DEF:ph='$rrddirectory/ls-phonebatt.rrd:phonebatt:LAST '${linetype}:api#${col01}:traction battery percent charged - from api' '${linetype}:ls#${col02}:traction battery percent charge from leafspy' '${linetype}:ph#${col03}:monitoring system battery percent charge' -W "${datestamp}" -t "nissan leaf battery"`;
 
+# speed, traction and regen power
+# regen and motor are both stored in watts but graphed in kW
+$output = `rrdtool graph $graphdirectory/leafspeedpower${time}.png -a PNG --vertical-label "kilowatts/mph" -s -${time} -w 1024 -h 300 'DEF:sp='$rrddirectory/ls-speed.rrd:speed:LAST 'DEF:mpw='$rrddirectory/ls-drivemotor.rrd:drivemotor:LAST 'DEF:rew='$rrddirectory/ls-regenwh.rrd:regenwh:LAST 'CDEF:re=rew,1000,/' 'CDEF:mp=mpw,1000,/' '${linetype}:sp#${col01}:vehicle speed mph' '${linetype}:mp#${col02}:motor power kW' '${linetype}:re#${col03}:regen power kW' -W "${datestamp}" -t "nissan leaf - speed and power"`;
+
 # temperatures - pack and ambient
 $output = `rrdtool graph $graphdirectory/leaftemps${time}.png -a PNG --vertical-label "deg c" -s -${time} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packtemp1.rrd:packtemp1:LAST 'DEF:p2='$rrddirectory/ls-packtemp2.rrd:packtemp2:LAST 'DEF:p4='$rrddirectory/ls-packtemp4.rrd:packtemp4:LAST 'DEF:amb='$rrddirectory/ls-ambienttemp.rrd:ambienttemp:LAST '${linetype}:p1#${col01}:battery sensor 1' '${linetype}:p2#${col02}:battery sensor 2' '${linetype}:p4#${col03}:battery sensor 4' '${linetype}:amb#${col04}:ambient sensor' -W "${datestamp}" -t "nissan leaf temperatures"`; 
 
