@@ -869,7 +869,7 @@ RRA:LAST:0.5:1:7905600
 #next - how many seconds between records                                                              
 #how many records to keep  
 
-for i in speed packamps drivemotor auxpower acpower acpres acpower2 heatpower chargepower
+for i in speed packamps drivemotor auxpower acpower acpres acpower2 heatpower chargepower elevation
 do
 rrdtool create ls-${i}.rrd --start 1485400000 --step 5 \
 DS:${i}:GAUGE:60:U:U \
@@ -882,7 +882,7 @@ done
 # for these, which change more slowly, we just need once a minute, then the same 
 # 15 years daily min/max/avg
 # once a minute is 1440 times/day, 20160 times in 2 weeks
-for i in elevation gids soc amphr packvolts packvolts2 packvolts3 maxcpmv mincpmv avgcpmv cpmvdiff judgementval packtemp1 packtemp2 packtemp4 voltsla packhealth packhealth2 ambienttemp phonebatt
+for i in gids soc amphr packvolts packvolts2 packvolts3 maxcpmv mincpmv avgcpmv cpmvdiff judgementval packtemp1 packtemp2 packtemp4 voltsla packhealth packhealth2 ambienttemp phonebatt
 do
 rrdtool create ls-${i}.rrd --start 1485400000 --step 60 \
 DS:${i}:GAUGE:120:U:U \
