@@ -92,6 +92,9 @@ $output = `rrdtool graph $graphdirectory/leafbatt${filename}.png -a PNG -u 100 -
 # above without regen, which is bollocksed
 $output = `rrdtool graph $graphdirectory/leafspeedpower${filename}.png -a PNG --vertical-label "kilowatts/mph" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:sp='$rrddirectory/ls-speed.rrd:speed:LAST 'DEF:mpw='$rrddirectory/ls-drivemotor.rrd:drivemotor:LAST 'CDEF:mp=mpw,1000,/' '${linetype}:sp#${col01}:vehicle speed mph' '${linetype}:mp#${col02}:motor power kW' -W "${datestamp}" -t "nissan leaf - speed and power"`;
 
+# elevation
+$output = `rrdtool graph $graphdirectory/leafelevation${filename}.png -a PNG --vertical-label "meters above sea level" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:el='$rrddirectory/ls-elevation.rrd:elevation:LAST '${linetype}:el#${col01}:vehicle height metres' -W "${datestamp}" -t "nissan leaf - gps elevation"`; 
+
 # temperatures - pack and ambient
 $output = `rrdtool graph $graphdirectory/leaftemps${filename}.png -a PNG --vertical-label "deg c" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packtemp1.rrd:packtemp1:LAST 'DEF:p2='$rrddirectory/ls-packtemp2.rrd:packtemp2:LAST 'DEF:p4='$rrddirectory/ls-packtemp4.rrd:packtemp4:LAST 'DEF:amb='$rrddirectory/ls-ambienttemp.rrd:ambienttemp:LAST '${linetype}:p1#${col01}:battery sensor 1' '${linetype}:p2#${col02}:battery sensor 2' '${linetype}:p4#${col03}:battery sensor 4' '${linetype}:amb#${col04}:ambient sensor' -W "${datestamp}" -t "nissan leaf temperatures"`; 
 
