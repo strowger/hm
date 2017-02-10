@@ -869,7 +869,7 @@ RRA:LAST:0.5:1:7905600
 #next - how many seconds between records                                                              
 #how many records to keep  
 
-for i in speed packamps drivemotor auxpower acpower acpres acpower2 heatpower chargepower elevation
+for i in speed packamps drivemotor auxpower acpower acpres acpower2 heatpower chargepower elevation regenwatts
 do
 rrdtool create ls-${i}.rrd --start 1485400000 --step 5 \
 DS:${i}:GAUGE:60:U:U \
