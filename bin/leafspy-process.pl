@@ -35,6 +35,8 @@ open LOCKFILE, ">", $lockfile or die $!;
 $timestamp = time();                                                                                  
 $starttime = $timestamp;
 
+$regenwhlast = 0;
+
 open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;                                               
 
 print LOGFILE "starting leafspy-process.pl at $timestamp\n";
@@ -64,10 +66,17 @@ while (<>)
 # timegm requires months in range 0-11 (!)
   $stupidmonth = $month -1;
   $linetime = timegm($second, $minute, $hour, $day, $stupidmonth, $year);
+
+  # if it's the first line then this will be unset, so set it, we use it later 
+  #  to calculate regen watts
+  if (not defined ($linetimelast)) { $linetimelast = $linetime; }
+
   $lat = $line[1];
   $long = $line[2];
-  # in units determined by the android device, from android gps
-  $elevation = $line[3];
+  # in units determined by the android device, from android gps 
+  #  - if we select miles (which we do) as unit, as seem to get feet here
+  $elevationfeet = $line[3];
+  $elevation = $elevationfeet * 0.3048;
   # also in android units from android gps
   $speed = $line[4];
   # units of 80Wh of energy left in pack
@@ -123,6 +132,17 @@ while (<>)
   # we get negative numbers out of this which make rrdtool choke
   $regenwh = $line[132];
   $regenwh = abs $regenwh;
+  # also i'm shit at understanding counter-type rrds so mangle this to watts
+  $regenwhdiff = $regenwh - $regenwhlast;
+  $timediff = $linetime - $linetimelast;
+  # we have a number of watt-hours and a number of seconds
+  #  "watt-hours per hour" are watts, so watt hours per second/3600 are watts
+  # don't divide by zero
+  if ( $timediff > 0 )
+  {
+    $regenwhpersec = $regenwhdiff / $timediff;
+    $regenwatts = $regenwhpersec / 3600;
+  }
   # phone battery in %
   $phonebatt = $line[133];
   $epochtime = $line[134];
@@ -178,13 +198,18 @@ while (<>)
   # had some bad lines were both of these were set to the same crazy value, one negative
   if ( abs ($packvolts) == abs ($packamps) )
     { $packvolts = "U"; $packamps = "U"; $packvolts2 = "U"; $packvolts3 = "U"; }
+  # and some others where packvolts3 goes absurdly low
+  if ( abs ($packvolts3) < 250 ) { $packvolts3 = "U"; }
 
   # had some lines where packhealth2 gets set to 0
   if ($packhealth2 == 0) { $packhealth2 = "U"; }
 
+  # we get drive motor spikes to way over the rated max 80kW, despike these
+  if ( $drivemotor > 100000 ) { $drivemotor = "U"; }
+
 print LOGFILE "processing line from $linetime\n";
 
-@rrds = ("speed", "packamps", "drivemotor", "auxpower", "acpower", "acpres", "acpower2", "heatpower", "chargepower", "elevation", "gids", "soc", "amphr", "packvolts", "packvolts2", "packvolts3", "maxcpmv", "mincpmv", "avgcpmv", "cpmvdiff", "judgementval", "packtemp1", "packtemp2", "packtemp4", "voltsla", "packhealth", "packhealth2", "ambienttemp", "phonebatt", "regenwh", "odom", "quickcharges", "slowcharges");
+@rrds = ("speed", "packamps", "drivemotor", "auxpower", "acpower", "acpres", "acpower2", "heatpower", "chargepower", "elevation", "gids", "soc", "amphr", "packvolts", "packvolts2", "packvolts3", "maxcpmv", "mincpmv", "avgcpmv", "cpmvdiff", "judgementval", "packtemp1", "packtemp2", "packtemp4", "voltsla", "packhealth", "packhealth2", "ambienttemp", "phonebatt", "regenwh", "regenwatts", "odom", "quickcharges", "slowcharges");
 
 foreach $rrd (@rrds)
 {
@@ -211,10 +236,12 @@ foreach $rrd (@rrds)
 foreach $cellpairstupid (0..95)
 {
   $cellpair = $cellpairstupid + 1;
+# there seem to be failure/error modes of leafspy where it returns the voltages as negatives
+  $cpvalue = abs $cp[$cellpairstupid];
 #  print LOGFILE "updating rrd for cp$cellpair...";
   if ( -f "$rrddirectory/ls-cp$cellpair.rrd" )
   {
-    $output = `rrdtool update $rrddirectory/ls-cp$cellpair.rrd $linetime:$cp[$cellpairstupid]`;
+    $output = `rrdtool update $rrddirectory/ls-cp$cellpair.rrd $linetime:$cpvalue`;
     if (length $output)
     {
       chomp $output;
@@ -230,6 +257,10 @@ foreach $cellpairstupid (0..95)
 }
 
 print LOGFILE "\n";
+
+# we need these values next time round
+$linetimelast = $linetime;
+$regenwhlast = $regenwh;
 
 =pod
   print "log line summary:\n";
