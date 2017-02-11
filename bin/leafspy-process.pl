@@ -12,6 +12,14 @@
 # begun
 #
 
+if ($ARGV[0] eq "-process")  { $modeswitch = "process"; }
+if ($ARGV[0] eq "-dump")  { $modeswitch = "dump"; }
+if (($ARGV[0] ne "-process") && ($ARGV[0] ne "-dump"))
+{
+  print "usage: [cat logfile.csv|]leafspy-process.pl -process (to add log values to rrds) or -dump (to print to stdout)\n";
+  exit 1;
+}
+
 # for calculating epoch from logfile values
 use Time::Local;
 
@@ -21,16 +29,16 @@ no warnings 'once';
 $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="leafspy-process.log";
-$lockfile="/tmp/leafspy-process.lock";
+#$lockfile="/tmp/leafspy-process.lock";
 
 #open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;                                             
 
-if ( -f $lockfile ) 
-{
-  print "FATAL: lockfile exists, exiting";
-  exit 2;
-}
-open LOCKFILE, ">", $lockfile or die $!;
+#if ( -f $lockfile ) 
+#{
+#  print "FATAL: lockfile exists, exiting";
+#  exit 2;
+#}
+#open LOCKFILE, ">", $lockfile or die $!;
 
 $timestamp = time();                                                                                  
 $starttime = $timestamp;
@@ -42,7 +50,7 @@ open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
 print LOGFILE "starting leafspy-process.pl at $timestamp\n";
 
 # this will read from either stdin or a file specified on the commandline
-while (<>)
+while (<STDIN>)
 {
 # Leafspy pro logfile format
 #Date/Time,Lat,Long,Elv,Speed,Gids,SOC,AHr,Pack Volts,Pack Amps,Max CP mV,Min CP mV,Avg CP mV,CP mV Diff,Judgment Value,Pack T1 F,Pack T1 C,Pack T2 F,Pack T2 C,Pack T3 F,Pack T3 C,Pack T4 F,Pack T4 C,CP1,CP2,CP3,CP4,CP5,CP6,CP7,CP8,CP9,CP10,CP11,CP12,CP13,CP14,CP15,CP16,CP17,CP18,CP19,CP20,CP21,CP22,CP23,CP24,CP25,CP26,CP27,CP28,CP29,CP30,CP31,CP32,CP33,CP34,CP35,CP36,CP37,CP38,CP39,CP40,CP41,CP42,CP43,CP44,CP45,CP46,CP47,CP48,CP49,CP50,CP51,CP52,CP53,CP54,CP55,CP56,CP57,CP58,CP59,CP60,CP61,CP62,CP63,CP64,CP65,CP66,CP67,CP68,CP69,CP70,CP71,CP72,CP73,CP74,CP75,CP76,CP77,CP78,CP79,CP80,CP81,CP82,CP83,CP84,CP85,CP86,CP87,CP88,CP89,CP90,CP91,CP92,CP93,CP94,CP95,CP96,12v Bat Amps,VIN,Hx,12v Bat Volts,Odo(km),QC,L1/L2,TP-FL,TP-FR,TP-RR,TP-RL,Ambient,SOH,RegenWh,BLevel,epoch time,Motor Pwr(100w),Aux Pwr(100w),A/C Pwr(250w),A/C Comp(0.1MPa),Est Pwr A/C(50w),Est Pwr Htr(250w),Plug State,Charge Mode,OBC Out Pwr,Gear,HVolt1,HVolt2,GPS Status,Power SW,BMS,OBC
@@ -137,7 +145,8 @@ while (<>)
   $timediff = $linetime - $linetimelast;
   # we have a number of watt-hours and a number of seconds
   #  "watt-hours per hour" are watts, so watt hours per second/3600 are watts
-  # don't divide by zero
+  # don't divide by zero, but set it to something first so we don't have it undefined
+  $regenwatts = 0;
   if ( $timediff > 0 )
   {
     $regenwhpersec = $regenwhdiff / $timediff;
@@ -195,11 +204,12 @@ while (<>)
   #  writing "U" to the rrd is a special value which will just enter an unknown
   if ($ambienttemp > 50 ) { $ambienttemp = "U" };
 
+  # ignore log lines where packvolts3 goes absurdly low - must do before check below as
+  #  otherwise it will intermittently attempt to do arithmetic comparison on "U".
+  if ( abs ($packvolts3) < 250 ) { $packvolts3 = "U"; }
   # had some bad lines were both of these were set to the same crazy value, one negative
   if ( abs ($packvolts) == abs ($packamps) )
     { $packvolts = "U"; $packamps = "U"; $packvolts2 = "U"; $packvolts3 = "U"; }
-  # and some others where packvolts3 goes absurdly low
-  if ( abs ($packvolts3) < 250 ) { $packvolts3 = "U"; }
 
   # had some lines where packhealth2 gets set to 0
   if ($packhealth2 == 0) { $packhealth2 = "U"; }
@@ -207,82 +217,87 @@ while (<>)
   # we get drive motor spikes to way over the rated max 80kW, despike these
   if ( $drivemotor > 100000 ) { $drivemotor = "U"; }
 
-print LOGFILE "processing line from $linetime\n";
-
-@rrds = ("speed", "packamps", "drivemotor", "auxpower", "acpower", "acpres", "acpower2", "heatpower", "chargepower", "elevation", "gids", "soc", "amphr", "packvolts", "packvolts2", "packvolts3", "maxcpmv", "mincpmv", "avgcpmv", "cpmvdiff", "judgementval", "packtemp1", "packtemp2", "packtemp4", "voltsla", "packhealth", "packhealth2", "ambienttemp", "phonebatt", "regenwh", "regenwatts", "odom", "quickcharges", "slowcharges");
-
-foreach $rrd (@rrds)
+if ($modeswitch eq "process")
 {
-#  print LOGFILE "updating rrd for $rrd...";
-  if ( -f "$rrddirectory/ls-$rrd.rrd" )
-  {
-    # this uses a symbolic reference and is naughty
-    $output = `rrdtool update $rrddirectory/ls-$rrd.rrd $linetime:$$rrd`;
-    if (length $output)
-    { 
-      chomp $output;
-      print LOGFILE "got error $output..."; 
-    }
-#    print LOGFILE "ok";
-  }
-  else
-  {
-    print LOGFILE "not found; skipping..."
-  }
-#  print LOGFILE "; ";
-}
+  print LOGFILE "processing line from $linetime\n";
 
-# cellpairs in the @cp array are 0..95 but in the car are 1..96
-foreach $cellpairstupid (0..95)
-{
-  $cellpair = $cellpairstupid + 1;
-# there seem to be failure/error modes of leafspy where it returns the voltages as negatives
-  $cpvalue = abs $cp[$cellpairstupid];
-#  print LOGFILE "updating rrd for cp$cellpair...";
-  if ( -f "$rrddirectory/ls-cp$cellpair.rrd" )
+  @rrds = ("speed", "packamps", "drivemotor", "auxpower", "acpower", "acpres", "acpower2", "heatpower", "chargepower", "elevation", "gids", "soc", "amphr", "packvolts", "packvolts2", "packvolts3", "maxcpmv", "mincpmv", "avgcpmv", "cpmvdiff", "judgementval", "packtemp1", "packtemp2", "packtemp4", "voltsla", "packhealth", "packhealth2", "ambienttemp", "phonebatt", "regenwh", "regenwatts", "odom", "quickcharges", "slowcharges");
+
+  foreach $rrd (@rrds)
   {
-    $output = `rrdtool update $rrddirectory/ls-cp$cellpair.rrd $linetime:$cpvalue`;
-    if (length $output)
+  #  print LOGFILE "updating rrd for $rrd...";
+    if ( -f "$rrddirectory/ls-$rrd.rrd" )
     {
-      chomp $output;
-      print LOGFILE "got error $output...";
+      # this uses a symbolic reference and is naughty
+      $output = `rrdtool update $rrddirectory/ls-$rrd.rrd $linetime:$$rrd`;
+      if (length $output)
+      { 
+        chomp $output;
+        print LOGFILE "got error $output..."; 
+      }
+  #    print LOGFILE "ok";
     }
-#    print LOGFILE "ok";
+    else
+    {
+      print LOGFILE "not found; skipping..."
+    }
+    #  print LOGFILE "; ";
   }
-  else
-  {
-    print LOGFILE "not found; skipping..."
-  }
-#  print LOGFILE "; ";
-}
 
+  # cellpairs in the @cp array are 0..95 but in the car are 1..96
+  foreach $cellpairstupid (0..95)
+  {
+    $cellpair = $cellpairstupid + 1;
+  # there seem to be failure/error modes of leafspy where it returns the voltages as negatives
+    $cpvalue = abs $cp[$cellpairstupid];
+  #  print LOGFILE "updating rrd for cp$cellpair...";
+    if ( -f "$rrddirectory/ls-cp$cellpair.rrd" )
+    {
+      $output = `rrdtool update $rrddirectory/ls-cp$cellpair.rrd $linetime:$cpvalue`;
+      if (length $output)
+      {
+        chomp $output;
+        print LOGFILE "got error $output...";
+      }
+  #    print LOGFILE "ok";
+    }
+    else
+    {
+      print LOGFILE "not found; skipping..."
+    }
+  #  print LOGFILE "; ";
+  }
+}
 print LOGFILE "\n";
 
-# we need these values next time round
-$linetimelast = $linetime;
-$regenwhlast = $regenwh;
-
-=pod
+if ($modeswitch eq "dump")
+{
   print "log line summary:\n";
- print "$year $month $day $hour $minute $second epoch $epochtime calculated epoch $linetime\n";
+  print "$year $month $day $hour $minute $second epoch $epochtime calculated epoch $linetime\n";
   print "lat $lat long $long elevation $elevation speed $speed\n";
   print "gids $gids state-of-charge $soc amp capacity $amphr\n";
   print "volts (3 readings) $packvolts $packvolts2 $packvolts3 amps $packamps\n";
   print "cellpairs max $maxcpmv min $mincpmv avg $avgcpmv biggest difference $cpmvdiff judgementval $judgementval\n";
   print "pack temps $packtemp1 $packtemp2 $packtemp3 $packtemp4 health1 $packhealth health2 $packhealth2 quickcharges $quickcharges slowcharges $slowcharges\n";
-  print "vin $vin odometer miles $odom 12v volts $voltsla outside temp $ambienttemp c $ambienttempf f\n";
+  print "odometer miles $odom 12v volts $voltsla outside temp $ambienttemp c\n";
   print "tyre presures front left $tpfl front right $tpfr rear left $tprl rear right $tprr\n";
-  print "regenwh $regenwh drive motor $drivemotor W aux $auxpower W\n";
+  print "regen cumulative wh $regenwh regen power $regenwatts drive motor $drivemotor W aux $auxpower W\n";
   print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";
   print "phone battery $phonebatt\n";
-=cut
+}
+
+
+# we need these values next time round
+$linetimelast = $linetime;
+$regenwhlast = $regenwh;
+
 }
 
 $endtime = time();
 $runtime = $endtime - $starttime;
 
 print LOGFILE "exiting successfully after $runtime seconds \n\n";
-close LOCKFILE;
-unlink $lockfile;
+#close LOCKFILE;
+#unlink $lockfile;
 
 
