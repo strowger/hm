@@ -146,8 +146,9 @@ while (<STDIN>)
   # we have a number of watt-hours and a number of seconds
   #  "watt-hours per hour" are watts, so watt hours per second/3600 are watts
   # don't divide by zero, but set it to something first so we don't have it undefined
+  # if the current value is 0, don't do anything
   $regenwatts = 0;
-  if ( $timediff > 0 )
+  if (( $timediff > 0 ) && ($regenwh > 0))
   {
     $regenwhpersec = $regenwhdiff / $timediff;
     $regenwatts = $regenwhpersec / 3600;
