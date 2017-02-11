@@ -17,7 +17,7 @@ $lockfile="/tmp/leafspy.lock";
 $in="/home/leaf/logs";
 $out="/data/hm/leaf";
 
-$processor="/data/hm/bin/leafspy-process.pl";
+$processor="/data/hm/bin/leafspy-process.pl -process";
 
 # if the lock exists, just quit - checklogs will alert if we don't get run
 if ( -f $lockfile ) { exit 0; }
