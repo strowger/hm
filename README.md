@@ -45,6 +45,9 @@ Reads data expressed as bluetooth low energy broadcasts from a popular air quali
 beacon.pl
 Reads data expressed as bluetooth low energy broadcasts from ankhmaway bluetooth sensor beacon. Abandoned before logging etc was properly implemented out of frustration with the impossiblity of extracting useful information from the beacon's accelerometer outputs.
 
+rtl433-log
+Runs rtl433 and collects its output in a series of logfiles for later parsing. Intended to be run on a separate box in a remote location, and logs copied back for parsing.
+
 leaf.pl
 Queries the Nissan Carwings (aka NissanConnect) API to gather data from a Nissan Leaf electric vehicle using the leaf.py script (below) from pycarwings2, and logs to logfiles and RRDs.
 
