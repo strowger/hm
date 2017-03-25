@@ -67,8 +67,8 @@ foreach $file (@files)
   print LOGFILE "working on file $file\n";
   # diff them, lose the first line and the "< " from the start of each diff'ed line
   @diff = `diff /tmp/$file $out/$file|sed "1 d"|sed "s/^\< //"`;
-  # having done the diff, copy the file 
-  `cp /tmp/$file $out/$file`;
+  # having done the diff, move the file 
+  `mv -f /tmp/$file $out/$file`;
   open PROCESSOR, "|$processor";
   foreach $diffline (@diff)
   {
