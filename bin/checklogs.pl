@@ -14,6 +14,7 @@ $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $owerrorlog="1wireread-errors.log";
 $routererrorlog="router-errors.log";
+$alarmsyncerrorlog="alarmbox-rsync-errors.log";
 $leaferrorlog="leaf-errors.log";
 $lockfile="/tmp/checklogs.lock";
 $leafspylog="leafspy.log";
@@ -230,6 +231,26 @@ if (-f "$logdirectory/$routererrorlog" )
     print "@errorlines";
   }
   unlink "$logdirectory/$routererrorlog";
+}
+
+# as above for rsync errors with the odroid box in the alarm panel box
+# one failure generates 3 error lines
+if (-f "$logdirectory/$alarmsyncerrorlog" )
+{
+  $errorlinecount = 0;
+  @errorlines = ();
+  open AWRSLOG, "<", "$logdirectory/$alarmsyncerrorlog" or die $!;
+  foreach $errorline (<AWRSLOG>)
+  {
+    $errorlinecount++;
+    push(@errorlines, $errorline);
+  }
+  close AWRSLOG;
+  if ($errorlinecount > 5)
+  {
+    print "More than 5 log lines from alarmpanel rsync cron job:\n";
+    print "@errorlines";
+  }
 }
 
 # same as above but for nissan leaf monitoring errors - we only poll 4 times
