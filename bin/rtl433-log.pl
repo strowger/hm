@@ -33,7 +33,8 @@ while (1)
   $timestamp=time();
   open LOGFILE, ">", "$logdirectory/$location-$timestamp.log" or die $!;
 # there's quite a lot of debug output, which is temporarily useful if it fails
-  $rtloutput = `$rtl433 $rtloptions 2>$logdirectory/debug.log`;
+  `date > $logdirectory/debug.log`;
+  $rtloutput = `$rtl433 $rtloptions 2>>$logdirectory/debug.log`;
   print LOGFILE "$rtloutput";
   close LOGFILE;
 }
