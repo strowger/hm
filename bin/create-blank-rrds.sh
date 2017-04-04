@@ -63,6 +63,22 @@ RRA:MAX:0.1:1440:10980 \
 RRA:MAX:0.1:10080:1569 \
 RRA:MAX:0.1:40320:393
 
+# 20170404 the clamp meter is now on the car chaging point so we'll start
+# a new RRD
+
+rrdtool create ccclampwattscar.rrd --start 1491300000 --step 60 \
+DS:power:GAUGE:120:0:10000 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
 rrdtool create ccoptiwatts.rrd --start 1434700000 --step 60 \
 DS:power:GAUGE:120:0:10000 \
 RRA:LAST:0.5:1:15811200 \

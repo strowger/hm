@@ -176,12 +176,13 @@ $lastvalage = $timestamp-$lasttime;
 if ($lastvalage > 3700)                                                         
 { print "currentcost optical sensor hasn't read for an hour\n"; } 
 
-$cclastclamp = `grep clamp $logdirectory/power.log|tail -1`;                    
-($lasttime) = split(' ',$cclastclamp);                                          
-$lastvalage = $timestamp-$lasttime;                                             
-##print "currentcost clamp sensor last read $lastvalage secs ago\n";  
-if ($lastvalage > 3700)                                                         
-{ print "currentcost clamp sensor hasn't read for an hour\n"; }
+
+#$cclastclamp = `grep clamp $logdirectory/power.log|tail -1`;                    
+#($lasttime) = split(' ',$cclastclamp);                                          
+#$lastvalage = $timestamp-$lasttime;                                             
+###print "currentcost clamp sensor last read $lastvalage secs ago\n";  
+#if ($lastvalage > 3700)                                                         
+#{ print "currentcost clamp sensor hasn't read for an hour\n"; }
 
 # check the kitchen air sensor is logging
 $lastline = `tail -1 $logdirectory/airkitchen-co2.log`;
