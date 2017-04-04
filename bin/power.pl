@@ -7,6 +7,9 @@
 # add 'optismart' meter
 # 20150619 GH
 # move to styes, alter device name, paths, tidy up logging
+# 20170404 GH
+# stop logging the clamp meter as that's now the car charger and will
+# be handled by the new rtl433 scripts
 
 # log everything we get in the temp log, delete it at startup
 # log the values we capture in the power log and keep forever
@@ -39,13 +42,13 @@ while ($line = <SERIAL>)
   # sensor 9 is the raw value of impulses from the optismart??
   if ($line =~ m!<tmpr>\s*(-*[\d.]+)</tmpr><sensor>0</sensor>.*<ch1><watts>0*(\d+)</watts></ch1>!)
   {
-     $temp = $1;
-     $powerclamp = $2;
-     print LOGFILE "$timestamp clamp ${powerclamp}W ${temp}C\n";
-     $output = `rrdtool update $rrddirectory/ccclampwatts.rrd $timestamp:$powerclamp`;
-#     print TEMPLOG "rrdtool said $output\n";
-     $output = `rrdtool update $rrddirectory/cctemp.rrd $timestamp:$temp`;
-#     print TEMPLOG "rrdtool said $output\n";
+#     $temp = $1;
+#     $powerclamp = $2;
+#     print LOGFILE "$timestamp clamp ${powerclamp}W ${temp}C\n";
+#     $output = `rrdtool update $rrddirectory/ccclampwatts.rrd $timestamp:$powerclamp`;
+##     print TEMPLOG "rrdtool said $output\n";
+#     $output = `rrdtool update $rrddirectory/cctemp.rrd $timestamp:$temp`;
+##     print TEMPLOG "rrdtool said $output\n";
   }
   if ($line =~ m!<tmpr>\s*(-*[\d.]+)</tmpr><sensor>8</sensor>.*<ch1><watts>0*(\d+)</watts></ch1>!)
   {
