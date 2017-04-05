@@ -24,6 +24,9 @@ $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="rtl433-process.log";
 
+$logccopti="rtl433-ccoptical.log";
+$logccclamp="rtl433-ccclamp.log";
+
 $timestamp = time();                                                                                  
 $starttime = $timestamp;
 
@@ -31,6 +34,9 @@ $starttime = $timestamp;
 open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;                                               
 
 print LOGFILE "starting rtl433-process.pl at $timestamp\n";
+
+open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
+open CCCLAMP, ">>", "$logdirectory/$logccclamp" or die $!;
 
 # each received transmission occupies multiple lines in the output, so we have to be stateful
 $midtx = 0;
@@ -99,10 +105,16 @@ while (<STDIN>)
             ## for now we're not rrd updating based on the optical sensor, but
             ## instead letting the cc base unit continue to do it
             # $output = `rrdtool update $rrddirectory/ccoptiwatts.rrd $linetime:$ccpower`;
+            # if we got some output then it fucked up so don't log, otherwise...
             # if (length $output)
             # {
             #   chomp $output;
             #   print LOGFILE "got error $output...";
+            # }
+            # ...log to a sensible logfile so we can bin off the rtl433 logs
+            # else
+            # {
+            #   print CCOPTI "$linetime $ccpower\n";
             # }
           }
           if ($modeswitch eq "dump")
@@ -120,6 +132,10 @@ while (<STDIN>)
             {
               chomp $output;
               print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCCLAMP "$linetime $ccpower\n";
             }
           }
           if ($modeswitch eq "dump")
@@ -145,4 +161,6 @@ $runtime = $endtime - $starttime;
 
 print LOGFILE "exiting successfully after $runtime seconds \n\n";
 
-
+close LOGFILE;
+close CCOPTI;
+close CCCLAMP;
