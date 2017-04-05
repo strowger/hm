@@ -45,6 +45,9 @@ Reads data expressed as bluetooth low energy broadcasts from a popular air quali
 beacon.pl
 Reads data expressed as bluetooth low energy broadcasts from ankhmaway bluetooth sensor beacon. Abandoned before logging etc was properly implemented out of frustration with the impossiblity of extracting useful information from the beacon's accelerometer outputs.
 
+rtl433 scripts:
+
+rtl433 uses an rtl-sdr to receive 433mhz broadcasts. initially this receives broadcasts from our currentcost devices, with a view to replacing the currentcost base station eventually. 
 
 rtl433-log.pl
 Runs rtl433 and collects its output in a series of logfiles for later parsing. Intended to be run on a separate box in a remote location, and logs copied back for parsing.
