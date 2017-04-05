@@ -115,7 +115,7 @@ $output = `rrdtool graph $graphdirectory/leafauxbatt${filename}.png -a PNG --ver
 $output = `rrdtool graph $graphdirectory/leafpackamps${filename}.png -a PNG --vertical-label "amps" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packamps.rrd:packamps:LAST '${linetype}:p1#${col01}:nissan leaf traction battery amps' 'HRULE:0#000000' -W "${datestamp}" -t "nissan leaf traction battery current"`;
 
 # charging power
-$output = `rrdtool graph $graphdirectory/leafchargepower${filename}.png -a PNG --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-chargepower.rrd:chargepower:LAST '${linetype}:p1#${col01}:nissan leaf charging power' -W "${datestamp}" -t "nissan leaf charging power"`;
+$output = `rrdtool graph $graphdirectory/leafchargepower${filename}.png -a PNG --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-chargepower.rrd:chargepower:LAST 'DEF:house='$rrddirectory/ccclampwattscar.rrd:power:LAST  '${linetype}:p1#${col01}:nissan leaf charging power' '${linetype}:house#${col02}:house charger power' -W "${datestamp}" -t "nissan leaf charging power"`;
 
 # pack health
 $output = `rrdtool graph $graphdirectory/leafpackhealth${filename}.png -a PNG --vertical-label "percent" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packhealth.rrd:packhealth:LAST 'DEF:p2='$rrddirectory/ls-packhealth2.rrd:packhealth2:LAST '${linetype}:p1#${col01}:nissan leaf pack health measure 1' '${linetype}:p2#${col02}:nissan leaf pack health measure 2' -W "${datestamp}" -t "nissan leaf battery pack health"`;
