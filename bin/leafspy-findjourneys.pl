@@ -176,8 +176,28 @@ while (<>)
 #  print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";
 #  print "phone battery $phonebatt powerswitch $powerswitch\n";
 
+if ( defined $lastlinetime )
+{
+  # gap in seconds between lines
+  $lineinterval = $linetime - $lastlinetime;
+  if ( $lineinterval > 100 )
+  {
+    print "possible journey end at $lastlinetime\n";
+    print "possible journey start at $linetime\n";
+  }
+  $lastlinetime = $linetime; 
+}
+else
+{
+  # no last line time - first line of the file? the powerswitch check 
+  # below should catch the journey if so
+  $lastlinetime = $linetime;
+}
+
 # power switch is off now but was on last poll - journey end?
-#
+# with the bluetooth module powered only by switched live, we never get
+# any "powerswitch = 0" lines - this should still catch the first
+# power-on of the day though
 if (($powerswitch == 1) && ($oldpowerswitch == 0))
 {
   print "possible journey start at $epochtime\n";
@@ -190,6 +210,15 @@ if (($powerswitch == 0) && ($oldpowerswitch == 1))
 
 @oldline = @line;
 $oldpowerswitch = $powerswitch;
+}
+
+# after the last line of the time...
+
+$timenow = time();
+$lineage = $timenow - $linetime;
+if ( $lineage > 1800)
+{
+  print "possible journey end at $linetime\n";
 }
 
 
