@@ -42,12 +42,15 @@ open CCCLAMP, ">>", "$logdirectory/$logccclamp" or die $!;
 $midtx = 0;
 ## we're not dealing with a device we didn't expect
 #$alien = 0;
-
+$linecount = 0;
 # this will read from either stdin or a file specified on the commandline
 while (<STDIN>)
 {
+  $linecount = $linecount+1;
   @line = split(" ",$_);
 #  $lineitems = scalar (@line); 
+  # seem to get some blank lines which result in emailed errors
+  if ( ! defined $line[0] ) { next; }
   # match on xxxx-xx-xx xx:xx:xx :
   if (( $line[0] =~ /^\d{4}-\d{2}-\d{2}$/) && ($line[1] =~ /^\d{2}:\d{2}:\d{2}$/) && ($line[2] =~ /^:$/))
   {
@@ -159,7 +162,7 @@ while (<STDIN>)
 $endtime = time();
 $runtime = $endtime - $starttime;
 
-print LOGFILE "exiting successfully after $runtime seconds \n\n";
+print LOGFILE "exiting successfully after $linecount lines in $runtime seconds \n\n";
 
 close LOGFILE;
 close CCOPTI;
