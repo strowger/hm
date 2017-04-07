@@ -220,7 +220,7 @@ while (<STDIN>)
 
 if ($modeswitch eq "process")
 {
-  print LOGFILE "processing line from $linetime\n";
+  print LOGFILE "processing line from $epochtime\n";
 
   @rrds = ("speed", "packamps", "drivemotor", "auxpower", "acpower", "acpres", "acpower2", "heatpower", "chargepower", "elevation", "gids", "soc", "amphr", "packvolts", "packvolts2", "packvolts3", "maxcpmv", "mincpmv", "avgcpmv", "cpmvdiff", "judgementval", "packtemp1", "packtemp2", "packtemp4", "voltsla", "packhealth", "packhealth2", "ambienttemp", "phonebatt", "regenwh", "regenwatts", "odom", "quickcharges", "slowcharges");
 
@@ -230,7 +230,7 @@ if ($modeswitch eq "process")
     if ( -f "$rrddirectory/ls-$rrd.rrd" )
     {
       # this uses a symbolic reference and is naughty
-      $output = `rrdtool update $rrddirectory/ls-$rrd.rrd $linetime:$$rrd`;
+      $output = `rrdtool update $rrddirectory/ls-$rrd.rrd $epochtime:$$rrd`;
       if (length $output)
       { 
         chomp $output;
@@ -254,7 +254,8 @@ if ($modeswitch eq "process")
   #  print LOGFILE "updating rrd for cp$cellpair...";
     if ( -f "$rrddirectory/ls-cp$cellpair.rrd" )
     {
-      $output = `rrdtool update $rrddirectory/ls-cp$cellpair.rrd $linetime:$cpvalue`;
+      $output = `rrdtool update $rrddirectory/ls-cp$cellpair.rrd $epochtime:$cpvalue`;
+
       if (length $output)
       {
         chomp $output;
