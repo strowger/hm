@@ -1,7 +1,7 @@
 # hm
 home monitoring stuff
 
-This is a set of scripts and configs I use for monitoring various aspects of my home.
+This is a set of scripts and configs I use for monitoring various aspects of my home and car.
 
 It's here so that I can work on it. Don't go thinking it will be useful for anyone else.
 
@@ -64,13 +64,29 @@ Called by the above script to parse rtl433 logs and generate condensed logfiles 
 leaf.pl
 Queries the Nissan Carwings (aka NissanConnect) API to gather data from a Nissan Leaf electric vehicle using the leaf.py script (below) from pycarwings2, and logs to logfiles and RRDs.
 
+Nissan Leaf stuff
+-----------------
+
 leaf.py
-Python script from the 'pycarwings2' project which does the hard work of interacting with Nissan. using the leaf.py script (below) from pycarwings2.
+Python script from the 'pycarwings2' project which does the hard work of interacting with Nissan. using the leaf.py script from pycarwings2.
+
+leaf.pl
+Runs the above python script, parses the output, logs and writes to RRDs.
 
 leafspy.pl
-Parses log lines from the Android/IOS Leafspy app, which logs data from a Nissan Leaf using the obd2 interface
+Checks a dropbox location on local disk for newly-arrived leafspy data files and sends any new ones for processing.
+
+leafspy-process.pl
+Parses log lines from the Android/IOS Leafspy app, which logs data from a Nissan Leaf using the obd2 interface. Displays information about the log lines on standard out, or logs it to RRDs.
+
+leafspy-findjourneys.pl
+Parses log files from the Leafspy app to find the start and end times of journeys.
+
+leaf-dailystats.pl
+Unfinished. Parses logs from currentcost clamp meter in car charger, and leafspy, to generate a line for each day showing power used and miles covered, and economy.
 
 to-do
+-----
 
 we are gathering data from downstairs bathroom radiator flow/return but not graphing it
 

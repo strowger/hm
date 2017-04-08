@@ -7,6 +7,8 @@
 # begun
 #
 
+no warnings 'once';
+
 ## for calculating epoch from logfile values
 #use Time::Local;
 
