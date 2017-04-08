@@ -9,9 +9,6 @@
 
 no warnings 'once';
 
-## for calculating epoch from logfile values
-#use Time::Local;
-
 $logdirectory="/data/hm/log";
 $leafspydirectory="/data/hm/leaf";
 $chargerlog="rtl433-ccclamp.log";
@@ -106,9 +103,13 @@ while (<CHLOG>)
     $lastepochtime = $epochtime;
     next;
   } 
-  
+
 
   $readinggap = $epochtime - $lastepochtime;
+    if ( $readinggap > 600)
+    {
+      print STDERR "WARNING: $readinggap seconds between power meter readings at $epochtime\n";
+    }
   $lastepochtime = $epochtime;
   $lastsec = $sec;
   $lastmin = $min;
