@@ -41,7 +41,7 @@ open CCCLAMP, ">>", "$logdirectory/$logccclamp" or die $!;
 # each received transmission occupies multiple lines in the output, so we have to be stateful
 $midtx = 0;
 ## we're not dealing with a device we didn't expect
-#$alien = 0;
+$alien = 0;
 $linecount = 0;
 # this will read from either stdin or a file specified on the commandline
 while (<STDIN>)
@@ -61,6 +61,7 @@ while (<STDIN>)
     # timegm requires months in range 0-11 (!)
     $stupidmonth = $month -1;
     $linetime = timegm($second, $minute, $hour, $day, $stupidmonth, $year);
+    $alien = 0;
     # we are part-way through parsing a transmission now
     if ($midtx == 1) 
     { 
@@ -81,6 +82,7 @@ while (<STDIN>)
       print STDERR "$linetime got alien device $line[3]\n"; 
       # we don't know what to do with this so we ignore the next lines
       $midtx = 0;
+      $alien = 1;
     }
   }
 
@@ -152,6 +154,7 @@ while (<STDIN>)
       }
       else { print STDERR "$linetime got a currentcost power line without a preceding deviceid\n"; }
     }
+    if ( $alien eq "1" ) { print STDERR "@line\n"; }
   # 
   # end of "non-tx-start line" processing
   }

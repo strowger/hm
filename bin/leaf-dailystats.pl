@@ -33,14 +33,17 @@ $starttime = $timestamp;
 $goodlines = 0;
 $badlines = 0;
 $powertotal = 0;
-$lastlineday = 0;
+$lastsec = 0;
+$lastmin = 0;
+$lasthour = 0;
+$lastmday = 0;
+$lastmon = 0;
+$lastyear = 0;
+$lastwday = 0;
+$lastyday = 0;
+$lastisdst = 0;
 while (<CHLOG>)
 {
-# get date and time
-# get value
-# time between readings
-# is it new day? if so print somethign
-
   @line = split(" ",$_);
   $lineitems = scalar (@line);
   if ( $lineitems != 2 )
@@ -65,12 +68,12 @@ while (<CHLOG>)
   $year = $stupidyear + 1900;
   $mday = sprintf ("%02d", $mday);
 
-  if ( $mday != $lastlineday )
+  if ( $mday != $lastmday )
   {
-    # it's the first line of a new day
+    # it's the first line of a new day, so print *yesterday's* data out
     $powertotal = sprintf("%.2f", $powertotal);
-    print "$year-$mon-$mday power total $powertotal kWh";
-    $leafspyfilename = "Log_U6003414_" . substr($year, -2) . $mon . $mday . "_e8ace.csv";
+    print "$lastyear-$lastmon-$lastmday power total $powertotal kWh";
+    $leafspyfilename = "Log_U6003414_" . substr($lastyear, -2) . $lastmon . $lastmday . "_e8ace.csv";
     if ( ! -f "$leafspydirectory/$leafspyfilename" )
     {
       print " - couldn't find a corresponding leafspy log\n";
@@ -84,17 +87,18 @@ while (<CHLOG>)
     $odokmend = $dayendline[123];
     $odokmday = $odokmend - $odokmstart;
     $odom = $odokmday * 0.621371;
+    $odom = sprintf("%.2f", $odom);
     print " - $odom miles covered";
     if ( $powertotal > 0)
     {
       $mpkwh = $odom / $powertotal;
+      $mpkwh = sprintf("%.2f", $mpkwh);
       print " - $mpkwh miles per kWh";
     }
     print "\n";
     }
     $powertotal = 0;
   }
-  $lastlineday = $mday;
   
   if ( ! defined $lastepochtime ) 
   { 
@@ -102,9 +106,18 @@ while (<CHLOG>)
     $lastepochtime = $epochtime;
     next;
   } 
- 
+  
+
   $readinggap = $epochtime - $lastepochtime;
   $lastepochtime = $epochtime;
+  $lastsec = $sec;
+  $lastmin = $min;
+  $lastmday = $mday;
+  $lastmon = $mon;
+  $lastyear  = $year;
+  $lastwday = $wday;
+  $lastyday = $yday;
+  $lastisdst = $isdst;
 
   $powertotal = $powertotal + ($readinggap * $power / 3600000);
 
@@ -113,11 +126,38 @@ while (<CHLOG>)
 # the last day we consider, we never get an output from the loop above,
 # as the output happens when we see a new day for the first time
 $powertotal = sprintf("%.2f", $powertotal);
-print "$year-$mon-$mday power total $powertotal kWh *incomplete day*\n";
+print "$year-$mon-$mday power total $powertotal kWh";
+$leafspyfilename = "Log_U6003414_" . substr($year, -2) . $mon . $mday . "_e8ace.csv";
+if ( ! -f "$leafspydirectory/$leafspyfilename" )
+{
+  print " - couldn't find a corresponding leafspy log\n";
+}
+else
+{
+  # get the odometer value from first and last lines
+  @daystartline = split(",",`head -2 $leafspydirectory/$leafspyfilename |tail -1`);
+  @dayendline = split(",",`tail -1 $leafspydirectory/$leafspyfilename`);
+  $odokmstart = $daystartline[123];
+  $odokmend = $dayendline[123];
+  $odokmday = $odokmend - $odokmstart;
+  $odom = $odokmday * 0.621371;
+  $odom = sprintf("%.2f", $odom);
+  print " - $odom miles covered";
+  if ( $powertotal > 0)
+  {
+    $mpkwh = $odom / $powertotal;
+    $mpkwh = sprintf("%.2f", $mpkwh);
+    print " - $mpkwh miles per kWh";
+  }
+  print " *INCOMPLETE DAY*\n";
+}
+
 
 $endtime = time();
 $runtime = $endtime - $starttime;
 print "done $goodlines good lines and $badlines error lines in $runtime seconds\n";
+
+close CHLOG;
 close LOCKFILE;
 unlink $lockfile;
 
