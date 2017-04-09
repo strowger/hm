@@ -69,7 +69,7 @@ while (<CHLOG>)
   {
     # it's the first line of a new day, so print *yesterday's* data out
     $powertotal = sprintf("%.2f", $powertotal);
-    print "$lastyear-$lastmon-$lastmday power total $powertotal kWh";
+    print "$lastyear-$lastmon-$lastmday input power total $powertotal kWh";
     $leafspyfilename = "Log_U6003414_" . substr($lastyear, -2) . $lastmon . $lastmday . "_e8ace.csv";
     if ( ! -f "$leafspydirectory/$leafspyfilename" )
     {
@@ -81,16 +81,27 @@ while (<CHLOG>)
     @daystartline = split(",",`head -2 $leafspydirectory/$leafspyfilename |tail -1`);
     @dayendline = split(",",`tail -1 $leafspydirectory/$leafspyfilename`);
     $odokmstart = $daystartline[123];
+    $gidsstart = $daystartline[5];
     $odokmend = $dayendline[123];
+    $gidsend = $dayendline[5];
     $odokmday = $odokmend - $odokmstart;
     $odom = $odokmday * 0.621371;
     $odom = sprintf("%.2f", $odom);
-    print " - $odom miles covered";
+    $gids = $gidsstart - $gidsend;
+    $kwhcar = $gids * 80 / 1000;
+    $kwhcar = sprintf("%.2f", $kwhcar);
+    print " - car power $kwhcar kWh - $odom miles covered";
     if ( $powertotal > 0)
     {
       $mpkwh = $odom / $powertotal;
       $mpkwh = sprintf("%.2f", $mpkwh);
-      print " - $mpkwh miles per kWh";
+      print " - $mpkwh miles per input kWh";
+    }
+    if ( $kwhcar > 0)
+    {
+      $mpkwhcar = $odom / $kwhcar;
+      $mpkwhcar = sprintf("%.2f", $mpkwhcar);
+      print " - $mpkwhcar miles per car kWh";
     }
     print "\n";
     }

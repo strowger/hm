@@ -277,8 +277,7 @@ if ($modeswitch eq "dump")
   print "log line summary:\n";
   print "$year $month $day $hour $minute $second epoch $epochtime calculated epoch $linetime\n";
   print "lat $lat long $long elevation $elevation speed $speed\n";
-  print "gids $gids state-of-charge $soc amp capacity $amphr\n";
-  print "volts (3 readings) $packvolts $packvolts2 $packvolts3 amps $packamps\n";
+  print "gids: $gids percent-soc: $soc amphr: $amphr volts (3 readings) $packvolts $packvolts2 $packvolts3\n";
   print "cellpairs max $maxcpmv min $mincpmv avg $avgcpmv biggest difference $cpmvdiff judgementval $judgementval\n";
   print "pack temps $packtemp1 $packtemp2 $packtemp3 $packtemp4 health1 $packhealth health2 $packhealth2 quickcharges $quickcharges slowcharges $slowcharges\n";
   print "odometer miles $odom 12v volts $voltsla outside temp $ambienttemp c\n";
