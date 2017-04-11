@@ -118,7 +118,10 @@ $output = `rrdtool graph $graphdirectory/leafpackamps${filename}.png -a PNG --ve
 $output = `rrdtool graph $graphdirectory/leafchargepower${filename}.png -a PNG --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-chargepower.rrd:chargepower:LAST 'DEF:house='$rrddirectory/ccclampwattscar.rrd:power:LAST  '${linetype}:p1#${col01}:nissan leaf charging power' '${linetype}:house#${col02}:house charger power' -W "${datestamp}" -t "nissan leaf charging power"`;
 
 # pack health
-$output = `rrdtool graph $graphdirectory/leafpackhealth${filename}.png -a PNG --vertical-label "percent" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packhealth.rrd:packhealth:LAST 'DEF:p2='$rrddirectory/ls-packhealth2.rrd:packhealth2:LAST '${linetype}:p1#${col01}:nissan leaf pack health measure 1' '${linetype}:p2#${col02}:nissan leaf pack health measure 2' -W "${datestamp}" -t "nissan leaf battery pack health"`;
+$output = `rrdtool graph $graphdirectory/leafpackhealth${filename}.png -a PNG --vertical-label "percent" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packhealth.rrd:packhealth:LAST 'DEF:p2='$rrddirectory/ls-packhealth2.rrd:packhealth2:LAST '${linetype}:p1#${col01}:nissan leaf pack internal resistance' '${linetype}:p2#${col02}:nissan leaf pack state of health' -W "${datestamp}" -t "nissan leaf battery pack health"`;
+
+# pack capacity in amphr
+$output = `rrdtool graph $graphdirectory/leafpackah${filename}.png -a PNG --vertical-label "amp-hours" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:ah='$rrddirectory/ls-amphr.rrd:amphr:LAST '${linetype}:ah#${col01}:nissan leaf pack amp hours' -W "${datestamp}" -t "nissan leaf battery pack amp-hours"`;
 
 # cell pair differences
 $output = `rrdtool graph $graphdirectory/leafcellpairsummary${filename}.png -a PNG --vertical-label "millivolts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:max='$rrddirectory/ls-maxcpmv.rrd:maxcpmv:LAST 'DEF:min='$rrddirectory/ls-mincpmv.rrd:mincpmv:LAST 'DEF:avg='$rrddirectory/ls-avgcpmv.rrd:avgcpmv:LAST '${linetype}:max#${col01}:highest cell-pair voltage' '${linetype}:min#${col02}:lowest cell-pair voltage' '${linetype}:avg#${col03}:average cell-pair voltage' -W "${datestamp}" -t "nissan leaf traction battery cell-pair voltages"`;
