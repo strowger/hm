@@ -29,7 +29,9 @@ $starttime = $timestamp;
 
 $goodlines = 0;
 $badlines = 0;
+$preheatpowertotal = 0;
 $powertotal = 0;
+$longgaps = 0;
 $lastsec = 0;
 $lastmin = 0;
 $lasthour = 0;
@@ -67,9 +69,20 @@ while (<CHLOG>)
 
   if ( $mday != $lastmday )
   {
+    # find out when driving starts on this day
+    $leafspyfilename = "Log_U6003414_" . substr($year, -2) . $mon . $mday . "_e8ace.csv";
+    if ( -f "$leafspydirectory/$leafspyfilename" )
+    {
+      # get the timestamp on the first line
+      @daystartline = split(",",`head -2 $leafspydirectory/$leafspyfilename |tail -1`);
+      $carstarttime = $daystartline[134];
+    }
     # it's the first line of a new day, so print *yesterday's* data out
     $powertotal = sprintf("%.2f", $powertotal);
-    print "$lastyear-$lastmon-$lastmday input power total $powertotal kWh";
+    $preheatpowertotal = sprintf("%.2f", $preheatpowertotal); 
+    $powertobattery = $powertotal - $preheatpowertotal;
+    $powertobattery = sprintf("%.2f", $powertobattery); 
+    print "$lastyear-$lastmon-$lastmday input power total $powertotal kWh of which $preheatpowertotal kWh pre-heat giving $powertobattery kWh supplied to battery";
     $leafspyfilename = "Log_U6003414_" . substr($lastyear, -2) . $lastmon . $lastmday . "_e8ace.csv";
     if ( ! -f "$leafspydirectory/$leafspyfilename" )
     {
@@ -95,7 +108,9 @@ while (<CHLOG>)
     {
       $mpkwh = $odom / $powertotal;
       $mpkwh = sprintf("%.2f", $mpkwh);
-      print " - $mpkwh miles per input kWh";
+      $chargingefficiency = $kwhcar / ( $powertotal - $preheatpowertotal) * 100;
+      $chargingefficiency = sprintf("%.1f", $chargingefficiency);
+      print " - $mpkwh miles per input kWh, implied charging efficiency $chargingefficiency%";
     }
     if ( $kwhcar > 0)
     {
@@ -106,6 +121,7 @@ while (<CHLOG>)
     print "\n";
     }
     $powertotal = 0;
+    $preheatpowertotal = 0;
   }
   
   if ( ! defined $lastepochtime ) 
@@ -119,7 +135,8 @@ while (<CHLOG>)
   $readinggap = $epochtime - $lastepochtime;
     if ( $readinggap > 600)
     {
-      print STDERR "WARNING: $readinggap seconds between power meter readings at $epochtime\n";
+#      print STDERR "WARNING: $readinggap seconds between power meter readings at $epochtime\n";
+      $longgaps = $longgaps + 1;
     }
   $lastepochtime = $epochtime;
   $lastsec = $sec;
@@ -132,13 +149,18 @@ while (<CHLOG>)
   $lastisdst = $isdst;
 
   $powertotal = $powertotal + ($readinggap * $power / 3600000);
+  if ( $epochtime < $carstarttime )
+    { $preheatpowertotal = $preheatpowertotal + ($readinggap * $power / 3600000); }
 
 }
 
 # the last day we consider, we never get an output from the loop above,
 # as the output happens when we see a new day for the first time
 $powertotal = sprintf("%.2f", $powertotal);
-print "$year-$mon-$mday power total $powertotal kWh";
+$preheatpowertotal = sprintf("%.2f", $preheatpowertotal); 
+$powertobattery = $powertotal - $preheatpowertotal;                         
+$powertobattery = sprintf("%.2f", $powertobattery);                         
+print "$lastyear-$lastmon-$lastmday input power total $powertotal kWh of which $preheatpowertotal kWh pre-heat giving $powertobattery kWh supplied to battery"; 
 $leafspyfilename = "Log_U6003414_" . substr($year, -2) . $mon . $mday . "_e8ace.csv";
 if ( ! -f "$leafspydirectory/$leafspyfilename" )
 {
@@ -167,7 +189,7 @@ else
 
 $endtime = time();
 $runtime = $endtime - $starttime;
-print "done $goodlines good lines and $badlines error lines in $runtime seconds\n";
+print "done $goodlines good lines and $badlines error lines in $runtime seconds with $longgaps instances of missing power log lines\n";
 
 close CHLOG;
 close LOCKFILE;
