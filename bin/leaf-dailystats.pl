@@ -78,48 +78,7 @@ while (<CHLOG>)
       $carstarttime = $daystartline[134];
     }
     # it's the first line of a new day, so print *yesterday's* data out
-    $powertotal = sprintf("%.2f", $powertotal);
-    $preheatpowertotal = sprintf("%.2f", $preheatpowertotal); 
-    $powertobattery = $powertotal - $preheatpowertotal;
-    $powertobattery = sprintf("%.2f", $powertobattery); 
-    print "$lastyear-$lastmon-$lastmday input power total $powertotal kWh of which $preheatpowertotal kWh pre-heat giving $powertobattery kWh supplied to battery";
-    $leafspyfilename = "Log_U6003414_" . substr($lastyear, -2) . $lastmon . $lastmday . "_e8ace.csv";
-    if ( ! -f "$leafspydirectory/$leafspyfilename" )
-    {
-      print " - couldn't find a corresponding leafspy log\n";
-    }
-    else
-    {
-    # get the odometer value from first and last lines
-    @daystartline = split(",",`head -2 $leafspydirectory/$leafspyfilename |tail -1`);
-    @dayendline = split(",",`tail -1 $leafspydirectory/$leafspyfilename`);
-    $odokmstart = $daystartline[123];
-    $gidsstart = $daystartline[5];
-    $odokmend = $dayendline[123];
-    $gidsend = $dayendline[5];
-    $odokmday = $odokmend - $odokmstart;
-    $odom = $odokmday * 0.621371;
-    $odom = sprintf("%.2f", $odom);
-    $gids = $gidsstart - $gidsend;
-    $kwhcar = $gids * 80 / 1000;
-    $kwhcar = sprintf("%.2f", $kwhcar);
-    print " - car power $kwhcar kWh - $odom miles covered";
-    if ( $powertotal > 0)
-    {
-      $mpkwh = $odom / $powertotal;
-      $mpkwh = sprintf("%.2f", $mpkwh);
-      $chargingefficiency = $kwhcar / ( $powertotal - $preheatpowertotal) * 100;
-      $chargingefficiency = sprintf("%.1f", $chargingefficiency);
-      print " - $mpkwh miles per input kWh, implied charging efficiency $chargingefficiency%";
-    }
-    if ( $kwhcar > 0)
-    {
-      $mpkwhcar = $odom / $kwhcar;
-      $mpkwhcar = sprintf("%.2f", $mpkwhcar);
-      print " - $mpkwhcar miles per car kWh";
-    }
-    print "\n";
-    }
+    printstats();
     $powertotal = 0;
     $preheatpowertotal = 0;
   }
@@ -156,36 +115,8 @@ while (<CHLOG>)
 
 # the last day we consider, we never get an output from the loop above,
 # as the output happens when we see a new day for the first time
-$powertotal = sprintf("%.2f", $powertotal);
-$preheatpowertotal = sprintf("%.2f", $preheatpowertotal); 
-$powertobattery = $powertotal - $preheatpowertotal;                         
-$powertobattery = sprintf("%.2f", $powertobattery);                         
-print "$lastyear-$lastmon-$lastmday input power total $powertotal kWh of which $preheatpowertotal kWh pre-heat giving $powertobattery kWh supplied to battery"; 
-$leafspyfilename = "Log_U6003414_" . substr($year, -2) . $mon . $mday . "_e8ace.csv";
-if ( ! -f "$leafspydirectory/$leafspyfilename" )
-{
-  print " - couldn't find a corresponding leafspy log\n";
-}
-else
-{
-  # get the odometer value from first and last lines
-  @daystartline = split(",",`head -2 $leafspydirectory/$leafspyfilename |tail -1`);
-  @dayendline = split(",",`tail -1 $leafspydirectory/$leafspyfilename`);
-  $odokmstart = $daystartline[123];
-  $odokmend = $dayendline[123];
-  $odokmday = $odokmend - $odokmstart;
-  $odom = $odokmday * 0.621371;
-  $odom = sprintf("%.2f", $odom);
-  print " - $odom miles covered";
-  if ( $powertotal > 0)
-  {
-    $mpkwh = $odom / $powertotal;
-    $mpkwh = sprintf("%.2f", $mpkwh);
-    print " - $mpkwh miles per kWh";
-  }
-  print " *INCOMPLETE DAY*\n";
-}
-
+printstats();
+print " **INCOMPLETE DAY**\n";
 
 $endtime = time();
 $runtime = $endtime - $starttime;
@@ -196,3 +127,48 @@ close LOCKFILE;
 unlink $lockfile;
 
 
+
+sub printstats {
+$powertotal = sprintf("%.2f", $powertotal);
+$preheatpowertotal = sprintf("%.2f", $preheatpowertotal); 
+$powertobattery = $powertotal - $preheatpowertotal;
+$powertobattery = sprintf("%.2f", $powertobattery); 
+print "\n$lastyear-$lastmon-$lastmday supplied $powertotal kWh to car of which $preheatpowertotal kWh pre-heat giving $powertobattery kWh for charging";
+$leafspyfilename = "Log_U6003414_" . substr($lastyear, -2) . $lastmon . $lastmday . "_e8ace.csv";
+if ( ! -f "$leafspydirectory/$leafspyfilename" )
+{
+  print " - couldn't find a corresponding leafspy log";
+}
+else
+{
+  # get the odometer value from first and last lines
+  @daystartline = split(",",`head -2 $leafspydirectory/$leafspyfilename |tail -1`);
+  @dayendline = split(",",`tail -1 $leafspydirectory/$leafspyfilename`);
+  $odokmstart = $daystartline[123];
+  $gidsstart = $daystartline[5];
+  $odokmend = $dayendline[123];
+  $gidsend = $dayendline[5];
+  $odokmday = $odokmend - $odokmstart;
+  $odom = $odokmday * 0.621371;
+  $odom = sprintf("%.2f", $odom);
+  $gids = $gidsstart - $gidsend;
+  $kwhcar = $gids * 80 / 1000;
+  $kwhcar = sprintf("%.2f", $kwhcar);
+  print " - car power $kwhcar kWh - $odom miles covered";
+  if ( $powertotal > 0)
+  {
+    $mpkwh = $odom / $powertotal;
+    $mpkwh = sprintf("%.2f", $mpkwh);
+    $chargingefficiency = $kwhcar / ( $powertotal - $preheatpowertotal) * 100;
+    $chargingefficiency = sprintf("%.1f", $chargingefficiency);
+    print " - $mpkwh miles per input kWh, implied charging efficiency $chargingefficiency%";
+  }
+  if ( $kwhcar > 0)
+  {
+    $mpkwhcar = $odom / $kwhcar;
+    $mpkwhcar = sprintf("%.2f", $mpkwhcar);
+    print " - $mpkwhcar miles per car kWh";
+  }
+}
+
+}
