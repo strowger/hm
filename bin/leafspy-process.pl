@@ -118,6 +118,7 @@ while (<STDIN>)
   # la = leadacid - our car doesn't have this value, it's gen1 only
   $ampsla = $line[119];
   $vin = $line[120];
+  # this one is actually hx - internal resistance
   $packhealth = $line[121];
   # leadacid again
   $voltsla = $line[122];
