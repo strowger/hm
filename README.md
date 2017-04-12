@@ -61,8 +61,6 @@ Works on the directory used by the above script to indentify new logs which have
 rtl433-process.pl
 Called by the above script to parse rtl433 logs and generate condensed logfiles locally which are suitable for long-term storage, and update rrds. Can also be used to simply print information about rtl433 logs for manual inspection.
 
-leaf.pl
-Queries the Nissan Carwings (aka NissanConnect) API to gather data from a Nissan Leaf electric vehicle using the leaf.py script (below) from pycarwings2, and logs to logfiles and RRDs.
 
 Nissan Leaf stuff
 -----------------
@@ -71,7 +69,7 @@ leaf.py
 Python script from the 'pycarwings2' project which does the hard work of interacting with Nissan. using the leaf.py script from pycarwings2.
 
 leaf.pl
-Runs the above python script, parses the output, logs and writes to RRDs.
+Queries the Nissan Carwings (aka NissanConnect) API to gather data from a Nissan Leaf electric vehicle using the leaf.py script (above) from pycarwings2, and logs to logfiles and RRDs.
 
 leafspy.pl
 Checks a dropbox location on local disk for newly-arrived leafspy data files and sends any new ones for processing.
@@ -88,10 +86,7 @@ Unfinished. Parses logs from currentcost clamp meter in car charger, and leafspy
 to-do
 -----
 
-we are gathering data from downstairs bathroom radiator flow/return but not graphing it
-
 we are not graphing the sensor in the void by the downstairs toilet cistern
 
 the water meter data is not being collected until we get another counter board, and even then the graphing is unhelpful and needs updating (like for the gas?)
 
-we started to instrument the smaller kitchen radiator but the sensors are not yet connected
