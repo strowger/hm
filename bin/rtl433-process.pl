@@ -52,7 +52,7 @@ while (<STDIN>)
   # seem to get some blank lines which result in emailed errors
   #  also some lines which don't have a third item - which for all our devices
   #  are bogus - these could just be a check for $line[2] really
-  if (( ! defined $line[0] || ( ! defined $line[2])) { next; }
+  if (( ! defined $line[0] ) || ( ! defined $line[2])) { next; }
   # match on xxxx-xx-xx xx:xx:xx :
   if (( $line[0] =~ /^\d{4}-\d{2}-\d{2}$/) && ($line[1] =~ /^\d{2}:\d{2}:\d{2}$/) && ($line[2] =~ /^:$/))
   {
