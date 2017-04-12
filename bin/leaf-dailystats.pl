@@ -27,6 +27,12 @@ open CHLOG, "<", "$logdirectory/$chargerlog";
 $timestamp = time();
 $starttime = $timestamp;
 
+$unchargedday = 0;
+$unchargedmiles = 0;
+$unchargedkwhcar = 0;
+$odom = 0;
+$lastpower = 0;
+$carriedover = 0;
 $goodlines = 0;
 $badlines = 0;
 $preheatpowertotal = 0;
@@ -41,6 +47,9 @@ $lastyear = 0;
 $lastwday = 0;
 $lastyday = 0;
 $lastisdst = 0;
+$lastpowertotal = 0;
+$lastodom = 0;
+
 while (<CHLOG>)
 {
   @line = split(" ",$_);
@@ -77,8 +86,36 @@ while (<CHLOG>)
       @daystartline = split(",",`head -2 $leafspydirectory/$leafspyfilename |tail -1`);
       $carstarttime = $daystartline[134];
     }
+
     # it's the first line of a new day, so print *yesterday's* data out
+    # if we're charging on the first line of the day then we're still charging
+    # from yesterday, so wait...
+    if (( $power > 5) && ($lastpower > 5))
+    {
+      # still charging
+      $carriedover = 1
+    }
+    else
+    {
+      printstats();
+      if (( $odom > 0) && ( $powertotal < 0.25 ))
+      {  
+        print "car used but not charged?\n"; 
+        $unchargedday = 1;
+        $unchargedmiles = $unchargedmiles + $odom;
+        $unchargedkwhcar = $unchargedkwhcar + $kwhcar;
+      }
+      $powertotal = 0;
+      $preheatpowertotal = 0;
+    }
+
+  }
+
+  # if we carried on charging over the midnight boundary but have now finished
+  if (( $carriedover == 1 ) && ( $power < 5 ) && ( $lastpower < 5 ))
+  {
     printstats();
+    $carriedover = 0;
     $powertotal = 0;
     $preheatpowertotal = 0;
   }
@@ -97,6 +134,13 @@ while (<CHLOG>)
 #      print STDERR "WARNING: $readinggap seconds between power meter readings at $epochtime\n";
       $longgaps = $longgaps + 1;
     }
+
+  $powertotal = $powertotal + ($readinggap * $power / 3600000);
+  # if the car hasn't been used yet then there won't be any leafspy logs 
+  # so it's likely that power use before this time is for pre-heat
+  if ( $epochtime < $carstarttime )
+    { $preheatpowertotal = $preheatpowertotal + ($readinggap * $power / 3600000); }
+
   $lastepochtime = $epochtime;
   $lastsec = $sec;
   $lastmin = $min;
@@ -106,10 +150,10 @@ while (<CHLOG>)
   $lastwday = $wday;
   $lastyday = $yday;
   $lastisdst = $isdst;
-
-  $powertotal = $powertotal + ($readinggap * $power / 3600000);
-  if ( $epochtime < $carstarttime )
-    { $preheatpowertotal = $preheatpowertotal + ($readinggap * $power / 3600000); }
+  $lastpower = $power;
+  $lastpowertotal = $powertotal;
+  $lastpreheatpowertotal = $preheatpowertotal;
+  $lastodom = $odom;
 
 }
 
@@ -129,6 +173,8 @@ unlink $lockfile;
 
 
 sub printstats {
+# years before i got the car are bogus lines in log 
+if ( $lastyear < 2016 ) { return; }
 $powertotal = sprintf("%.2f", $powertotal);
 $preheatpowertotal = sprintf("%.2f", $preheatpowertotal); 
 $powertobattery = $powertotal - $preheatpowertotal;
@@ -138,6 +184,7 @@ $leafspyfilename = "Log_U6003414_" . substr($lastyear, -2) . $lastmon . $lastmda
 if ( ! -f "$leafspydirectory/$leafspyfilename" )
 {
   print "couldn't find a corresponding leafspy log";
+  $odom = 0;
 }
 else
 {
@@ -170,5 +217,29 @@ else
     print ", $mpkwhcar miles per car kWh";
   }
 }
-
+if (( $unchargedday == 1) && ( $powertotal > 0.25))
+{
+  print "\nadding previous uncharged day/s totals to today:\n";
+  $odom = $odom + $unchargedmiles;
+  $kwhcar = $kwhcar + $unchargedkwhcar;
+  print "total from last charge until today's: car logged $kwhcar kWh from battery for $odom miles";
+  
+  $mpkwh = $odom / $powertotal;
+  $mpkwh = sprintf("%.2f", $mpkwh);
+  $chargingefficiency = $kwhcar / ( $powertotal - $preheatpowertotal) * 100;
+  $chargingefficiency = sprintf("%.1f", $chargingefficiency);
+  print "\n$mpkwh miles per input kWh, charging efficiency $chargingefficiency%";
+  
+  $mpkwhcar = $odom / $kwhcar;
+  $mpkwhcar = sprintf("%.2f", $mpkwhcar);
+  print ", $mpkwhcar miles per car kWh";
+  $unchargedday = 0;
+  $unchargedmiles = 0;
+  $unchargedkwhcar = 0;
 }
+
+if ( $carriedover == 1) 
+  { print "\ncharged over midnight boundary - check\n"; }
+  print "\n";
+
+} # end of sub
