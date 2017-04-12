@@ -116,7 +116,7 @@ while (<CHLOG>)
 # the last day we consider, we never get an output from the loop above,
 # as the output happens when we see a new day for the first time
 printstats();
-print " **INCOMPLETE DAY**\n";
+print "\n**INCOMPLETE DAY**\n";
 
 $endtime = time();
 $runtime = $endtime - $starttime;
@@ -133,11 +133,11 @@ $powertotal = sprintf("%.2f", $powertotal);
 $preheatpowertotal = sprintf("%.2f", $preheatpowertotal); 
 $powertobattery = $powertotal - $preheatpowertotal;
 $powertobattery = sprintf("%.2f", $powertobattery); 
-print "\n$lastyear-$lastmon-$lastmday supplied $powertotal kWh to car of which $preheatpowertotal kWh pre-heat giving $powertobattery kWh for charging";
+print "\n$lastyear-$lastmon-$lastmday kWh: $powertotal to car of which $preheatpowertotal pre-heat; $powertobattery for charging\n";
 $leafspyfilename = "Log_U6003414_" . substr($lastyear, -2) . $lastmon . $lastmday . "_e8ace.csv";
 if ( ! -f "$leafspydirectory/$leafspyfilename" )
 {
-  print " - couldn't find a corresponding leafspy log";
+  print "couldn't find a corresponding leafspy log";
 }
 else
 {
@@ -154,20 +154,20 @@ else
   $gids = $gidsstart - $gidsend;
   $kwhcar = $gids * 80 / 1000;
   $kwhcar = sprintf("%.2f", $kwhcar);
-  print " - car power $kwhcar kWh - $odom miles covered";
+  print "car logged $kwhcar kWh from battery for $odom miles";
   if ( $powertotal > 0)
   {
     $mpkwh = $odom / $powertotal;
     $mpkwh = sprintf("%.2f", $mpkwh);
     $chargingefficiency = $kwhcar / ( $powertotal - $preheatpowertotal) * 100;
     $chargingefficiency = sprintf("%.1f", $chargingefficiency);
-    print " - $mpkwh miles per input kWh, implied charging efficiency $chargingefficiency%";
+    print "\n$mpkwh miles per input kWh, charging efficiency $chargingefficiency%";
   }
   if ( $kwhcar > 0)
   {
     $mpkwhcar = $odom / $kwhcar;
     $mpkwhcar = sprintf("%.2f", $mpkwhcar);
-    print " - $mpkwhcar miles per car kWh";
+    print ", $mpkwhcar miles per car kWh";
   }
 }
 
