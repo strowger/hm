@@ -26,6 +26,9 @@ $logfile="rtl433-process.log";
 
 $logccopti="rtl433-ccoptical.log";
 $logccclamp="rtl433-ccclamp.log";
+$logcciamdryer="rtl433-cciamdryer.log";
+$logcciamwasher="rtl433-cciamwasher.log";
+$logcciamfridge="rtl433-cciamfridge.log";
 
 $timestamp = time();                                                                                  
 $starttime = $timestamp;
@@ -37,6 +40,9 @@ print LOGFILE "starting rtl433-process.pl at $timestamp\n";
 
 open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
 open CCCLAMP, ">>", "$logdirectory/$logccclamp" or die $!;
+open CCIAMDRYER, ">>", "$logdirectory/$logcciamdryer" or die $!;
+open CCIAMWASHER, ">>", "$logdirectory/$logcciamwasher" or die $!;
+open CCIAMFRIDGE, ">>", "$logdirectory/$logcciamfridge" or die $!;
 
 # each received transmission occupies multiple lines in the output, so we have to be stateful
 $midtx = 0;
@@ -170,7 +176,7 @@ while (<STDIN>)
             }
             else
             {
-              print CCCLAMP "$linetime $ccpower\n";
+              print CCIAMWASHER "$linetime $ccpower\n";
             }
           }
           if ($modeswitch eq "dump")
@@ -191,7 +197,7 @@ while (<STDIN>)
             }
             else
             {
-              print CCCLAMP "$linetime $ccpower\n";
+              print CCIAMDRYER "$linetime $ccpower\n";
             }
           }
           if ($modeswitch eq "dump")
@@ -212,7 +218,7 @@ while (<STDIN>)
             }
             else
             {
-              print CCCLAMP "$linetime $ccpower\n";
+              print CCIAMFRIDGE "$linetime $ccpower\n";
             }
           }
           if ($modeswitch eq "dump")
