@@ -106,9 +106,9 @@ while (<STDIN>)
 # they seem set randomly 
 # 0    = optical transmitter on whole house
 # 77   = clamp transmitter on car charger
-# 921  = iam 
-# 1971 = iam
-# 3037 = iam
+# 921  = iam washing machine
+# 1971 = iam dryer
+# 3037 = iam fridge
       if ( defined $ccdevid )
       {
         $ccpower = $line[2];
@@ -157,6 +157,70 @@ while (<STDIN>)
             print "$linetime clamp sensor power $ccpower watts\n";
           }
         }
+
+        if ( $ccdevid == 921 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/cciamwasher.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCCLAMP "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime iam washer sensor power $ccpower watts\n";
+          }
+        }
+
+        if ( $ccdevid == 1971 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/cciamdryer.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCCLAMP "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime iam dryer sensor power $ccpower watts\n";
+          }
+        }
+
+        if ( $ccdevid == 3037 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/cciamfridge.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCCLAMP "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime iam fridge sensor power $ccpower watts\n";
+          }
+        }
+
 
         # we don't care about subsequent "Power x:" lines as they're all zero
         $midtx = 0;
