@@ -9,9 +9,12 @@
 
 no warnings 'once';
 
+# price of power, pence per kWh
+$powerprice = 8.5;
 $logdirectory="/data/hm/log";
 $leafspydirectory="/data/hm/leaf";
 $chargerlog="rtl433-ccclamp.log";
+
 
 $lockfile="/tmp/leaf-dailystats.lock";
 
@@ -206,9 +209,11 @@ else
   {
     $mpkwh = $odom / $powertotal;
     $mpkwh = sprintf("%.2f", $mpkwh);
+    $ppm = $powerprice / $mpkwh;
+    $ppm = sprintf("%.1f", $ppm);
     $chargingefficiency = $kwhcar / ( $powertotal - $preheatpowertotal) * 100;
     $chargingefficiency = sprintf("%.1f", $chargingefficiency);
-    print "\n$mpkwh miles per input kWh, charging efficiency $chargingefficiency%";
+    print "\n$mpkwh miles/input kWh: ${ppm}p/mile. charge efficiency $chargingefficiency%";
   }
   if ( $kwhcar > 0)
   {
@@ -226,9 +231,11 @@ if (( $unchargedday == 1) && ( $powertotal > 0.25))
   
   $mpkwh = $odom / $powertotal;
   $mpkwh = sprintf("%.2f", $mpkwh);
+  $ppm = $powerprice / $mpkwh;
+  $ppm = sprintf("%.1f", $ppm);
   $chargingefficiency = $kwhcar / ( $powertotal - $preheatpowertotal) * 100;
   $chargingefficiency = sprintf("%.1f", $chargingefficiency);
-  print "\n$mpkwh miles per input kWh, charging efficiency $chargingefficiency%";
+  print "\n$mpkwh miles/input kWh: ${ppm}p/mile. charge efficiency $chargingefficiency%";
   
   $mpkwhcar = $odom / $kwhcar;
   $mpkwhcar = sprintf("%.2f", $mpkwhcar);

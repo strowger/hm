@@ -102,6 +102,13 @@ while (<STDIN>)
     
     if (($line[0] eq "Power") && ($line[1] eq "0:"))
     {
+# $ccdevid is the "Device Id" output by the currentcost transmitter
+# they seem set randomly 
+# 0    = optical transmitter on whole house
+# 77   = clamp transmitter on car charger
+# 921  = iam 
+# 1971 = iam
+# 3037 = iam
       if ( defined $ccdevid )
       {
         $ccpower = $line[2];
