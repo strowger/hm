@@ -30,6 +30,7 @@ $logcciamdryer="rtl433-cciamdryer.log";
 $logcciamwasher="rtl433-cciamwasher.log";
 $logcciamfridge="rtl433-cciamfridge.log";
 
+
 $timestamp = time();                                                                                  
 $starttime = $timestamp;
 
@@ -87,7 +88,7 @@ while (<STDIN>)
     }
     else 
     { 
-      print STDERR "$linetime got alien device $line[3]\n"; 
+      print LOGFILE "$linetime got alien device $line[3]\n"; 
       # we don't know what to do with this so we ignore the next lines
       $midtx = 0;
       $alien = 1;
@@ -233,7 +234,7 @@ while (<STDIN>)
       }
       else { print STDERR "$linetime got a currentcost power line without a preceding deviceid\n"; }
     }
-    if ( $alien eq "1" ) { print STDERR "@line\n"; }
+    if ( $alien eq "1" ) { print LOGFILE "@line\n"; }
   # 
   # end of "non-tx-start line" processing
   }
