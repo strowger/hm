@@ -252,6 +252,7 @@ if (-f "$logdirectory/$alarmsyncerrorlog" )
     print "More than 5 log lines from alarmpanel rsync cron job:\n";
     print "@errorlines";
   }
+  unlink "$logdirectory/$alarmsyncerrorlog";
 }
 
 # same as above but for nissan leaf monitoring errors - we only poll 4 times
