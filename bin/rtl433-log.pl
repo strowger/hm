@@ -10,6 +10,7 @@
 # begun
 #
 
+$templogdirectory="/data/hm/rtltmp";
 $logdirectory="/data/hm/rtl";
 $lockfile="/tmp/rtl433-log.lock";
 $rtl433="/usr/local/bin/rtl_433";
@@ -31,12 +32,13 @@ open LOCKFILE, ">", $lockfile or die $!;
 while (1)
 {
   $timestamp=time();
-  open LOGFILE, ">", "$logdirectory/$location-$timestamp.log" or die $!;
+  open LOGFILE, ">", "$templogdirectory/$location-$timestamp.log" or die $!;
 # there's quite a lot of debug output, which is temporarily useful if it fails
-  `date > $logdirectory/debug.log`;
-  $rtloutput = `$rtl433 $rtloptions 2>>$logdirectory/debug.log`;
+  `date > $templogdirectory/debug.log`;
+  $rtloutput = `$rtl433 $rtloptions 2>>$templogdirectory/debug.log`;
   print LOGFILE "$rtloutput";
   close LOGFILE;
+  `mv $templogdirectory/* $logdirectory`;
 }
 #$endtime = time();
 #$runtime = $endtime - $starttime;
