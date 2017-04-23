@@ -12,7 +12,7 @@ then
 fi
 touch /tmp/rtl433-logsync-lock
 
-rsync strowger@192.168.1.40:/data/hm/rtl/* /data/hm/rtl-in >> /data/hm/log/alarmbox-rsync-errors.log 2>> /data/hm/log/alarmbox-rsync-errors.log
+rsync --remove-source-files strowger@192.168.1.40:/data/hm/rtl/* /data/hm/rtl-in >> /data/hm/log/alarmbox-rsync-errors.log 2>> /data/hm/log/alarmbox-rsync-errors.log
 
 rm /tmp/rtl433-logsync-lock
 

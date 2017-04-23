@@ -38,7 +38,7 @@ while (1)
   $rtloutput = `$rtl433 $rtloptions 2>>$templogdirectory/debug.log`;
   print LOGFILE "$rtloutput";
   close LOGFILE;
-  `find $templogdirectory -type f -size +0c -exec mv {} $logdirectory \;`;
+  `find $templogdirectory -type f -size +0c -exec mv {} $logdirectory \\;`;
 }
 #$endtime = time();
 #$runtime = $endtime - $starttime;
