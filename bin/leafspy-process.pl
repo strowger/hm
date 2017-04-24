@@ -244,10 +244,12 @@ if ($modeswitch eq "process")
 
   @rrds = ("speed", "packamps", "drivemotor", "auxpower", "acpower", "acpres", "acpower2", "heatpower", "chargepower", "elevation", "gids", "soc", "amphr", "packvolts", "packvolts2", "packvolts3", "maxcpmv", "mincpmv", "avgcpmv", "cpmvdiff", "judgementval", "packtemp1", "packtemp2", "packtemp4", "voltsla", "packhealth", "packhealth2", "ambienttemp", "phonebatt", "regenwh", "regenwatts", "odom", "quickcharges", "slowcharges");
 
-  # 0.39.97 (april 2017) adds 3 more fields to the end of the line                                                                                                        
+  # 0.39.97 (april 2017) adds 3 more fields to the end of the line   
   if ( $lineitems == 155 )
   {
-    push @rrds, ("motortemp", "inverter2temp", "inverttemp");
+#   at the moment the inverter temp ones are outputting just zeros
+#    push @rrds, ("motortemp", "inverter2temp", "inverter4temp");
+    push @rrds, ("motortemp");
   }
   foreach $rrd (@rrds)
   {
@@ -310,7 +312,7 @@ if ($modeswitch eq "dump")
   print "regen cumulative wh $regenwh regen power $regenwatts drive motor $drivemotor W aux $auxpower W\n";
   print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";
   print "phone battery $phonebatt\n";
-  # 0.39.97 (april 2017) adds 3 more fields to the end of the line                                                                                                        
+  # 0.39.97 (april 2017) adds 3 more fields to the end of the line
   if ( $lineitems == 155 )
   {
     print "new log format - motor temp $motortemp c, inverter temps $inverter2temp c $inverter4temp c\n";
