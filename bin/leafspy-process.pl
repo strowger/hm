@@ -54,6 +54,7 @@ while (<STDIN>)
 {
 # Leafspy pro logfile format
 #Date/Time,Lat,Long,Elv,Speed,Gids,SOC,AHr,Pack Volts,Pack Amps,Max CP mV,Min CP mV,Avg CP mV,CP mV Diff,Judgment Value,Pack T1 F,Pack T1 C,Pack T2 F,Pack T2 C,Pack T3 F,Pack T3 C,Pack T4 F,Pack T4 C,CP1,CP2,CP3,CP4,CP5,CP6,CP7,CP8,CP9,CP10,CP11,CP12,CP13,CP14,CP15,CP16,CP17,CP18,CP19,CP20,CP21,CP22,CP23,CP24,CP25,CP26,CP27,CP28,CP29,CP30,CP31,CP32,CP33,CP34,CP35,CP36,CP37,CP38,CP39,CP40,CP41,CP42,CP43,CP44,CP45,CP46,CP47,CP48,CP49,CP50,CP51,CP52,CP53,CP54,CP55,CP56,CP57,CP58,CP59,CP60,CP61,CP62,CP63,CP64,CP65,CP66,CP67,CP68,CP69,CP70,CP71,CP72,CP73,CP74,CP75,CP76,CP77,CP78,CP79,CP80,CP81,CP82,CP83,CP84,CP85,CP86,CP87,CP88,CP89,CP90,CP91,CP92,CP93,CP94,CP95,CP96,12v Bat Amps,VIN,Hx,12v Bat Volts,Odo(km),QC,L1/L2,TP-FL,TP-FR,TP-RR,TP-RL,Ambient,SOH,RegenWh,BLevel,epoch time,Motor Pwr(100w),Aux Pwr(100w),A/C Pwr(250w),A/C Comp(0.1MPa),Est Pwr A/C(50w),Est Pwr Htr(250w),Plug State,Charge Mode,OBC Out Pwr,Gear,HVolt1,HVolt2,GPS Status,Power SW,BMS,OBC
+# 0.39.97 (april 2017) adds 3 more fields to the end of the line: motor temperature, inverter 2 temperature, inverter 4 temperature
   @line = split(",",$_);
   $lineitems = scalar (@line);
   $datetime = $line[0];
@@ -61,10 +62,15 @@ while (<STDIN>)
   if ( $datetime =~ /Date\/Time/ )
     { next; }
   # first thing on a valid line is a date in format 2 digits, slash, 2 digits, slash, 4 digits
-  # valid lines have 152 items on them
-  if (( $datetime !~ /\d{2}\/\d{2}\/\d{4}/ ) || ( $lineitems != 152))
+  # valid lines have 152 items on them until leafspy 0.39.97, at which point they gained 3 and have 155 items
+  if ( $datetime !~ /\d{2}\/\d{2}\/\d{4}/ ) 
   {
     print "line appears corrupt, skipping\n";
+    next;
+  }
+  if ( $lineitems < 152 ) 
+  {
+    print "line appears truncated, skipping\n";
     next;
   }
   ($date,$time) = split(" ",$datetime);
@@ -198,7 +204,20 @@ while (<STDIN>)
   # 1 if obc ecu read else 0
   $obcecu = $line[150];
   $debuginfo = $line[151];
-  chomp $debuginfo; # last field so contains newline
+  # last field of the line ends in newline
+  if ( $lineitems == 152 ) { chomp $debuginfo; }
+  # 0.39.97 (april 2017) adds 3 more fields to the end of the line
+  if ( $lineitems == 155 ) 
+  { 
+    # subtract 40 from value to get degrees C!
+    $motortempstupid = $line[152];
+    $motortemp = $motortempstupid - 40;
+    $inverter2tempstupid = $line[153];
+    $inverter2temp = $inverter2tempstupid - 40;
+    $inverter4tempstupid = $line[154];
+    chomp $inverter4tempstupid; 
+    $inverter4temp = $inverter4tempstupid - 40;
+  }
 
   # some stuff to fix up stupid shit that leafspy has put in logs
 
@@ -225,6 +244,11 @@ if ($modeswitch eq "process")
 
   @rrds = ("speed", "packamps", "drivemotor", "auxpower", "acpower", "acpres", "acpower2", "heatpower", "chargepower", "elevation", "gids", "soc", "amphr", "packvolts", "packvolts2", "packvolts3", "maxcpmv", "mincpmv", "avgcpmv", "cpmvdiff", "judgementval", "packtemp1", "packtemp2", "packtemp4", "voltsla", "packhealth", "packhealth2", "ambienttemp", "phonebatt", "regenwh", "regenwatts", "odom", "quickcharges", "slowcharges");
 
+  # 0.39.97 (april 2017) adds 3 more fields to the end of the line                                                                                                        
+  if ( $lineitems == 155 )
+  {
+    push @rrds, ("motortemp", "inverter2temp", "inverttemp");
+  }
   foreach $rrd (@rrds)
   {
   #  print LOGFILE "updating rrd for $rrd...";
@@ -286,6 +310,11 @@ if ($modeswitch eq "dump")
   print "regen cumulative wh $regenwh regen power $regenwatts drive motor $drivemotor W aux $auxpower W\n";
   print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";
   print "phone battery $phonebatt\n";
+  # 0.39.97 (april 2017) adds 3 more fields to the end of the line                                                                                                        
+  if ( $lineitems == 155 )
+  {
+    print "new log format - motor temp $motortemp c, inverter temps $inverter2temp c $inverter4temp c\n";
+  }
 }
 
 
