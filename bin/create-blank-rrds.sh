@@ -936,6 +936,18 @@ RRA:MAX:0.001:17280:5500 \
 RRA:MIN:0.001:17280:5500
 done
 
+# 20170424 new leafspy version gave a new piece of information - motor temp
+
+for i in motortemp
+do
+rrdtool create ls-${i}.rrd --start 1493000000 --step 5 \
+DS:${i}:GAUGE:60:U:U \
+RRA:LAST:0.001:1:241920 \
+RRA:AVERAGE:0.001:17280:5500 \
+RRA:MAX:0.001:17280:5500 \
+RRA:MIN:0.001:17280:5500
+done
+
 # for these, which change more slowly, we just need once a minute, then the same 
 # 15 years daily min/max/avg
 # once a minute is 1440 times/day, 20160 times in 2 weeks
