@@ -261,13 +261,13 @@ if ($modeswitch eq "process")
       if (length $output)
       { 
         chomp $output;
-        print LOGFILE "got error $output..."; 
+        print LOGFILE "rrd $rrd got error $output..."; 
       }
   #    print LOGFILE "ok";
     }
     else
     {
-      print LOGFILE "not found; skipping..."
+      print LOGFILE "rrd $rrd not found; skipping..."
     }
     #  print LOGFILE "; ";
   }
@@ -286,13 +286,13 @@ if ($modeswitch eq "process")
       if (length $output)
       {
         chomp $output;
-        print LOGFILE "got error $output...";
+        print LOGFILE "rrd $rrd got error $output...";
       }
   #    print LOGFILE "ok";
     }
     else
     {
-      print LOGFILE "not found; skipping..."
+      print LOGFILE "rrd $rrd not found; skipping..."
     }
   #  print LOGFILE "; ";
   }
