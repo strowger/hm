@@ -22,8 +22,6 @@ $oldpowerswitch=0;
 # this will read from either stdin or a file specified on the commandline
 while (<>)
 {
-# Leafspy pro logfile format
-#Date/Time,Lat,Long,Elv,Speed,Gids,SOC,AHr,Pack Volts,Pack Amps,Max CP mV,Min CP mV,Avg CP mV,CP mV Diff,Judgment Value,Pack T1 F,Pack T1 C,Pack T2 F,Pack T2 C,Pack T3 F,Pack T3 C,Pack T4 F,Pack T4 C,CP1,CP2,CP3,CP4,CP5,CP6,CP7,CP8,CP9,CP10,CP11,CP12,CP13,CP14,CP15,CP16,CP17,CP18,CP19,CP20,CP21,CP22,CP23,CP24,CP25,CP26,CP27,CP28,CP29,CP30,CP31,CP32,CP33,CP34,CP35,CP36,CP37,CP38,CP39,CP40,CP41,CP42,CP43,CP44,CP45,CP46,CP47,CP48,CP49,CP50,CP51,CP52,CP53,CP54,CP55,CP56,CP57,CP58,CP59,CP60,CP61,CP62,CP63,CP64,CP65,CP66,CP67,CP68,CP69,CP70,CP71,CP72,CP73,CP74,CP75,CP76,CP77,CP78,CP79,CP80,CP81,CP82,CP83,CP84,CP85,CP86,CP87,CP88,CP89,CP90,CP91,CP92,CP93,CP94,CP95,CP96,12v Bat Amps,VIN,Hx,12v Bat Volts,Odo(km),QC,L1/L2,TP-FL,TP-FR,TP-RR,TP-RL,Ambient,SOH,RegenWh,BLevel,epoch time,Motor Pwr(100w),Aux Pwr(100w),A/C Pwr(250w),A/C Comp(0.1MPa),Est Pwr A/C(50w),Est Pwr Htr(250w),Plug State,Charge Mode,OBC Out Pwr,Gear,HVolt1,HVolt2,GPS Status,Power SW,BMS,OBC
   @line = split(",",$_);
   $lineitems = scalar (@line);
   $datetime = $line[0];
@@ -31,8 +29,8 @@ while (<>)
   if ( $datetime =~ /Date\/Time/ )
     { next; }
   # first thing on a valid line is a date in format 2 digits, slash, 2 digits, slash, 4 digits
-  # valid lines have 152 items on them
-  if (( $datetime !~ /\d{2}\/\d{2}\/\d{4}/ ) || ( $lineitems != 152))
+  # valid lines have 152 or 155 items on them
+  if (( $datetime !~ /\d{2}\/\d{2}\/\d{4}/ ) || ( $lineitems < 152))
   {
     print "line appears corrupt, skipping\n";
     next;
@@ -104,7 +102,6 @@ while (<>)
   $regenwh = $line[132];
   $regenwh = abs $regenwh;
   # phone battery in %
-  $phonebatt = $line[133];
   $epochtime = $line[134];
   # drive motor power in 100w units
   $drivemotorstupid = $line[135];
@@ -146,35 +143,7 @@ while (<>)
   $bmsecu = $line[149];
   # 1 if obc ecu read else 0
   $obcecu = $line[150];
-  $debuginfo = $line[151];
-  chomp $debuginfo; # last field so contains newline
 
-  # some stuff to fix up stupid shit that leafspy has put in logs
-
-  # we've had some spikes of this to 95C / 203F, which fucks up the graphs
-  #  writing "U" to the rrd is a special value which will just enter an unknown
-  if ($ambienttemp > 50 ) 
-    { $ambienttemp = "U" };
-
-  # had some bad lines were both of these were set to the same crazy value, one negative
-  if ( abs ($packvolts) == abs ($packamps) )
-    { $packvolts = "U"; $packamps = "U"; $packvolts2 = "U"; $packvolts3 = "U"; }
-
-  # had some lines where packhealth2 gets set to 0
-  if ($packhealth2 == 0) { $packhealth2 = "U"; }
-
-#  print "log line summary:\n";
-# print "$year $month $day $hour $minute $second epoch $epochtime calculated epoch $linetime\n";
-#  print "lat $lat long $long elevation $elevation speed $speed\n";
-#  print "gids $gids state-of-charge $soc amp capacity $amphr\n";
-#  print "volts (3 readings) $packvolts $packvolts2 $packvolts3 amps $packamps\n";
-#  print "cellpairs max $maxcpmv min $mincpmv avg $avgcpmv biggest difference $cpmvdiff judgementval $judgementval\n";
-#  print "pack temps $packtemp1 $packtemp2 $packtemp3 $packtemp4 health1 $packhealth health2 $packhealth2 quickcharges $quickcharges slowcharges $slowcharges\n";
-#  print "vin $vin odometer miles $odom 12v volts $voltsla outside temp $ambienttemp c $ambienttempf f\n";
-#  print "tyre presures front left $tpfl front right $tpfr rear left $tprl rear right $tprr\n";
-#  print "regenwh $regenwh drive motor $drivemotor W aux $auxpower W\n";
-#  print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";
-#  print "phone battery $phonebatt powerswitch $powerswitch\n";
 
 if ( defined $lastlinetime )
 {
