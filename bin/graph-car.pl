@@ -95,8 +95,12 @@ $output = `rrdtool graph $graphdirectory/leafspeedpower${filename}.png -a PNG --
 # elevation
 $output = `rrdtool graph $graphdirectory/leafelevation${filename}.png -a PNG --vertical-label "meters above sea level" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:el='$rrddirectory/ls-elevation.rrd:elevation:LAST '${linetype}:el#${col01}:vehicle height metres' -W "${datestamp}" -t "nissan leaf - gps elevation"`; 
 
-# temperatures - pack and ambient
-$output = `rrdtool graph $graphdirectory/leaftemps${filename}.png -a PNG --vertical-label "deg c" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packtemp1.rrd:packtemp1:LAST 'DEF:p2='$rrddirectory/ls-packtemp2.rrd:packtemp2:LAST 'DEF:p4='$rrddirectory/ls-packtemp4.rrd:packtemp4:LAST 'DEF:amb='$rrddirectory/ls-ambienttemp.rrd:ambienttemp:LAST '${linetype}:p1#${col01}:battery sensor 1' '${linetype}:p2#${col02}:battery sensor 2' '${linetype}:p4#${col03}:battery sensor 4' '${linetype}:amb#${col04}:ambient sensor' -W "${datestamp}" -t "nissan leaf temperatures"`; 
+# temperatures - pack,motor, and ambient
+# old
+#$output = `rrdtool graph $graphdirectory/leaftemps${filename}.png -a PNG --vertical-label "deg c" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packtemp1.rrd:packtemp1:LAST 'DEF:p2='$rrddirectory/ls-packtemp2.rrd:packtemp2:LAST 'DEF:p4='$rrddirectory/ls-packtemp4.rrd:packtemp4:LAST 'DEF:amb='$rrddirectory/ls-ambienttemp.rrd:ambienttemp:LAST '${linetype}:p1#${col01}:battery sensor 1' '${linetype}:p2#${col02}:battery sensor 2' '${linetype}:p4#${col03}:battery sensor 4' '${linetype}:amb#${col04}:ambient sensor' -W "${datestamp}" -t "nissan leaf temperatures"`; 
+
+
+$output = `rrdtool graph $graphdirectory/leaftemps${filename}.png -a PNG --vertical-label "deg c" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:p1='$rrddirectory/ls-packtemp1.rrd:packtemp1:LAST 'DEF:p2='$rrddirectory/ls-packtemp2.rrd:packtemp2:LAST 'DEF:p4='$rrddirectory/ls-packtemp4.rrd:packtemp4:LAST 'DEF:amb='$rrddirectory/ls-ambienttemp.rrd:ambienttemp:LAST 'DEF:mo='$rrddirectory/ls-motortemp.rrd:motortemp:LAST  '${linetype}:p1#${col01}:battery sensor 1' '${linetype}:p2#${col02}:battery sensor 2' '${linetype}:p4#${col03}:battery sensor 4' '${linetype}:amb#${col04}:ambient sensor' '${linetype}:mo#${col05}:motor' -W "${datestamp}" -t "nissan leaf temperatures"`; 
 
 # power - auxiliaries
 # old one without stacking
