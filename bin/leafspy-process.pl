@@ -163,9 +163,10 @@ while (<STDIN>)
   # phone battery in %
   $phonebatt = $line[133];
   $epochtime = $line[134];
-  # drive motor power in 100w units
+  # drive motor power was previously in 100w units
   $drivemotorstupid = $line[135];
-  $drivemotor = $drivemotorstupid * 100;
+  if ( $lineitems = 152) { $drivemotor = $drivemotorstupid * 100; }
+  if ( $lineitems = 155) { $drivemotor = $drivemotorstupid; }
   # auxiliaries power in 100w units
   $auxpowerstupid = $line[136];
   $auxpower = $auxpowerstupid * 100;
@@ -236,7 +237,7 @@ while (<STDIN>)
   if ($packhealth2 == 0) { $packhealth2 = "U"; }
 
   # we get drive motor spikes to way over the rated max 80kW, despike these
-  if ( $drivemotor > 100000 ) { $drivemotor = "U"; }
+  if ( $drivemotor > 120000 ) { $drivemotor = "U"; }
 
 if ($modeswitch eq "process")
 {
