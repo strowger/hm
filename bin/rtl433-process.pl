@@ -29,6 +29,12 @@ $logccclamp="rtl433-ccclamp.log";
 $logcciamdryer="rtl433-cciamdryer.log";
 $logcciamwasher="rtl433-cciamwasher.log";
 $logcciamfridge="rtl433-cciamfridge.log";
+$logcciamdwasher="rtl433-cciamdwasher.log";
+$logcciamupsb="rtl433-cciamupsb.log";
+$logcciamofficedesk="rtl433-cciamofficedesk.log";
+$logcciamupso="rtl433-cciamupso.log";
+$logcciamtoaster="rtl433-cciamtoaster.log";
+$logcciamkettle="rtl433-cciamkettle.log";
 
 
 $timestamp = time();                                                                                  
@@ -44,6 +50,12 @@ open CCCLAMP, ">>", "$logdirectory/$logccclamp" or die $!;
 open CCIAMDRYER, ">>", "$logdirectory/$logcciamdryer" or die $!;
 open CCIAMWASHER, ">>", "$logdirectory/$logcciamwasher" or die $!;
 open CCIAMFRIDGE, ">>", "$logdirectory/$logcciamfridge" or die $!;
+open CCIAMDWASHER, ">>", "$logdirectory/$logcciamdwasher" or die $!;
+open CCIAMUPSB, ">>", "$logdirectory/$logcciamupsb" or die $!;
+open CCIAMOFFICEDESK, ">>", "$logdirectory/$logcciamofficedesk" or die $!;
+open CCIAMUPSO, ">>", "$logdirectory/$logcciamupso" or die $!;
+open CCIAMTOASTER, ">>", "$logdirectory/$logcciamtoaster" or die $!;
+open CCIAMKETTLE, ">>", "$logdirectory/$logcciamkettle" or die $!;
 
 # each received transmission occupies multiple lines in the output, so we have to be stateful
 $midtx = 0;
@@ -116,6 +128,12 @@ while (<STDIN>)
 # 921  = iam washing machine
 # 1971 = iam dryer
 # 3037 = iam fridge
+# 3214 = iam dishwasher
+# 1314 = iam basement ups
+# 2829 = iam office desk 10bar
+# 3879 = office ups
+# 2017 = toaster
+# 4034 = kettle
       if ( defined $ccdevid )
       {
         $ccpower = $line[2];
@@ -228,6 +246,132 @@ while (<STDIN>)
           }
         }
 
+
+        if ( $ccdevid == 3214 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/cciamdwasher.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCIAMDWASHER "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime iam dishwasher sensor power $ccpower watts\n";
+          }
+        }
+
+        if ( $ccdevid == 1314 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/cciamupsb.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCIAMUPSB "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime iam basement ups sensor power $ccpower watts\n";
+          }
+        }
+
+        if ( $ccdevid == 2829 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/cciamofficedesk.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCIAMOFFICEDESK "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime iam office desk sensor power $ccpower watts\n";
+          }
+        }
+
+        if ( $ccdevid == 3879 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/cciamupso.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCIAMUPSO "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime iam office ups sensor power $ccpower watts\n";
+          }
+        }
+
+        if ( $ccdevid == 2071 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/cciamtoaster.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCIAMTOASTER "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime iam toaster sensor power $ccpower watts\n";
+          }
+        }
+
+        if ( $ccdevid == 4023 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/cciamkettle.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCIAMKETTLE "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime iam kettle sensor power $ccpower watts\n";
+          }
+        }
 
         # we don't care about subsequent "Power x:" lines as they're all zero
         $midtx = 0;
