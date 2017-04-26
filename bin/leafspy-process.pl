@@ -165,8 +165,8 @@ while (<STDIN>)
   $epochtime = $line[134];
   # drive motor power was previously in 100w units
   $drivemotorstupid = $line[135];
-  if ( $lineitems = 152) { $drivemotor = $drivemotorstupid * 100; }
-  if ( $lineitems = 155) { $drivemotor = $drivemotorstupid; }
+  if ( $lineitems == 152) { $drivemotor = $drivemotorstupid * 100; }
+  if ( $lineitems == 155) { $drivemotor = $drivemotorstupid; }
   # auxiliaries power in 100w units
   $auxpowerstupid = $line[136];
   $auxpower = $auxpowerstupid * 100;
