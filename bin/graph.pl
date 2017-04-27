@@ -70,7 +70,30 @@ $output = `rrdtool graph $graphdirectory/humidity${filename}.png -a PNG -l 0 -y 
 # this one has upper limit specified as 80 - no temperature should exceed this, but the modulation percentage does (which is ok). we also specify -r to disable auto-scaling.
 $output = `rrdtool graph $graphdirectory/chtemps${filename}.png -a PNG -u 80 -l 0 -r -y 10:1 --vertical-label "deg c" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:ebflow='$rrddirectory/ebflowtemp.rrd:temp:LAST 'DEF:ebreturn='$rrddirectory/ebreturntemp.rrd:temp:LAST 'DEF:desflow='$rrddirectory/desiredflowtemp.rrd:temp:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST  'CDEF:modtdif=ion,65,GT,0,modtd,IF' 'DEF:zvu='$rrddirectory/zvupstairsflow.rrd:temp:LAST 'DEF:zvd='$rrddirectory/zvdownstairsflow.rrd:temp:LAST 'DEF:zvh='$rrddirectory/zvhwflow.rrd:temp:LAST '${linetype}:ebflow#${col01}:flow temp - ebus' '${linetype}:ebreturn#${col02}:return temp - ebus' '${linetype}:desflow#${col03}:desired flow temp' '${linetype}:modtdif#${col04}:boiler output (percent of max)' '${linetype}:zvu#${col05}:flow temp to upstairs radiators' '${linetype}:zvd#${col06}:flow temp to downstairs radiators' '${linetype}:zvh#${col07}:flow temp to hw tank' -W "${datestamp}" -t "heating system temperatures"`;
 
-$output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:optical='$rrddirectory/ccoptiwatts.rrd:power:LAST 'DEF:car='$rrddirectory/ccclampwattscar.rrd:power:LAST 'DEF:wash='$rrddirectory/cciamwasher.rrd:power:LAST 'DEF:dry='$rrddirectory/cciamdryer.rrd:power:LAST 'DEF:fridge='$rrddirectory/cciamfridge.rrd:power:LAST 'DEF:dwasher='$rrddirectory/cciamdwasher.rrd:power:LAST 'DEF:upsb='$rrddirectory/cciamupsb.rrd:power:LAST 'DEF:officedesk='$rrddirectory/cciamofficedesk.rrd:power:LAST 'DEF:upso='$rrddirectory/cciamupso.rrd:power:LAST 'DEF:toaster='$rrddirectory/cciamtoaster.rrd:power:LAST 'DEF:kettle='$rrddirectory/cciamkettle.rrd:power:LAST '${linetype}:optical#${col12}:whole house' 'AREA:car#${col02}:car charger' 'AREA:fridge#${col03}:fridge':STACK 'AREA:wash#${col04}:washing machine':STACK 'AREA:dry#${col05}:tumble dryer':STACK 'AREA:dwasher#${col06}:dishwasher':STACK 'AREA:upsb#${col07}:basement server ups':STACK 'AREA:officedesk#${col08}:office desk':STACK 'AREA:upso#${col09}:office ups':STACK 'AREA:toaster#${col10}:toaster':STACK 'AREA:kettle#${col11}:kettle':STACK -W "${datestamp}" -t "electricity consumption"`;
+$output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:optical='$rrddirectory/ccoptiwatts.rrd:power:LAST \\
+'DEF:car='$rrddirectory/ccclampwattscar.rrd:power:LAST \\
+'DEF:wash='$rrddirectory/cciamwasher.rrd:power:LAST \\
+'DEF:dry='$rrddirectory/cciamdryer.rrd:power:LAST \\
+'DEF:fridge='$rrddirectory/cciamfridge.rrd:power:LAST \\
+'DEF:dwasher='$rrddirectory/cciamdwasher.rrd:power:LAST \\
+'DEF:upsb='$rrddirectory/cciamupsb.rrd:power:LAST \\
+'DEF:officedesk='$rrddirectory/cciamofficedesk.rrd:power:LAST \\
+'DEF:upso='$rrddirectory/cciamupso.rrd:power:LAST \\
+'DEF:toaster='$rrddirectory/cciamtoaster.rrd:power:LAST \\
+'DEF:kettle='$rrddirectory/cciamkettle.rrd:power:LAST \\
+'${linetype}:optical#${col12}:whole house' \\
+'AREA:upsb#${col01}:basement server ups' \\
+'AREA:upso#${col02}:office ups':STACK \\
+'AREA:officedesk#${col03}:office desk':STACK \\
+'AREA:car#${col04}:car charger':STACK \\
+'AREA:fridge#${col05}:fridge':STACK \\
+'AREA:wash#${col06}:washing machine':STACK \\
+'AREA:dry#${col07}:tumble dryer':STACK \\
+'AREA:dwasher#${col08}:dishwasher':STACK \\
+'AREA:toaster#${col09}:toaster':STACK \\
+'AREA:kettle#${col11}:kettle':STACK \\
+-W "${datestamp}" -t "electricity consumption"`;
 
 $output = `rrdtool graph $graphdirectory/waterpressure${filename}.png -a PNG -y 0.1:1 --vertical-label "bar" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:pressure='$rrddirectory/waterpressure.rrd:pres:LAST '${linetype}:pressure#${col01}:water pressure' -W "${datestamp}" -t "water pressure in central heating system"`;
 
