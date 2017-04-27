@@ -16,3 +16,5 @@ rsync --remove-source-files strowger@192.168.1.40:/data/hm/rtl/* /data/hm/rtl-in
 
 rm /tmp/rtl433-logsync-lock
 
+/data/hm/bin/rtl433-logimport.pl
+
