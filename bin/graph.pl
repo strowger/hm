@@ -95,6 +95,53 @@ $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:
 'AREA:kettle#${col11}:kettle':STACK \\
 -W "${datestamp}" -t "electricity consumption"`;
 
+$output = `rrdtool graph $graphdirectory/ccclampwattscar${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:car='$rrddirectory/ccclampwattscar.rrd:power:LAST '${linetype}:car#${col01}:car charger' -W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/cciamwasher${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:wash='$rrddirectory/cciamwasher.rrd:power:LAST \\
+'${linetype}:wash#${col01}:washing machine' \\
+-W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/cciamdryer${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:dry='$rrddirectory/cciamdryer.rrd:power:LAST \\
+'${linetype}:dry#${col01}:tumble dryer' \\
+-W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/cciamfridge${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:fridge='$rrddirectory/cciamfridge.rrd:power:LAST \\
+'${linetype}:fridge#${col01}:fridge' \\
+-W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/cciamdwasher${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:dwasher='$rrddirectory/cciamdwasher.rrd:power:LAST \\
+'${linetype}:dwasher#${col01}:dwasher' \\
+-W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/cciamupsb${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:upsb='$rrddirectory/cciamupsb.rrd:power:LAST \\
+'${linetype}:upsb#${col01}:basement server ups' \\
+-W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/cciamupso${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:upso='$rrddirectory/cciamupso.rrd:power:LAST \\
+'${linetype}:upso#${col01}:office server ups' \\
+-W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/cciamofficedesk${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:officedesk='$rrddirectory/cciamofficedesk.rrd:power:LAST \\
+'${linetype}:officedesk#${col01}:office desk' \\
+-W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/cciamtoaster${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:toaster='$rrddirectory/cciamtoaster.rrd:power:LAST \\
+'${linetype}:toaster#${col01}:toaster' \\
+-W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/cciamkettle${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:kettle='$rrddirectory/cciamkettle.rrd:power:LAST \\
+'${linetype}:kettle#${col01}:kettle' \\
+-W "${datestamp}" -t "electricity consumption"`;
+
 $output = `rrdtool graph $graphdirectory/waterpressure${filename}.png -a PNG -y 0.1:1 --vertical-label "bar" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:pressure='$rrddirectory/waterpressure.rrd:pres:LAST '${linetype}:pressure#${col01}:water pressure' -W "${datestamp}" -t "water pressure in central heating system"`;
 
 $output = `rrdtool graph $graphdirectory/ionisationvolts${filename}.png -a PNG --vertical-label "volts/modulation percentage" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST '${linetype}:ion#${col01}:flame sensor ionisation volts' '${linetype}:modtd#${col02}:desired modulation' -W "${datestamp}" -t "boiler flame detection (ionisation sensor)" `;
