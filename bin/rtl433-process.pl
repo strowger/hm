@@ -132,8 +132,8 @@ while (<STDIN>)
 # 1314 = iam basement ups
 # 2829 = iam office desk 10bar
 # 3879 = office ups
-# 2017 = toaster
-# 4034 = kettle
+# 2071 = toaster
+# 4023 = kettle
       if ( defined $ccdevid )
       {
         $ccpower = $line[2];
