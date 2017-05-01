@@ -125,15 +125,16 @@ while (<STDIN>)
 # they seem set randomly 
 # 0    = optical transmitter on whole house
 # 77   = clamp transmitter on car charger
+# 2267 = clamp transmitter on central heating
 # 921  = iam washing machine
 # 1971 = iam dryer
 # 3037 = iam fridge
 # 3214 = iam dishwasher
 # 1314 = iam basement ups
 # 2829 = iam office desk 10bar
-# 3879 = office ups
-# 2071 = toaster
-# 4023 = kettle
+# 3879 = iam office ups
+# 2071 = iam toaster
+# 4023 = iam kettle
       if ( defined $ccdevid )
       {
         $ccpower = $line[2];
@@ -182,6 +183,28 @@ while (<STDIN>)
             print "$linetime clamp sensor power $ccpower watts\n";
           }
         }
+
+        if ( $ccdevid == 2267 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/ccclampwattsheating.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCCLAMP "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime clamp sensor heating power $ccpower watts\n";
+          }
+        }
+
 
         if ( $ccdevid == 921 )
         {

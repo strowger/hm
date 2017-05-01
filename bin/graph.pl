@@ -79,6 +79,7 @@ $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:
 'DEF:dwasher='$rrddirectory/cciamdwasher.rrd:power:LAST \\
 'DEF:upsb='$rrddirectory/cciamupsb.rrd:power:LAST \\
 'DEF:officedesk='$rrddirectory/cciamofficedesk.rrd:power:LAST \\
+'DEF:heating='$rrddirectory/ccclampwattsheating.rrd:power:LAST \\
 'DEF:upso='$rrddirectory/cciamupso.rrd:power:LAST \\
 'DEF:toaster='$rrddirectory/cciamtoaster.rrd:power:LAST \\
 'DEF:kettle='$rrddirectory/cciamkettle.rrd:power:LAST \\
@@ -86,6 +87,7 @@ $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:
 'AREA:upsb#${col01}:basement server ups' \\
 'AREA:upso#${col02}:office ups':STACK \\
 'AREA:officedesk#${col03}:office desk':STACK \\
+'AREA:heating#${col10}:central heating':STACK \\
 'AREA:car#${col04}:car charger':STACK \\
 'AREA:fridge#${col05}:fridge':STACK \\
 'AREA:wash#${col06}:washing machine':STACK \\
@@ -96,6 +98,8 @@ $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:
 -W "${datestamp}" -t "electricity consumption"`;
 
 $output = `rrdtool graph $graphdirectory/ccclampwattscar${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:car='$rrddirectory/ccclampwattscar.rrd:power:LAST '${linetype}:car#${col01}:car charger' -W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/ccclampwattsheating${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:heating='$rrddirectory/ccclampwattsheating.rrd:power:LAST '${linetype}:heating#${col01}:central heating' -W "${datestamp}" -t "electricity consumption"`;
 
 $output = `rrdtool graph $graphdirectory/cciamwasher${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
 'DEF:wash='$rrddirectory/cciamwasher.rrd:power:LAST \\

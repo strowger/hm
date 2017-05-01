@@ -96,6 +96,21 @@ rrdtool create ccopticount.rrd --start 1434700000 --step 60 \
 DS:power:COUNTER:120:0:1000 \
 RRA:LAST:0.5:1:15811200
 
+# 20170501 additional clamp meter on the central heating
+
+rrdtool create ccclampwattsheating.rrd --start 1493000000 --step 60 \
+DS:power:GAUGE:120:0:10000 \
+RRA:LAST:0.5:1:15811200 \
+RRA:AVERAGE:0.1:1440:10980 \
+RRA:AVERAGE:0.1:10080:1569 \
+RRA:AVERAGE:0.1:40320:393 \
+RRA:MIN:0.1:1440:10980 \
+RRA:MIN:0.1:10080:1569 \
+RRA:MIN:0.1:40320:393 \
+RRA:MAX:0.1:1440:10980 \
+RRA:MAX:0.1:10080:1569 \
+RRA:MAX:0.1:40320:393
+
 # 20170422 currentcost individual appliance monitors
 
 rrdtool create cciamwasher.rrd --start 1492800000 --step 60 \
