@@ -13,7 +13,7 @@ no warnings 'once';
 $powerprice = 8.5;
 $logdirectory="/data/hm/log";
 $leafspydirectory="/data/hm/leaf";
-$chargerlog="rtl433-ccclamp.log";
+$chargerlog="rtl433-ccclampcar.log";
 
 
 $lockfile="/tmp/leaf-dailystats.lock";
