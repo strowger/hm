@@ -25,7 +25,8 @@ $logdirectory="/data/hm/log";
 $logfile="rtl433-process.log";
 
 $logccopti="rtl433-ccoptical.log";
-$logccclamp="rtl433-ccclamp.log";
+$logccclampcar="rtl433-ccclampcar.log";
+$logccclampheat="rtl433-ccclampheat.log";
 $logcciamdryer="rtl433-cciamdryer.log";
 $logcciamwasher="rtl433-cciamwasher.log";
 $logcciamfridge="rtl433-cciamfridge.log";
@@ -46,7 +47,8 @@ open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
 print LOGFILE "starting rtl433-process.pl at $timestamp\n";
 
 open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
-open CCCLAMP, ">>", "$logdirectory/$logccclamp" or die $!;
+open CCCLAMPHEAT, ">>", "$logdirectory/$logccclampheat" or die $!;
+open CCCLAMPCAR, ">>", "$logdirectory/$logccclampcar" or die $!;
 open CCIAMDRYER, ">>", "$logdirectory/$logcciamdryer" or die $!;
 open CCIAMWASHER, ">>", "$logdirectory/$logcciamwasher" or die $!;
 open CCIAMFRIDGE, ">>", "$logdirectory/$logcciamfridge" or die $!;
@@ -126,6 +128,7 @@ while (<STDIN>)
 # 0    = optical transmitter on whole house
 # 77   = clamp transmitter on car charger
 # 2267 = clamp transmitter on central heating
+# 1090 = clamp transmitter 20170502 new
 # 921  = iam washing machine
 # 1971 = iam dryer
 # 3037 = iam fridge
@@ -175,7 +178,7 @@ while (<STDIN>)
             }
             else
             {
-              print CCCLAMP "$linetime $ccpower\n";
+              print CCCLAMPCAR "$linetime $ccpower\n";
             }
           }
           if ($modeswitch eq "dump")
@@ -196,7 +199,7 @@ while (<STDIN>)
             }
             else
             {
-              print CCCLAMP "$linetime $ccpower\n";
+              print CCCLAMPHEAT "$linetime $ccpower\n";
             }
           }
           if ($modeswitch eq "dump")
