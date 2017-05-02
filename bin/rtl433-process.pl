@@ -47,7 +47,7 @@ open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;
 
 print LOGFILE "starting rtl433-process.pl at $timestamp\n";
 
-open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
+#open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
 open CCCLAMPHEAT, ">>", "$logdirectory/$logccclampheat" or die $!;
 open CCCLAMPCAR, ">>", "$logdirectory/$logccclampcar" or die $!;
 open CCCLAMPCOOK, ">>", "$logdirectory/$logccclampcook" or die $!;
