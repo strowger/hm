@@ -27,6 +27,7 @@ $logfile="rtl433-process.log";
 $logccopti="rtl433-ccoptical.log";
 $logccclampcar="rtl433-ccclampcar.log";
 $logccclampheat="rtl433-ccclampheat.log";
+$logccclampcook="rtl433-ccclampcook.log";
 $logcciamdryer="rtl433-cciamdryer.log";
 $logcciamwasher="rtl433-cciamwasher.log";
 $logcciamfridge="rtl433-cciamfridge.log";
@@ -49,6 +50,7 @@ print LOGFILE "starting rtl433-process.pl at $timestamp\n";
 open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
 open CCCLAMPHEAT, ">>", "$logdirectory/$logccclampheat" or die $!;
 open CCCLAMPCAR, ">>", "$logdirectory/$logccclampcar" or die $!;
+open CCCLAMPCOOK, ">>", "$logdirectory/$logccclampcook" or die $!;
 open CCIAMDRYER, ">>", "$logdirectory/$logcciamdryer" or die $!;
 open CCIAMWASHER, ">>", "$logdirectory/$logcciamwasher" or die $!;
 open CCIAMFRIDGE, ">>", "$logdirectory/$logcciamfridge" or die $!;
@@ -128,7 +130,7 @@ while (<STDIN>)
 # 0    = optical transmitter on whole house
 # 77   = clamp transmitter on car charger
 # 2267 = clamp transmitter on central heating
-# 1090 = clamp transmitter 20170502 new
+# 1090 = clamp transmitter on cooker
 # 921  = iam washing machine
 # 1971 = iam dryer
 # 3037 = iam fridge
@@ -183,7 +185,7 @@ while (<STDIN>)
           }
           if ($modeswitch eq "dump")
           {
-            print "$linetime clamp sensor power $ccpower watts\n";
+            print "$linetime clamp sensor car power $ccpower watts\n";
           }
         }
 
@@ -205,6 +207,27 @@ while (<STDIN>)
           if ($modeswitch eq "dump")
           {
             print "$linetime clamp sensor heating power $ccpower watts\n";
+          }
+        }
+
+        if ( $ccdevid == 1090 )
+        {
+          if ($modeswitch eq "process")
+          {
+            $output = `rrdtool update $rrddirectory/ccclampwattscooker.rrd $linetime:$ccpower`;
+            if (length $output)
+            {
+              chomp $output;
+              print LOGFILE "got error $output...";
+            }
+            else
+            {
+              print CCCLAMPCOOK "$linetime $ccpower\n";
+            }
+          }
+          if ($modeswitch eq "dump")
+          {
+            print "$linetime clamp sensor cooker power $ccpower watts\n";
           }
         }
 
@@ -418,5 +441,3 @@ $runtime = $endtime - $starttime;
 print LOGFILE "exiting successfully after $linecount lines in $runtime seconds \n\n";
 
 close LOGFILE;
-close CCOPTI;
-close CCCLAMP;

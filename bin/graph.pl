@@ -50,6 +50,7 @@ $col09="00FFFF"; # lightish blue
 $col10="2222FF"; # darkish blue 
 $col11="FF3300"; # brightish orange
 $col12="000000"; # black
+$col13="A30059"; # darker green
 
 $linetype="LINE2";
 # do thin lines if we're graphing months or years
@@ -80,6 +81,7 @@ $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:
 'DEF:upsb='$rrddirectory/cciamupsb.rrd:power:LAST \\
 'DEF:officedesk='$rrddirectory/cciamofficedesk.rrd:power:LAST \\
 'DEF:heating='$rrddirectory/ccclampwattsheating.rrd:power:LAST \\
+'DEF:cooker='$rrddirectory/ccclampwattscooker.rrd:power:LAST \\
 'DEF:upso='$rrddirectory/cciamupso.rrd:power:LAST \\
 'DEF:toaster='$rrddirectory/cciamtoaster.rrd:power:LAST \\
 'DEF:kettle='$rrddirectory/cciamkettle.rrd:power:LAST \\
@@ -95,11 +97,14 @@ $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:
 'AREA:dwasher#${col08}:dishwasher':STACK \\
 'AREA:toaster#${col09}:toaster':STACK \\
 'AREA:kettle#${col11}:kettle':STACK \\
+'AREA:cooker#${col13}:cooker':STACK \\
 -W "${datestamp}" -t "electricity consumption"`;
 
 $output = `rrdtool graph $graphdirectory/ccclampwattscar${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:car='$rrddirectory/ccclampwattscar.rrd:power:LAST '${linetype}:car#${col01}:car charger' -W "${datestamp}" -t "electricity consumption"`;
 
 $output = `rrdtool graph $graphdirectory/ccclampwattsheating${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:heating='$rrddirectory/ccclampwattsheating.rrd:power:LAST '${linetype}:heating#${col01}:central heating' -W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/ccclampwattscooker${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:cooker='$rrddirectory/ccclampwattscooker.rrd:power:LAST '${linetype}:cooker#${col01}:cooker' -W "${datestamp}" -t "electricity consumption"`;
 
 $output = `rrdtool graph $graphdirectory/cciamwasher${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
 'DEF:wash='$rrddirectory/cciamwasher.rrd:power:LAST \\
