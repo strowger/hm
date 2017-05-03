@@ -14,7 +14,8 @@ $powerprice = 8.5;
 $logdirectory="/data/hm/log";
 $leafspydirectory="/data/hm/leaf";
 $chargerlog="rtl433-ccclampcar.log";
-
+# where charges away from home are recorded (manually)
+$chargesdir="/data/hm/leaf/charges";
 
 $lockfile="/tmp/leaf-dailystats.lock";
 
@@ -202,10 +203,26 @@ else
   $odom = $odokmday * 0.621371;
   $odom = sprintf("%.2f", $odom);
   $gids = $gidsstart - $gidsend;
+  # charging away from home - manually-added data
+  $chargingfilename = $lastyear . $lastmon . $lastmday;
+  $kwhaway=0;
+  if ( -f "$chargesdir/$chargingfilename")
+  {
+    $kwhaway=`cat $chargesdir/$chargingfilename`;
+    chomp $kwhaway;
+    # regex: file must contain only: optional digit/s, optional dot, optional digit/s
+    if ($kwhaway =~ /^\d*\.?\d*$/)
+    {
+      print "car was charged away from home taking $kwhaway kWh\n";
+      $powerboth = $kwhaway + $powertotal;
+      print "power input for day $powertotal at home, $kwhaway away, total $powerboth\n";
+    }
+    else { print "malformed away-from-home charging data for day\n"; }
+  }
   $kwhcar = $gids * 80 / 1000;
   $kwhcar = sprintf("%.2f", $kwhcar);
   print "car logged $kwhcar kWh from battery for $odom miles";
-  if ( $powertotal > 0)
+  if (( $powertotal > 0) && ( ($powertotal - $preheatpowertotal) > 0))
   {
     $mpkwh = $odom / $powertotal;
     $mpkwh = sprintf("%.2f", $mpkwh);
