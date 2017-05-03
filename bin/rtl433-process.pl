@@ -24,7 +24,7 @@ $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="rtl433-process.log";
 
-$logccopti="rtl433-ccoptical.log";
+#$logccopti="rtl433-ccoptical.log";
 $logccclampcar="rtl433-ccclampcar.log";
 $logccclampheat="rtl433-ccclampheat.log";
 $logccclampcook="rtl433-ccclampcook.log";
@@ -38,14 +38,24 @@ $logcciamupso="rtl433-cciamupso.log";
 $logcciamtoaster="rtl433-cciamtoaster.log";
 $logcciamkettle="rtl433-cciamkettle.log";
 
-
 $timestamp = time();                                                                                  
 $starttime = $timestamp;
 
-
 open LOGFILE, ">>", "$logdirectory/$logfile" or die $!;                                               
-
 print LOGFILE "starting rtl433-process.pl at $timestamp\n";
+
+$timelastccclampcar=`tail -1 $logdirectory/$logccclampcar|awk '{print \$1}'`;
+$timelastccclampheat=`tail -1 $logdirectory/$logccclampheat|awk '{print \$1}'`;
+$timelastccclampcook=`tail -1 $logdirectory/$logccclampcook|awk '{print \$1}'`;
+$timelastcciamdryer=`tail -1 $logdirectory/$logcciamdryer|awk '{print \$1}'`;
+$timelastcciamwasher=`tail -1 $logdirectory/$logcciamwasher|awk '{print \$1}'`;
+$timelastcciamfridge=`tail -1 $logdirectory/$logcciamfridge|awk '{print \$1}'`;
+$timelastcciamdwasher=`tail -1 $logdirectory/$logcciamdwasher|awk '{print \$1}'`;
+$timelastcciamupsb=`tail -1 $logdirectory/$logcciamupsb|awk '{print \$1}'`;
+$timelastcciamofficedesk=`tail -1 $logdirectory/$logcciamofficedesk|awk '{print \$1}'`;
+$timelastcciamupso=`tail -1 $logdirectory/$logcciamupso|awk '{print \$1}'`;
+$timelastcciamtoaster=`tail -1 $logdirectory/$logcciamtoaster|awk '{print \$1}'`;
+$timelastcciamkettle=`tail -1 $logdirectory/$logcciamkettle|awk '{print \$1}'`;
 
 #open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
 open CCCLAMPHEAT, ">>", "$logdirectory/$logccclampheat" or die $!;
@@ -145,8 +155,9 @@ while (<STDIN>)
         $ccpower = $line[2];
         if ( $ccdevid == 0 )
         {
-          if ($modeswitch eq "process")
-          {
+#          if (($modeswitch eq "process") && ($linetime > $timelastccopti))
+#          {
+#            $timelastccopti = $linetime;
             ## for now we're not rrd updating based on the optical sensor, but
             ## instead letting the cc base unit continue to do it
             # $output = `rrdtool update $rrddirectory/ccoptiwatts.rrd $linetime:$ccpower`;
@@ -158,268 +169,191 @@ while (<STDIN>)
             # }
             # ...log to a sensible logfile so we can bin off the rtl433 logs
             # else
-            # {
-            #   print CCOPTI "$linetime $ccpower\n";
-            # }
-          }
+            #   { #   print CCOPTI "$linetime $ccpower\n"; # }
+#          }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime optical sensor power $ccpower watts\n";
-          }
+            { print "$linetime optical sensor power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 77 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastccclampcar))
           {
+            $timelastccclampcar = $linetime;
             $output = `rrdtool update $rrddirectory/ccclampwattscar.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCCLAMPCAR "$linetime $ccpower\n";
-            }
+              { print CCCLAMPCAR "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime clamp sensor car power $ccpower watts\n";
-          }
+            { print "$linetime clamp sensor car power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 2267 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastccclampheat))
           {
+            $timelastccclampheat = $linetime;
             $output = `rrdtool update $rrddirectory/ccclampwattsheating.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCCLAMPHEAT "$linetime $ccpower\n";
-            }
+              { print CCCLAMPHEAT "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime clamp sensor heating power $ccpower watts\n";
-          }
+            { print "$linetime clamp sensor heating power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 1090 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastccclampcook))
           {
+            $timelastccclampcook = $linetime;
             $output = `rrdtool update $rrddirectory/ccclampwattscooker.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+             { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCCLAMPCOOK "$linetime $ccpower\n";
-            }
+              { print CCCLAMPCOOK "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime clamp sensor cooker power $ccpower watts\n";
-          }
+            { print "$linetime clamp sensor cooker power $ccpower watts\n"; }
         }
 
 
         if ( $ccdevid == 921 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamwasher))
           {
+            $timelastcciamwasher = $linetime;
             $output = `rrdtool update $rrddirectory/cciamwasher.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCIAMWASHER "$linetime $ccpower\n";
-            }
+              { print CCIAMWASHER "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime iam washer sensor power $ccpower watts\n";
-          }
+            { print "$linetime iam washer sensor power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 1971 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamdryer))
           {
+            $timelastcciamdryer = $linetime;
             $output = `rrdtool update $rrddirectory/cciamdryer.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCIAMDRYER "$linetime $ccpower\n";
-            }
+              { print CCIAMDRYER "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime iam dryer sensor power $ccpower watts\n";
-          }
+            { print "$linetime iam dryer sensor power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 3037 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamfridge))
           {
+            $timelastcciamfridge = $linetime;
             $output = `rrdtool update $rrddirectory/cciamfridge.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCIAMFRIDGE "$linetime $ccpower\n";
-            }
+              { print CCIAMFRIDGE "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime iam fridge sensor power $ccpower watts\n";
-          }
+            { print "$linetime iam fridge sensor power $ccpower watts\n"; }
         }
-
 
         if ( $ccdevid == 3214 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamdwasher))
           {
+            $timelastcciamdwasher = $linetime;
             $output = `rrdtool update $rrddirectory/cciamdwasher.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCIAMDWASHER "$linetime $ccpower\n";
-            }
+              { print CCIAMDWASHER "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime iam dishwasher sensor power $ccpower watts\n";
-          }
+            { print "$linetime iam dishwasher sensor power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 1314 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamupsb))
           {
+            $timelastcciamupsb = $linetime;
             $output = `rrdtool update $rrddirectory/cciamupsb.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCIAMUPSB "$linetime $ccpower\n";
-            }
+              { print CCIAMUPSB "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime iam basement ups sensor power $ccpower watts\n";
-          }
+            { print "$linetime iam basement ups sensor power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 2829 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamofficedesk))
           {
+            $timelastcciamofficedesk = $linetime;
             $output = `rrdtool update $rrddirectory/cciamofficedesk.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCIAMOFFICEDESK "$linetime $ccpower\n";
-            }
+              { print CCIAMOFFICEDESK "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime iam office desk sensor power $ccpower watts\n";
-          }
+            { print "$linetime iam office desk sensor power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 3879 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamupso))
           {
+            $timelastcciamupso = $linetime;
             $output = `rrdtool update $rrddirectory/cciamupso.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCIAMUPSO "$linetime $ccpower\n";
-            }
+              { print CCIAMUPSO "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime iam office ups sensor power $ccpower watts\n";
-          }
+            { print "$linetime iam office ups sensor power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 2071 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamtoaster))
           {
+            $timelastcciamtoaster = $linetime;
             $output = `rrdtool update $rrddirectory/cciamtoaster.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCIAMTOASTER "$linetime $ccpower\n";
-            }
+              { print CCIAMTOASTER "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime iam toaster sensor power $ccpower watts\n";
-          }
+            { print "$linetime iam toaster sensor power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 4023 )
         {
-          if ($modeswitch eq "process")
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamkettle))
           {
+            $timelastcciamkettle = $linetime;
             $output = `rrdtool update $rrddirectory/cciamkettle.rrd $linetime:$ccpower`;
             if (length $output)
-            {
-              chomp $output;
-              print LOGFILE "got error $output...";
-            }
+              { chomp $output; print LOGFILE "got error $output..."; }
             else
-            {
-              print CCIAMKETTLE "$linetime $ccpower\n";
-            }
+              { print CCIAMKETTLE "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-          {
-            print "$linetime iam kettle sensor power $ccpower watts\n";
-          }
+            { print "$linetime iam kettle sensor power $ccpower watts\n"; }
         }
 
         # we don't care about subsequent "Power x:" lines as they're all zero
