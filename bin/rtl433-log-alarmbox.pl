@@ -15,7 +15,7 @@ $logdirectory="/data/hm/rtl";
 $lockfile="/tmp/rtl433-log.lock";
 $rtl433="/usr/local/bin/rtl_433";
 # prepended to logfile names
-$location="**FIXME**";
+$location="alarmbox";
 # -G: enable all protocols
 # -U: use utc for all timestamps
 # -T x: run for x seconds - shouldn't be too short as there's a startup delay
