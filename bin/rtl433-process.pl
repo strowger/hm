@@ -141,6 +141,8 @@ while (<STDIN>)
 # 77   = clamp transmitter on car charger
 # 2267 = clamp transmitter on central heating
 # 1090 = clamp transmitter on cooker
+# 1048 = clamp on ch, reads wrong, not graphed
+# 2232 = clamp not graphed (yet)
 # 921  = iam washing machine
 # 1971 = iam dryer
 # 3037 = iam fridge
