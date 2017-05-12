@@ -291,6 +291,7 @@ if ($lastvalage > 1200)
 # disk space - assumes we're just using /root
 # from df loses a space
 $diskpercentused = `df -Ph|grep root|cut -d " " -f 12 |sed "s/\%//"`;
+chomp $diskpercentused;
 if ($diskpercentused > 85)
   { print "Disk utilisation ${diskpercentused}%"; }
 
