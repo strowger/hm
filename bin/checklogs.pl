@@ -15,6 +15,7 @@ $logdirectory="/data/hm/log";
 $owerrorlog="1wireread-errors.log";
 $routererrorlog="router-errors.log";
 $alarmsyncerrorlog="alarmbox-rsync-errors.log";
+$officesyncerrorlog="office-rsync-errors.log";
 $leaferrorlog="leaf-errors.log";
 $lockfile="/tmp/checklogs.lock";
 $leafspylog="leafspy.log";
@@ -254,6 +255,29 @@ if (-f "$logdirectory/$alarmsyncerrorlog" )
   }
   unlink "$logdirectory/$alarmsyncerrorlog";
 }
+
+
+# as above for rsync errors with the office rpi3 box 
+# one failure generates 3 error lines
+if (-f "$logdirectory/$officesyncerrorlog" )
+{
+  $errorlinecount = 0;
+  @errorlines = ();
+  open AWRSLOG, "<", "$logdirectory/$officesyncerrorlog" or die $!;
+  foreach $errorline (<AWRSLOG>)
+  {
+    $errorlinecount++;
+    push(@errorlines, $errorline);
+  }
+  close AWRSLOG;
+  if ($errorlinecount > 5)
+  {
+    print "More than 5 log lines from office rsync cron job:\n";
+    print "@errorlines";
+  }
+  unlink "$logdirectory/$officesyncerrorlog";
+}
+
 
 # same as above but for nissan leaf monitoring errors - we only poll 4 times
 # per hour so for now we care if we get even a single one - later we'll care 
