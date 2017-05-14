@@ -278,6 +278,21 @@ if (-f "$logdirectory/$officesyncerrorlog" )
   unlink "$logdirectory/$officesyncerrorlog";
 }
 
+@rtlcollectors = ("alarmbox", "office");
+foreach $collector (@rtlcollectors)
+{
+  $timestamp = time();
+  $collectorlast = `ls -tr /data/hm/rtl-out/${collector}*log|tail -1`;
+  chomp $collectorlast;
+  # nb - this is giving us the time created *here* not on the collector box
+  $collectortime = (stat("$collectorlast"))[9];
+#  print "collector $collector file $collectorlast ctime $collectortime\n";
+  $collectorage = $timestamp - $collectortime;
+  if ( $collectorage > 600 )
+  { 
+    print "rtl433 collector $collector last file is $collectorage secs old\n"; 
+  }
+}
 
 # same as above but for nissan leaf monitoring errors - we only poll 4 times
 # per hour so for now we care if we get even a single one - later we'll care 
