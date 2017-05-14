@@ -287,33 +287,65 @@ foreach $collector (@rtlcollectors)
 }
 
 @cciamdevices = ("upsb", "upso", "officedesk", "fridge", "washer", "dryer", "dwasher", "kettle", "toaster");
-foreach $powerdevice (@cciamdevices)
+foreach $pdev (@cciamdevices)
 {
-  if (-f "$logdirectory/rtl433-cciam$powerdevice.log" )
+  if (-f "$logdirectory/rtl433-cciam$pdev.log" )
   {
-  $timestamp = time();
-  $lastline = `tail -1 $logdirectory/rtl433-cciam$powerdevice.log`;
-  ($lasttime) = split(' ',$lastline);
-  $lastvalage = $timestamp-$lasttime;
-  if ( $lastvalage > 600)
-    { print "power device $powerdevice last read $lastvalage seconds ago\n"; }
+    $timestamp = time();
+    $lastline = `tail -1 $logdirectory/rtl433-cciam$pdev.log`;
+    ($lasttime) = split(' ',$lastline);
+    $lastvalage = $timestamp-$lasttime;
+    if ( $lastvalage > 600)
+      { print "power device $pdev last read $lastvalage seconds ago\n"; }
+    # they tx every 6 seconds so this should catch a minimum of an hour
+    $fileend = `tail -600 $logdirectory/rtl433-cciam$pdev.log`;
+    @fileendar = split ('\n',$fileend);
+    $longgaps = 0;
+    $lasttime = 0;
+    foreach (@fileendar)
+    {
+      ($linetime, $lineval)  = split (' ',$_);
+      # first line of file
+      if ( $lasttime == 0 ) { $lasttime = $linetime; }
+      $interval = $linetime - $lasttime;
+      if ( $interval > 600 ) { $longgaps = $longgaps + 1; }
+      $lasttime = $linetime;
+    }
+    if ( $longgaps > 1 )
+      { print "power device $pdev had $longgaps long gaps between reads\n"; }
   }
-  else { print "log for power device $powerdevice missing\n"; }
+  else { print "log for power device $pdev missing\n"; }
 }
 
 @ccclampdevices = ("car", "heat", "cook");
-foreach $powerdevice (@ccclampdevices)
+foreach $pdev (@ccclampdevices)
 {
-  if (-f "$logdirectory/rtl433-ccclamp$powerdevice.log" )
+  if (-f "$logdirectory/rtl433-ccclamp$pdev.log" )
   {
-  $timestamp = time();
-  $lastline = `tail -1 $logdirectory/rtl433-ccclamp$powerdevice.log`;
-  ($lasttime) = split(' ',$lastline);
-  $lastvalage = $timestamp-$lasttime;
-  if ( $lastvalage > 600)
-    { print "power device $powerdevice last read $lastvalage seconds ago\n"; }
+    $timestamp = time();
+    $lastline = `tail -1 $logdirectory/rtl433-ccclamp$pdev.log`;
+    ($lasttime) = split(' ',$lastline);
+    $lastvalage = $timestamp-$lasttime;
+    if ( $lastvalage > 600)
+      { print "power device $pdev last read $lastvalage seconds ago\n"; }
+    # they tx every 6 seconds so this should catch a minimum of an hour
+    $fileend = `tail -600 $logdirectory/rtl433-ccclamp$pdev.log`;
+    @fileendar = split ('\n',$fileend);
+    $longgaps = 0;
+    $lasttime = 0;
+    foreach (@fileendar)
+    {
+      ($linetime, $lineval)  = split (' ',$_);
+      # first line of file
+      if ( $lasttime == 0 ) { $lasttime = $linetime; }
+      $interval = $linetime - $lasttime;
+      if ( $interval > 600 ) { $longgaps = $longgaps + 1; }
+      $lasttime = $linetime;
+    }
+    if ( $longgaps > 1 )
+      { print "power device $pdev had $longgaps long gaps between reads\n"; }
   }
-  else { print "log for power device $powerdevice missing\n"; }
+  else { print "log for power device $pdev missing\n"; }
 }
 
 
