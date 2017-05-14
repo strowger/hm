@@ -159,14 +159,14 @@ $lastline = `tail -1 $logdirectory/power.log`;
 ($lasttime) = split(' ',$lastline);                       
 $lastvalage = $timestamp-$lasttime;                                         
 if ($lastvalage > 600)                                                       
-{ print "currentcost hasn't output for $lastvalage seconds\n"; }                                                                           
+  { print "currentcost hasn't output for $lastvalage seconds\n"; }                                                                           
 # check for 0W values which indicate a currentcost sensor fail of some sort
 $cclastzero = `grep \\ 0W $logdirectory/power.log|tail -1`;
 ($lasttime) = split(' ',$cclastzero);
 $lastvalage = $timestamp-$lasttime;                   
 ##print "currentcost last read zero $lastvalage secs ago\n";                          
 if ($lastvalage < 3700)
-{ print "currentcost has read zero watts within last hour\n"; }
+  { print "currentcost has read zero watts within last hour\n"; }
 
 # whinge if one of the sensors hasn't read for an hour
 
@@ -175,22 +175,14 @@ $cclastopti = `grep opti $logdirectory/power.log|tail -1`;
 $lastvalage = $timestamp-$lasttime;
 ##print "currentcost optical sensor last read $lastvalage secs ago\n";
 if ($lastvalage > 3700)                                                         
-{ print "currentcost optical sensor hasn't read for an hour\n"; } 
-
-
-#$cclastclamp = `grep clamp $logdirectory/power.log|tail -1`;                    
-#($lasttime) = split(' ',$cclastclamp);                                          
-#$lastvalage = $timestamp-$lasttime;                                             
-###print "currentcost clamp sensor last read $lastvalage secs ago\n";  
-#if ($lastvalage > 3700)                                                         
-#{ print "currentcost clamp sensor hasn't read for an hour\n"; }
+  { print "currentcost optical sensor hasn't read for an hour\n"; } 
 
 # check the kitchen air sensor is logging
 $lastline = `tail -1 $logdirectory/airkitchen-co2.log`;
 ($lasttime) = split(' ',$lastline);
 $lastvalage = $timestamp-$lasttime;
 if ($lastvalage > 600)
-{ print "kitchen air sensor hasn't output for $lastvalage seconds\n"; }
+  { print "kitchen air sensor hasn't output for $lastvalage seconds\n"; }
 
 # if there are no owfs errors then that's all good, no need to warn 
 # that the file isn't there
@@ -293,6 +285,37 @@ foreach $collector (@rtlcollectors)
     print "rtl433 collector $collector last file is $collectorage secs old\n"; 
   }
 }
+
+@cciamdevices = ("upsb", "upso", "officedesk", "fridge", "washer", "dryer", "dwasher", "kettle", "toaster");
+foreach $powerdevice (@cciamdevices)
+{
+  if (-f "$logdirectory/rtl433-cciam$powerdevice.log" )
+  {
+  $timestamp = time();
+  $lastline = `tail -1 $logdirectory/rtl433-cciam$powerdevice.log`;
+  ($lasttime) = split(' ',$lastline);
+  $lastvalage = $timestamp-$lasttime;
+  if ( $lastvalage > 600)
+    { print "power device $powerdevice last read $lastvalage seconds ago\n"; }
+  }
+  else { print "log for power device $powerdevice missing\n"; }
+}
+
+@ccclampdevices = ("car", "heat", "cook");
+foreach $powerdevice (@ccclampdevices)
+{
+  if (-f "$logdirectory/rtl433-ccclamp$powerdevice.log" )
+  {
+  $timestamp = time();
+  $lastline = `tail -1 $logdirectory/rtl433-ccclamp$powerdevice.log`;
+  ($lasttime) = split(' ',$lastline);
+  $lastvalage = $timestamp-$lasttime;
+  if ( $lastvalage > 600)
+    { print "power device $powerdevice last read $lastvalage seconds ago\n"; }
+  }
+  else { print "log for power device $powerdevice missing\n"; }
+}
+
 
 # same as above but for nissan leaf monitoring errors - we only poll 4 times
 # per hour so for now we care if we get even a single one - later we'll care 
