@@ -139,10 +139,11 @@ while (<STDIN>)
 # they seem set randomly 
 # 0    = optical transmitter on whole house
 # 77   = clamp transmitter on car charger
-# 2267 = clamp transmitter on central heating
+# 996  = clamp transmitter on heating - needs correction factor applied
+# 2267 = clamp - went to euan
 # 1090 = clamp transmitter on cooker
-# 1048 = clamp on ch, reads wrong, not graphed
-# 2232 = clamp not graphed (yet)
+# 1048 = clamp on ch/SPARE
+# 2232 = clamp - went to euan
 # 921  = iam washing machine
 # 1971 = iam dryer
 # 3037 = iam fridge
@@ -192,11 +193,13 @@ while (<STDIN>)
             { print "$linetime clamp sensor car power $ccpower watts\n"; }
         }
 
-        if ( $ccdevid == 2267 )
+        if ( $ccdevid == 996 )
         {
           if (($modeswitch eq "process") && ($linetime > $timelastccclampheat))
           {
             $timelastccclampheat = $linetime;
+            # this is very inaccurate - rough correction is * 1.3
+            $ccpower = $ccpower * 1.3;
             $output = `rrdtool update $rrddirectory/ccclampwattsheating.rrd $linetime:$ccpower`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
@@ -204,7 +207,7 @@ while (<STDIN>)
               { print CCCLAMPHEAT "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-            { print "$linetime clamp sensor heating power $ccpower watts\n"; }
+            { print "$linetime clamp sensor heating power $ccpower ADJUSTED watts\n"; }
         }
 
         if ( $ccdevid == 1090 )
