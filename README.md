@@ -53,6 +53,9 @@ rtl433 uses an rtl-sdr to receive 433mhz broadcasts. initially this receives bro
 rtl433-log.pl
 Runs rtl433 and collects its output in a series of logfiles for later parsing. Intended to be run on a separate box in a remote location, and logs copied back for parsing.
 
+rtl433-watchdog.pl
+Runs from cron every few minutes and restarts rtl433 process spawned by the above, if it has frozen
+
 rtl433-logsync.sh
 Copies logs from the above script on a separate box, onto a server for processing. Uses rsync. Intended to be run on the server from cron at frequent intervals.
 

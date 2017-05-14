@@ -19,6 +19,7 @@ $location="**FIXME**";
 # -G: enable all protocols
 # -U: use utc for all timestamps
 # -T x: run for x seconds - shouldn't be too short as there's a startup delay
+# ** if these options change, the rtl433-watchdog.pl script must be updated**
 $rtloptions="-G -U -T 60";
 
 
