@@ -28,10 +28,12 @@ $timestamp=time();
 $watchctime=(stat("$templogdirectory/$watchlog"))[9];
 $watchage = $timestamp - $watchctime;
 
+open LOGFILE, ">>", "/tmp/rtl-watchdog.log" or die $!;
+
+
 if ( $watchage > 80 )
 {
   # a temporary log file
-  open LOGFILE, ">>", "/tmp/rtl-watchdog.log" or die $!;
   print LOGFILE "$timestamp found $watchlog with age $watchage...";
   # if the options used in the rtl433-log script change, have to update this
   $rtlpid = `ps x|grep "/[u]sr/local/bin/rtl_433 -G -U -T 60"|grep -v \\>\\>|awk '{print \$1}'`;
@@ -46,8 +48,10 @@ if ( $watchage > 80 )
   {
     print LOGFILE "failed to find rtl433 pid\n";
   }
-  close LOGFILE;
 }
+else { print LOGFILE "$timestamp ok\n"; }
 
+
+close LOGFILE;
 close LOCKFILE;
 unlink $lockfile;
