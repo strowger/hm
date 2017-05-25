@@ -73,6 +73,7 @@ $output = `rrdtool graph $graphdirectory/chtemps${filename}.png -a PNG -u 80 -l 
 
 $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
 'DEF:optical='$rrddirectory/ccoptiwatts.rrd:power:LAST \\
+'DEF:clamp='$rrddirectory/ccclampwatts.rrd:power:LAST \\
 'DEF:car='$rrddirectory/ccclampwattscar.rrd:power:LAST \\
 'DEF:wash='$rrddirectory/cciamwasher.rrd:power:LAST \\
 'DEF:dry='$rrddirectory/cciamdryer.rrd:power:LAST \\
@@ -85,7 +86,8 @@ $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:
 'DEF:upso='$rrddirectory/cciamupso.rrd:power:LAST \\
 'DEF:toaster='$rrddirectory/cciamtoaster.rrd:power:LAST \\
 'DEF:kettle='$rrddirectory/cciamkettle.rrd:power:LAST \\
-'${linetype}:optical#${col12}:whole house' \\
+'${linetype}:optical#${col12}:whole house opti' \\
+'${linetype}:clamp#${col12}:whole house clamp':dashes \\
 'AREA:upsb#${col01}:basement server ups' \\
 'AREA:upso#${col02}:office ups':STACK \\
 'AREA:officedesk#${col03}:office desk':STACK \\
