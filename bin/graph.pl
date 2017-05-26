@@ -37,7 +37,7 @@ $graphdirectory="/root/Dropbox/Public/styes-graphs";
 $lockfile="/tmp/graph.lock";
 $datestamp = `date +%F\\ %R\\ %z`;                                                   
 
-# http://html-color-codes.com/
+# http://html-color-codes.com/ and http://paletton.com/
 $col01="CC0033"; # darkish red
 $col02="99CC00"; # putrid green
 $col03="00CC99"; # turquoise
@@ -51,6 +51,7 @@ $col10="2222FF"; # darkish blue
 $col11="FF3300"; # brightish orange
 $col12="000000"; # black
 $col13="A30059"; # darker green
+$col14="602870"; # darker purple
 
 $linetype="LINE2";
 # do thin lines if we're graphing months or years
@@ -86,6 +87,7 @@ $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:
 'DEF:upso='$rrddirectory/cciamupso.rrd:power:LAST \\
 'DEF:toaster='$rrddirectory/cciamtoaster.rrd:power:LAST \\
 'DEF:kettle='$rrddirectory/cciamkettle.rrd:power:LAST \\
+'DEF:towelrail='$rrddirectory/ccclampwattstowelrail.rrd:power:LAST \\
 '${linetype}:optical#${col12}:whole house opti' \\
 '${linetype}:clamp#${col12}:whole house clamp':dashes \\
 'AREA:upsb#${col01}:basement server ups' \\
@@ -100,6 +102,7 @@ $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:
 'AREA:toaster#${col09}:toaster':STACK \\
 'AREA:kettle#${col11}:kettle':STACK \\
 'AREA:cooker#${col13}:cooker':STACK \\
+'AREA:towelrail#${col14}:towel rail':STACK \\
 -W "${datestamp}" -t "electricity consumption"`;
 
 $output = `rrdtool graph $graphdirectory/ccclampwattscar${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:car='$rrddirectory/ccclampwattscar.rrd:power:LAST '${linetype}:car#${col01}:car charger' -W "${datestamp}" -t "electricity consumption"`;
@@ -107,6 +110,8 @@ $output = `rrdtool graph $graphdirectory/ccclampwattscar${filename}.png -a PNG -
 $output = `rrdtool graph $graphdirectory/ccclampwattsheating${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:heating='$rrddirectory/ccclampwattsheating.rrd:power:LAST '${linetype}:heating#${col01}:central heating' -W "${datestamp}" -t "electricity consumption"`;
 
 $output = `rrdtool graph $graphdirectory/ccclampwattscooker${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:cooker='$rrddirectory/ccclampwattscooker.rrd:power:LAST '${linetype}:cooker#${col01}:cooker' -W "${datestamp}" -t "electricity consumption"`;
+
+$output = `rrdtool graph $graphdirectory/ccclampwattstowelrail${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:tr='$rrddirectory/ccclampwattstowelrail.rrd:power:LAST '${linetype}:tr#${col01}:towel rail' -W "${datestamp}" -t "electricity consumption"`;
 
 $output = `rrdtool graph $graphdirectory/cciamwasher${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
 'DEF:wash='$rrddirectory/cciamwasher.rrd:power:LAST \\
