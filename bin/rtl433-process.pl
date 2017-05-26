@@ -30,6 +30,7 @@ $logccclampheat="rtl433-ccclampheat.log";
 #$logccclampheat2="rtl433-ccclampheat2.log";
 #$logccclampheat3="rtl433-ccclampheat3.log";
 $logccclampcook="rtl433-ccclampcook.log";
+$logccclamptowelrail="rtl433-ccclamptowelrail.log";
 $logcciamdryer="rtl433-cciamdryer.log";
 $logcciamwasher="rtl433-cciamwasher.log";
 $logcciamfridge="rtl433-cciamfridge.log";
@@ -55,6 +56,7 @@ $timelastccclampheat=`tail -1 $logdirectory/$logccclampheat|awk '{print \$1}'`;
 #$timelastccclampheat3=`tail -1 $logdirectory/$logccclampheat3|awk '{print \$1}'`;
 
 $timelastccclampcook=`tail -1 $logdirectory/$logccclampcook|awk '{print \$1}'`;
+$timelastccclamptowelrail=`tail -1 $logdirectory/$logccclamptowelrail|awk '{print \$1}'`;
 $timelastcciamdryer=`tail -1 $logdirectory/$logcciamdryer|awk '{print \$1}'`;
 $timelastcciamwasher=`tail -1 $logdirectory/$logcciamwasher|awk '{print \$1}'`;
 $timelastcciamfridge=`tail -1 $logdirectory/$logcciamfridge|awk '{print \$1}'`;
@@ -72,6 +74,7 @@ open CCCLAMPHEAT, ">>", "$logdirectory/$logccclampheat" or die $!;
 #open CCCLAMPHEAT3, ">>", "$logdirectory/$logccclampheat3" or die $!;
 open CCCLAMPCAR, ">>", "$logdirectory/$logccclampcar" or die $!;
 open CCCLAMPCOOK, ">>", "$logdirectory/$logccclampcook" or die $!;
+open CCCLAMPTOWELRAIL, ">>", "$logdirectory/$logccclamptowelrail" or die $!;
 open CCIAMDRYER, ">>", "$logdirectory/$logcciamdryer" or die $!;
 open CCIAMWASHER, ">>", "$logdirectory/$logcciamwasher" or die $!;
 open CCIAMFRIDGE, ">>", "$logdirectory/$logcciamfridge" or die $!;
@@ -157,7 +160,7 @@ while (<STDIN>)
 # 1090 = clamp transmitter on cooker
 # 1048 = clamp on whole house
 # 2232 = clamp - went to euan
-# 3957 - clamp SPARE
+# 3957 - clamp - master bedroom ensuite towel rail
 # 921  = iam washing machine
 # 1971 = iam dryer
 # 3037 = iam fridge
@@ -388,6 +391,23 @@ while (<STDIN>)
           if ($modeswitch eq "dump")
             { print "$linetime iam kettle sensor power $ccpower watts\n"; }
         }
+
+
+        if ( $ccdevid == 3957 )
+        {
+          if (($modeswitch eq "process") && ($linetime > $timelastccclamptowelrail))
+          {
+            $timelastccclamptowelrail = $linetime;
+            $output = `rrdtool update $rrddirectory/ccclampwattstowelrail.rrd $linetime:$ccpower`;
+            if (length $output)
+              { chomp $output; print LOGFILE "got error $output..."; }
+            else
+              { print CCCLAMPTOWELRAIL "$linetime $ccpower\n"; }
+          }
+          if ($modeswitch eq "dump")
+            { print "$linetime clamp towelrail sensor power $ccpower watts\n"; }
+        }
+
 
         # we don't care about subsequent "Power x:" lines as they're all zero
         $midtx = 0;
