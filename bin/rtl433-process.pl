@@ -27,6 +27,8 @@ $logfile="rtl433-process.log";
 #$logccopti="rtl433-ccoptical.log";
 $logccclampcar="rtl433-ccclampcar.log";
 $logccclampheat="rtl433-ccclampheat.log";
+#$logccclampheat2="rtl433-ccclampheat2.log";
+#$logccclampheat3="rtl433-ccclampheat3.log";
 $logccclampcook="rtl433-ccclampcook.log";
 $logcciamdryer="rtl433-cciamdryer.log";
 $logcciamwasher="rtl433-cciamwasher.log";
@@ -37,6 +39,9 @@ $logcciamofficedesk="rtl433-cciamofficedesk.log";
 $logcciamupso="rtl433-cciamupso.log";
 $logcciamtoaster="rtl433-cciamtoaster.log";
 $logcciamkettle="rtl433-cciamkettle.log";
+# this one is an exception - the log is a different name to the rrd
+# the rrd is much older, having been previously updated by power.pl
+$logccclamphouse="rtl433-ccclamphouse.log";
 
 $timestamp = time();                                                                                  
 $starttime = $timestamp;
@@ -46,6 +51,9 @@ print LOGFILE "starting rtl433-process.pl at $timestamp\n";
 
 $timelastccclampcar=`tail -1 $logdirectory/$logccclampcar|awk '{print \$1}'`;
 $timelastccclampheat=`tail -1 $logdirectory/$logccclampheat|awk '{print \$1}'`;
+#$timelastccclampheat2=`tail -1 $logdirectory/$logccclampheat2|awk '{print \$1}'`;
+#$timelastccclampheat3=`tail -1 $logdirectory/$logccclampheat3|awk '{print \$1}'`;
+
 $timelastccclampcook=`tail -1 $logdirectory/$logccclampcook|awk '{print \$1}'`;
 $timelastcciamdryer=`tail -1 $logdirectory/$logcciamdryer|awk '{print \$1}'`;
 $timelastcciamwasher=`tail -1 $logdirectory/$logcciamwasher|awk '{print \$1}'`;
@@ -56,9 +64,12 @@ $timelastcciamofficedesk=`tail -1 $logdirectory/$logcciamofficedesk|awk '{print 
 $timelastcciamupso=`tail -1 $logdirectory/$logcciamupso|awk '{print \$1}'`;
 $timelastcciamtoaster=`tail -1 $logdirectory/$logcciamtoaster|awk '{print \$1}'`;
 $timelastcciamkettle=`tail -1 $logdirectory/$logcciamkettle|awk '{print \$1}'`;
+$timelastccclamphouse=`tail -1 $logdirectory/$logccclamphouse|awk '{print \$1}'`;
 
 #open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
 open CCCLAMPHEAT, ">>", "$logdirectory/$logccclampheat" or die $!;
+#open CCCLAMPHEAT2, ">>", "$logdirectory/$logccclampheat2" or die $!;
+#open CCCLAMPHEAT3, ">>", "$logdirectory/$logccclampheat3" or die $!;
 open CCCLAMPCAR, ">>", "$logdirectory/$logccclampcar" or die $!;
 open CCCLAMPCOOK, ">>", "$logdirectory/$logccclampcook" or die $!;
 open CCIAMDRYER, ">>", "$logdirectory/$logcciamdryer" or die $!;
@@ -70,6 +81,7 @@ open CCIAMOFFICEDESK, ">>", "$logdirectory/$logcciamofficedesk" or die $!;
 open CCIAMUPSO, ">>", "$logdirectory/$logcciamupso" or die $!;
 open CCIAMTOASTER, ">>", "$logdirectory/$logcciamtoaster" or die $!;
 open CCIAMKETTLE, ">>", "$logdirectory/$logcciamkettle" or die $!;
+open CCCLAMPHOUSE, ">>", "$logdirectory/$logccclamphouse" or die $!;
 
 # each received transmission occupies multiple lines in the output, so we have to be stateful
 $midtx = 0;
@@ -139,11 +151,13 @@ while (<STDIN>)
 # they seem set randomly 
 # 0    = optical transmitter on whole house
 # 77   = clamp transmitter on car charger
-# 996  = clamp transmitter on heating - needs correction factor applied
+# 910  = clamp on ch
+# 996  = clamp transmitter SPARE - ?inaccurate
 # 2267 = clamp - went to euan
 # 1090 = clamp transmitter on cooker
-# 1048 = clamp on ch/SPARE
+# 1048 = clamp on whole house
 # 2232 = clamp - went to euan
+# 3957 - clamp SPARE
 # 921  = iam washing machine
 # 1971 = iam dryer
 # 3037 = iam fridge
@@ -178,6 +192,22 @@ while (<STDIN>)
             { print "$linetime optical sensor power $ccpower watts\n"; }
         }
 
+        if ( $ccdevid == 1048 )
+        {
+          if (($modeswitch eq "process") && ($linetime > $timelastccclamphouse))
+          {
+            $timelastccclamphouse = $linetime;
+            # non-standard filename
+            $output = `rrdtool update $rrddirectory/ccclampwatts.rrd $linetime:$ccpower`;
+            if (length $output)
+              { chomp $output; print LOGFILE "got error $output..."; }
+            else
+              { print CCCLAMPHOUSE "$linetime $ccpower\n"; }
+          }
+          if ($modeswitch eq "dump")
+            { print "$linetime clamp sensor whole-house power $ccpower watts\n"; }
+        }
+
         if ( $ccdevid == 77 )
         {
           if (($modeswitch eq "process") && ($linetime > $timelastccclampcar))
@@ -193,13 +223,11 @@ while (<STDIN>)
             { print "$linetime clamp sensor car power $ccpower watts\n"; }
         }
 
-        if ( $ccdevid == 996 )
+        if ( $ccdevid == 910 )
         {
           if (($modeswitch eq "process") && ($linetime > $timelastccclampheat))
           {
             $timelastccclampheat = $linetime;
-            # this is very inaccurate - rough correction is * 1.3
-            $ccpower = $ccpower * 1.3;
             $output = `rrdtool update $rrddirectory/ccclampwattsheating.rrd $linetime:$ccpower`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
@@ -207,7 +235,7 @@ while (<STDIN>)
               { print CCCLAMPHEAT "$linetime $ccpower\n"; }
           }
           if ($modeswitch eq "dump")
-            { print "$linetime clamp sensor heating power $ccpower ADJUSTED watts\n"; }
+            { print "$linetime clamp sensor heating power $ccpower watts\n"; }
         }
 
         if ( $ccdevid == 1090 )
