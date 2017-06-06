@@ -100,7 +100,10 @@ while (<STDIN>)
   # seem to get some blank lines which result in emailed errors
   #  also some lines which don't have a third item - which for all our devices
   #  are bogus - these could just be a check for $line[2] really
-  if (( ! defined $line[0] ) || ( ! defined $line[2])) { next; }
+  if (( ! defined $line[0] ) || ( ! defined $line[2])) 
+  { 
+    if ( $midtx == 0) { next; } 
+  }
   # match on xxxx-xx-xx xx:xx:xx :
   if (( $line[0] =~ /^\d{4}-\d{2}-\d{2}$/) && ($line[1] =~ /^\d{2}:\d{2}:\d{2}$/) && ($line[2] =~ /^:$/))
   {
@@ -122,10 +125,8 @@ while (<STDIN>)
     if ( $line[3] eq "CurrentCost" )
     # there isn't necessarily going to be a line[4] if it's not currentcost
     {
-      if ($line[4] eq "TX")
-      {
-        $txtype = "currentcost";
-      }   
+      if ( $line[4] eq "TX" ) { $txtype = "currentcost-tx"; }
+      if ( $line[4] eq "Counter" ) { $txtype = "currentcost-counter"; }
     }
     else 
     { 
@@ -142,34 +143,38 @@ while (<STDIN>)
     # currentcost tx details
     if (($line[0] eq "Device") && ($line[1] eq "Id:"))
     {
-      if (($midtx == 1) && ($txtype eq "currentcost"))
-      {
-        $ccdevid = $line[2];
-      }
+      # for now, we handle both of these cases the same way 
+      # we're capturing the device id
+      # $ccdevid is the "Device Id" output by the currentcost transmitter
+      # they seem set randomly 
+      # 0    = optical transmitter on whole house
+      # 77   = clamp transmitter on car charger
+      # 910  = clamp on ch
+      # 996  = clamp transmitter SPARE - ?inaccurate
+      # 2267 = clamp - went to euan
+      # 1090 = clamp transmitter on cooker
+      # 1048 = clamp on whole house
+      # 2232 = clamp - went to euan
+      # 3957 - clamp - master bedroom ensuite towel rail
+      # 921  = iam washing machine
+      # 1971 = iam dryer
+      # 3037 = iam fridge
+      # 3214 = iam dishwasher
+      # 1314 = iam basement ups
+      # 2829 = iam office desk 10bar
+      # 3879 = iam office ups
+      # 2071 = iam toaster
+      # 4023 = iam kettle
+      # 1039 = counter - gasmart on gas meter
+      # 2977 = counter - pulse counter on electricity meter led - same physical device as id 0
+      #  but outputting a different frame type with the count in it
+      if (($midtx == 1) && ($txtype eq "currentcost-tx")) { $ccdevid = $line[2]; }
+      if (($midtx == 1) && ($txtype eq "currentcost-counter")) { $ccdevid = $line[2]; }
     }
-    
+
+# this giant "if" statement handles "power" ie "-tx" devices, another below does counters    
     if (($line[0] eq "Power") && ($line[1] eq "0:"))
     {
-# $ccdevid is the "Device Id" output by the currentcost transmitter
-# they seem set randomly 
-# 0    = optical transmitter on whole house
-# 77   = clamp transmitter on car charger
-# 910  = clamp on ch
-# 996  = clamp transmitter SPARE - ?inaccurate
-# 2267 = clamp - went to euan
-# 1090 = clamp transmitter on cooker
-# 1048 = clamp on whole house
-# 2232 = clamp - went to euan
-# 3957 - clamp - master bedroom ensuite towel rail
-# 921  = iam washing machine
-# 1971 = iam dryer
-# 3037 = iam fridge
-# 3214 = iam dishwasher
-# 1314 = iam basement ups
-# 2829 = iam office desk 10bar
-# 3879 = iam office ups
-# 2071 = iam toaster
-# 4023 = iam kettle
       if ( defined $ccdevid )
       {
         $ccpower = $line[2];
@@ -392,7 +397,6 @@ while (<STDIN>)
             { print "$linetime iam kettle sensor power $ccpower watts\n"; }
         }
 
-
         if ( $ccdevid == 3957 )
         {
           if (($modeswitch eq "process") && ($linetime > $timelastccclamptowelrail))
@@ -414,6 +418,20 @@ while (<STDIN>)
       }
       else { print STDERR "$linetime got a currentcost power line without a preceding deviceid\n"; }
     }
+
+    # FIXME why does this never trigger??
+    if ( $line[0] eq "Counter:" ) 
+    {
+      # we need to handle these as in the giant "if" statement for power devices above
+      if ( defined $ccdevid )
+      {
+        $ccpower = $line[1];
+        ## FIXME individual "if" statements to deal with each coutner device go here
+        $midtx = 0;
+      }
+      else { print STDERR "$linetime got a currentcost count line without a preceding deviceid\n"; }
+    }
+
     if ( $alien eq "1" ) { print LOGFILE "@line\n"; }
   # 
   # end of "non-tx-start line" processing
