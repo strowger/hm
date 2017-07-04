@@ -40,6 +40,8 @@ $logcciamofficedesk="rtl433-cciamofficedesk.log";
 $logcciamupso="rtl433-cciamupso.log";
 $logcciamtoaster="rtl433-cciamtoaster.log";
 $logcciamkettle="rtl433-cciamkettle.log";
+$logcccountoptical="rtl433-cccountoptical.log";
+$logcccountgas="rtl433-cccountgas.log";
 # this one is an exception - the log is a different name to the rrd
 # the rrd is much older, having been previously updated by power.pl
 $logccclamphouse="rtl433-ccclamphouse.log";
@@ -67,6 +69,8 @@ $timelastcciamupso=`tail -1 $logdirectory/$logcciamupso|awk '{print \$1}'`;
 $timelastcciamtoaster=`tail -1 $logdirectory/$logcciamtoaster|awk '{print \$1}'`;
 $timelastcciamkettle=`tail -1 $logdirectory/$logcciamkettle|awk '{print \$1}'`;
 $timelastccclamphouse=`tail -1 $logdirectory/$logccclamphouse|awk '{print \$1}'`;
+$timelastcccountoptical=`tail -1 $logdirectory/$logcccountoptical|awk '{print \$1}'`;
+$timelastcccountgas=`tail -1 $logdirectory/$logcccountgas|awk '{print \$1}'`;
 
 #open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
 open CCCLAMPHEAT, ">>", "$logdirectory/$logccclampheat" or die $!;
@@ -85,10 +89,12 @@ open CCIAMUPSO, ">>", "$logdirectory/$logcciamupso" or die $!;
 open CCIAMTOASTER, ">>", "$logdirectory/$logcciamtoaster" or die $!;
 open CCIAMKETTLE, ">>", "$logdirectory/$logcciamkettle" or die $!;
 open CCCLAMPHOUSE, ">>", "$logdirectory/$logccclamphouse" or die $!;
+open CCCOUNTOPTICAL, ">>", "$logdirectory/$logcccountoptical" or die $!;
+open CCCOUNTGAS, ">>", "$logdirectory/$logcccountgas" or die $!;
 
 # each received transmission occupies multiple lines in the output, so we have to be stateful
 $midtx = 0;
-## we're not dealing with a device we didn't expect
+# we're not dealing with a device we didn't expect
 $alien = 0;
 $linecount = 0;
 # this will read from either stdin or a file specified on the commandline
@@ -412,7 +418,6 @@ while (<STDIN>)
             { print "$linetime clamp towelrail sensor power $ccpower watts\n"; }
         }
 
-
         # we don't care about subsequent "Power x:" lines as they're all zero
         $midtx = 0;
       }
@@ -425,8 +430,33 @@ while (<STDIN>)
       # we need to handle these as in the giant "if" statement for power devices above
       if ( defined $ccdevid )
       {
-        $ccpower = $line[1];
-        ## FIXME individual "if" statements to deal with each coutner device go here
+        $cccount = $line[1];
+        
+        if ( $ccdevid == 2977 )
+        {
+          if (($modeswitch eq "process") && ($linetime > $timelastcccountoptical)) 
+          {
+            $timelastcccountoptical = $linetime;
+            $output = `rrdtool update $rrddirectory/cccountoptical.rrd $linetime:$cccount`;
+            if (length $output) { chomp $output; print LOGFILE "got error $output..."; }
+            else { print CCCOUNTOPTICAL "$linetime $cccount\n"; }
+          }
+          if ($modeswitch eq "dump")
+            { print "$linetime optical sensor count $cccount\n"; }
+        }
+
+        if ( $ccdevid == 1039 )
+        {
+          if (($modeswitch eq "process") && ($linetime > $timelastcccountgas)) 
+          {
+            $timelastcccountgas = $linetime;
+            $output = `rrdtool update $rrddirectory/cccountgas.rrd $linetime:$cccount`;
+            if (length $output) { chomp $output; print LOGFILE "got error $output..."; }
+            else { print CCCOUNTGAS "$linetime $cccount\n"; }
+          }
+          if ($modeswitch eq "dump")
+            { print "$linetime gas meter sensor count $cccount\n"; }
+        }
         $midtx = 0;
       }
       else { print STDERR "$linetime got a currentcost count line without a preceding deviceid\n"; }
