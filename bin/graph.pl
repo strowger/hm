@@ -72,9 +72,13 @@ $output = `rrdtool graph $graphdirectory/humidity${filename}.png -a PNG -l 0 -y 
 # this one has upper limit specified as 80 - no temperature should exceed this, but the modulation percentage does (which is ok). we also specify -r to disable auto-scaling.
 $output = `rrdtool graph $graphdirectory/chtemps${filename}.png -a PNG -u 80 -l 0 -r -y 10:1 --vertical-label "deg c" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:ebflow='$rrddirectory/ebflowtemp.rrd:temp:LAST 'DEF:ebreturn='$rrddirectory/ebreturntemp.rrd:temp:LAST 'DEF:desflow='$rrddirectory/desiredflowtemp.rrd:temp:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST  'CDEF:modtdif=ion,65,GT,0,modtd,IF' 'DEF:zvu='$rrddirectory/zvupstairsflow.rrd:temp:LAST 'DEF:zvd='$rrddirectory/zvdownstairsflow.rrd:temp:LAST 'DEF:zvh='$rrddirectory/zvhwflow.rrd:temp:LAST '${linetype}:ebflow#${col01}:flow temp - ebus' '${linetype}:ebreturn#${col02}:return temp - ebus' '${linetype}:desflow#${col03}:desired flow temp' '${linetype}:modtdif#${col04}:boiler output (percent of max)' '${linetype}:zvu#${col05}:flow temp to upstairs radiators' '${linetype}:zvd#${col06}:flow temp to downstairs radiators' '${linetype}:zvh#${col07}:flow temp to hw tank' -W "${datestamp}" -t "heating system temperatures"`;
 
+# '${linetype}:optical#${col12}:whole house opti' \\
+#
+
 $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:5 --vertical-label "watts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
 'DEF:optical='$rrddirectory/ccoptiwatts.rrd:power:LAST \\
 'DEF:clamp='$rrddirectory/ccclampwatts.rrd:power:LAST \\
+'DEF:count='$rrddirectory/cccountoptical.rrd:power:LAST \\
 'DEF:car='$rrddirectory/ccclampwattscar.rrd:power:LAST \\
 'DEF:wash='$rrddirectory/cciamwasher.rrd:power:LAST \\
 'DEF:dry='$rrddirectory/cciamdryer.rrd:power:LAST \\
@@ -88,8 +92,8 @@ $output = `rrdtool graph $graphdirectory/power${filename}.png -a PNG -l 0 -y 50:
 'DEF:toaster='$rrddirectory/cciamtoaster.rrd:power:LAST \\
 'DEF:kettle='$rrddirectory/cciamkettle.rrd:power:LAST \\
 'DEF:towelrail='$rrddirectory/ccclampwattstowelrail.rrd:power:LAST \\
-'${linetype}:optical#${col12}:whole house opti' \\
 '${linetype}:clamp#${col12}:whole house clamp':dashes \\
+'${linetype}:count#${col12}:whole house opti counter':dashes=2 \\
 'AREA:upsb#${col01}:basement server ups' \\
 'AREA:upso#${col02}:office ups':STACK \\
 'AREA:officedesk#${col03}:office desk':STACK \\
@@ -177,10 +181,12 @@ $output = `rrdtool graph $graphdirectory/hotwater${filename}.png -a PNG --vertic
 # modulation between 3.8 - 18.5kW with 80 flow/60 return
 # guess we should work with the 22.385 figure - hence 'modtd' CDEF
 #
-# gas bill says kwh = m3 * 1.02264 * 40 (corr. factor, calorific value) / 3.6 
-# 1 m3 = 11.363kWh/m3
-# the gas meter gives a pulse per dm3, which is .001 m3
-# the 409 in the kw CDEF is from 6*60*11.363
+# gas bill says kwh = m3 * 1.02264 * 39.7 (corr. factor, calorific value) / 3.6 
+# 1 m3 = 11.277kWh
+# the gas meter gives a pulse per dm3, which is .001 m3 - ie 1000 per m3
+# one pulse is 11.277/1000 = .011277 kWh
+# the number in the CDEF is (pulses per second /60/60) [to give pulses per hour] * .011277
+# 40.5972
 
 # the calculation stuff uses rrd rpn syntax to bring the modulation line
 # down to zero if the flame ionisation sensor indicates the fire is out
@@ -189,9 +195,11 @@ $output = `rrdtool graph $graphdirectory/hotwater${filename}.png -a PNG --vertic
 # the logic is "if ionisation > 65 then zero else modtdpc"
 
 # stop graphing the gas meter as it's nonsense, pending investigation
-#$output = `rrdtool graph $graphdirectory/gasmeter${filename}.png -a PNG --vertical-label "kwh per hour" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'CDEF:kw=dm3persec,409,*' 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'CDEF:modtdpcif=ion,65,GT,0,modtdpc,IF' '${linetype}:kw#${col01}:gas kwh from meter' '${linetype}:modtdpcif#${col02}:boiler ebus modulation percentage scaled to kW' -W "${datestamp}" -t "gas consumption" `;
+#$output = `rrdtool graph $graphdirectory/gasmeter${filename}.png -a PNG --vertical-label "kW" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'CDEF:kw=dm3persec,40.5972,*' 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'CDEF:modtdpcif=ion,65,GT,0,modtdpc,IF' '${linetype}:kw#${col01}:gas kW from meter' '${linetype}:modtdpcif#${col02}:boiler ebus modulation percentage scaled to kW' -W "${datestamp}" -t "gas consumption" `;
 
-$output = `rrdtool graph $graphdirectory/gasmeter${filename}.png -a PNG --vertical-label "kwh per hour" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'CDEF:modtdpcif=ion,65,GT,0,modtdpc,IF' '${linetype}:modtdpcif#${col02}:boiler ebus modulation percentage scaled to kW' -W "${datestamp}" -t "gas consumption" `;
+$output = `rrdtool graph $graphdirectory/gasmeter${filename}.png -a PNG --vertical-label "kW" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:dm3persec='$rrddirectory/gasmeter.rrd:dmcubed:LAST 'DEF:dm3perseccc='$rrddirectory/cccountgas.rrd:power:LAST 'CDEF:kw=dm3persec,40.5972,*' 'CDEF:kwcc=dm3perseccc,40.5972,*'  'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'CDEF:modtdpcif=ion,65,GT,0,modtdpc,IF' '${linetype}:kw#${col01}:gas kW from meter repton' '${linetype}:modtdpcif#${col02}:boiler ebus modulation percentage scaled to kW' '${linetype}:kwcc#${col03}:gas kW from meter - gasmart' -W "${datestamp}" -t "gas consumption" `;
+
+#$output = `rrdtool graph $graphdirectory/gasmeter${filename}.png -a PNG --vertical-label "kW per hour" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:ion='$rrddirectory/ionisationvolts.rrd:volts:LAST 'DEF:modtd='$rrddirectory/modtempdesired.rrd:temp:LAST 'CDEF:modtdpc=modtd,0.22385,*' 'CDEF:modtdpcif=ion,65,GT,0,modtdpc,IF' '${linetype}:modtdpcif#${col02}:boiler ebus modulation percentage scaled to kW' -W "${datestamp}" -t "gas consumption" `;
 
 $output = `rrdtool graph $graphdirectory/igntime${filename}.png -a PNG --vertical-label "seconds" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:avg='$rrddirectory/igntimeavg.rrd:secs:LAST 'DEF:min='$rrddirectory/igntimemin.rrd:secs:LAST 'DEF:max='$rrddirectory/igntimemax.rrd:secs:LAST '${linetype}:avg#${col01}:average ignition time' '${linetype}:min#${col02}:minimum ignition time' '${linetype}:max#${col03}:maximum ignition time' -W "${datestamp}" -t "boiler igntion times"`;
 
