@@ -80,6 +80,16 @@ if ( $lastline =~ /sessions since last restart\: (\d+)/ )
   # this uses the (\d+) in the above line
   $errorsessions = $1;
   print LOGFILE "last $errorsessions sessions were short\n";
+  if ( $errorsessions > 10 )
+  {
+    print LOGFILE "$timestamp rebooting due to short sessions...\n";
+    `wall "rtl-watchdog found rtl error, rebooting in 1 minute`;
+    close LOGFILE;
+    sleep 90;
+    close LOCKFILE;
+    unlink $lockfile;
+    `sudo reboot`;
+  }
 }
 close LOGFILE;
 close LOCKFILE;
