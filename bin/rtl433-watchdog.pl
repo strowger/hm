@@ -75,9 +75,9 @@ $timesliced = substr $timestamp, 0, 7;
 # second-to-last file as the current's still being written
 $last=`ls $logdirectory/*$timesliced*|tail -2|head -1`;
 $lastline=`tail -1 $last`;
-if ( $lastline =~ /sessions since last restart\: \d+/ )
+if ( $lastline =~ /sessions since last restart\: (\d+)/ )
 {
-  # this uses the \d+ in the above line
+  # this uses the (\d+) in the above line
   $errorsessions = $1;
   print LOGFILE "last $errorsessions sessions were short\n";
 }
