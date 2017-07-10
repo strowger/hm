@@ -12,6 +12,7 @@
 # begun
 #
 
+$logdirectory="/data/hm/rtl";
 $templogdirectory="/data/hm/rtltmp";
 $lockfile="/tmp/rtl433-watchdog.lock";
 $logfile="/tmp/rtl-watchdog.log";
@@ -67,7 +68,17 @@ if ( $watchage > 80 )
 }
 else { print LOGFILE "$timestamp ok\n"; }
 
-
+# when the rtl script goes wrong we can have so many files created
+# that it breaks ls - so we'll just look at the last few 
+$timestamp = time();
+$timesliced = substr $timestamp, 0, 7;
+# second-to-last file as the current's still being written
+$last=`ls $logdirectory/*$timesliced*|tail -2|head -1`;
+$lastline=`tail -1 $last`;
+if ( $lastline =~ /sessions since last restart\:/
+{
+  print LOGFILE "last session was short\n";
+}
 close LOGFILE;
 close LOCKFILE;
 unlink $lockfile;
