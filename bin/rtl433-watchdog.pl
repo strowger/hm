@@ -79,7 +79,7 @@ if ( $lastline =~ /sessions since last restart\: \d+/ )
 {
   # this uses the \d+ in the above line
   $errorsessions = $1;
-  print LOGFILE "last $1 sessions were short\n";
+  print LOGFILE "last $errorsessions sessions were short\n";
 }
 close LOGFILE;
 close LOCKFILE;
