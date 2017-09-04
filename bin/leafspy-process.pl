@@ -164,9 +164,10 @@ while (<STDIN>)
   $phonebatt = $line[133];
   $epochtime = $line[134];
   # drive motor power was previously in 100w units
-  $drivemotorstupid = $line[135];
+  $drivemotorstupid = $line[137];
   if ( $lineitems == 152) { $drivemotor = $drivemotorstupid * 100; }
-  if ( $lineitems == 155) { $drivemotor = $drivemotorstupid; }
+  # 20170904 new version of leafspy has more line items so this broke
+  if (( $lineitems == 155) || ( $lineitems == 158)) { $drivemotor = $drivemotorstupid; }
   # auxiliaries power in 100w units
   $auxpowerstupid = $line[136];
   $auxpower = $auxpowerstupid * 100;
