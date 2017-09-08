@@ -167,7 +167,7 @@ while (<STDIN>)
   $drivemotorstupid = $line[137];
   if ( $lineitems == 152) { $drivemotor = $drivemotorstupid * 100; }
   # 20170904 new version of leafspy has more line items so this broke
-  if (( $lineitems == 155) || ( $lineitems == 158)) { $drivemotor = $drivemotorstupid; }
+  if ( $lineitems > 152) { $drivemotor = $drivemotorstupid; }
   # auxiliaries power in 100w units
   $auxpowerstupid = $line[136];
   $auxpower = $auxpowerstupid * 100;
@@ -209,7 +209,7 @@ while (<STDIN>)
   # last field of the line ends in newline
   if ( $lineitems == 152 ) { chomp $debuginfo; }
   # 0.39.97 (april 2017) adds 3 more fields to the end of the line
-  if ( $lineitems == 155 ) 
+  if ( $lineitems > 152 ) 
   { 
     # subtract 40 from value to get degrees C!
     $motortempstupid = $line[152];
@@ -247,7 +247,7 @@ if ($modeswitch eq "process")
   @rrds = ("speed", "packamps", "drivemotor", "auxpower", "acpower", "acpres", "acpower2", "heatpower", "chargepower", "elevation", "gids", "soc", "amphr", "packvolts", "packvolts2", "packvolts3", "maxcpmv", "mincpmv", "avgcpmv", "cpmvdiff", "judgementval", "packtemp1", "packtemp2", "packtemp4", "voltsla", "packhealth", "packhealth2", "ambienttemp", "phonebatt", "regenwh", "regenwatts", "odom", "quickcharges", "slowcharges");
 
   # 0.39.97 (april 2017) adds 3 more fields to the end of the line   
-  if ( $lineitems == 155 )
+  if ( $lineitems > 152 )
   {
 #   at the moment the inverter temp ones are outputting just zeros
 #    push @rrds, ("motortemp", "inverter2temp", "inverter4temp");
@@ -315,7 +315,7 @@ if ($modeswitch eq "dump")
   print "ac pressure $acpres psi, power $acpower W est power $acpower2 W heater est power $heatpower W\n";
   print "phone battery $phonebatt\n";
   # 0.39.97 (april 2017) adds 3 more fields to the end of the line
-  if ( $lineitems == 155 )
+  if ( $lineitems > 152 )
   {
     print "new log format - motor temp $motortemp c, inverter temps $inverter2temp c $inverter4temp c\n";
   }
