@@ -1089,8 +1089,9 @@ RRA:MIN:0.001:17280:5500
 done
 
 # 20170424 new leafspy version gave a new piece of information - motor temp
+# 20170908 new leafspy version gave 2 new pieces of information - speedsensor1/2
 
-for i in motortemp
+for i in motortemp speedsensor1 speedsensor2
 do
 rrdtool create ls-${i}.rrd --start 1493000000 --step 5 \
 DS:${i}:GAUGE:60:U:U \
