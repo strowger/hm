@@ -87,10 +87,7 @@ $output = `rrdtool graph $graphdirectory/leafbatt${filename}.png -a PNG -u 100 -
 
 # speed, traction and regen power
 # regen and motor are both stored in watts but graphed in kW
-$output = `rrdtool graph $graphdirectory/leafspeedpower${filename}.png -a PNG --vertical-label "kilowatts/mph" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:sp='$rrddirectory/ls-speed.rrd:speed:LAST 'DEF:mpw='$rrddirectory/ls-drivemotor.rrd:drivemotor:LAST 'DEF:rew='$rrddirectory/ls-regenwatts.rrd:regenwatts:LAST 'CDEF:re=rew,1000,/' 'CDEF:mp=mpw,1000,/' '${linetype}:sp#${col01}:vehicle speed mph' '${linetype}:mp#${col02}:motor power kW' '${linetype}:re#${col03}:regen power kW' -W "${datestamp}" -t "nissan leaf - speed and power"`;
-
-## above without regen, which is bollocksed
-#$output = `rrdtool graph $graphdirectory/leafspeedpower${filename}.png -a PNG --vertical-label "kilowatts/mph" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:sp='$rrddirectory/ls-speed.rrd:speed:LAST 'DEF:mpw='$rrddirectory/ls-drivemotor.rrd:drivemotor:LAST 'CDEF:mp=mpw,1000,/' '${linetype}:sp#${col01}:vehicle speed mph' '${linetype}:mp#${col02}:motor power kW' -W "${datestamp}" -t "nissan leaf - speed and power"`;
+$output = `rrdtool graph $graphdirectory/leafspeedpower${filename}.png -a PNG --vertical-label "kilowatts/mph" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:sp='$rrddirectory/ls-speed.rrd:speed:LAST 'DEF:mpw='$rrddirectory/ls-drivemotor.rrd:drivemotor:LAST 'DEF:rew='$rrddirectory/ls-regenwatts.rrd:regenwatts:LAST 'DEF:sp1='$rrddirectory/ls-speedsensor1.rrd:speedsensor1:LAST 'DEF:sp2='$rrddirectory/ls-speedsensor2.rrd:speedsensor2:LAST 'CDEF:re=rew,1000,/' 'CDEF:mp=mpw,1000,/' '${linetype}:sp#${col01}:vehicle speed mph' '${linetype}:sp1#${col02}:vehicle speed sensor 1 mph' '${linetype}:sp2#${col03}:vehicle speed sensor 2 mph' '${linetype}:mp#${col04}:motor power kW' '${linetype}:re#${col05}:regen power kW' -W "${datestamp}" -t "nissan leaf - speed and power"`;
 
 # elevation
 $output = `rrdtool graph $graphdirectory/leafelevation${filename}.png -a PNG --vertical-label "meters above sea level" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:el='$rrddirectory/ls-elevation.rrd:elevation:LAST '${linetype}:el#${col01}:vehicle height metres' -W "${datestamp}" -t "nissan leaf - gps elevation"`; 
