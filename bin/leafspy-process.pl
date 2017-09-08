@@ -208,7 +208,7 @@ while (<STDIN>)
   $debuginfo = $line[151];
   # last field of the line ends in newline
   if ( $lineitems == 152 ) { chomp $debuginfo; }
-  # 0.39.97 (april 2017) adds 3 more fields to the end of the line
+  # 0.39.97 (april 2017) adds 3 more fields to the end of the line: 155
   if ( $lineitems > 152 ) 
   { 
     # subtract 40 from value to get degrees C!
@@ -219,6 +219,16 @@ while (<STDIN>)
     $inverter4tempstupid = $line[154];
     chomp $inverter4tempstupid; 
     $inverter4temp = $inverter4tempstupid - 40;
+  }
+  # 0.40.101 (august 2017) adds a further 3 fields to the end of the line: 158
+  if ( $lineitems > 155 )
+  {
+    # i think these are abs sensors. values are in kmh * 100
+    $speedsensor1stupid = $line[155];
+    $speedsensor2stupid = $line[156];
+    # $wiperstatus = $line[157]; # this is pretty useless
+    $speedsensor1 = $speedsensor1stupid / 100 * 0.621371;
+    $speedsensor2 = $speedsensor2stupid / 100 * 0.621371;
   }
 
   # some stuff to fix up stupid shit that leafspy has put in logs
@@ -253,6 +263,10 @@ if ($modeswitch eq "process")
 #    push @rrds, ("motortemp", "inverter2temp", "inverter4temp");
     push @rrds, ("motortemp");
   }
+  # 0.40.101 (aug 2017) adds 3 further fields
+  if ( $lineitems > 155 )
+    { push @rrds, ("speedsensor1", "speedsensor2"); } 
+ 
   foreach $rrd (@rrds)
   {
   #  print LOGFILE "updating rrd for $rrd...";
@@ -319,6 +333,12 @@ if ($modeswitch eq "dump")
   {
     print "new log format - motor temp $motortemp c, inverter temps $inverter2temp c $inverter4temp c\n";
   }
+  # 0.40.101 (august 2017) adds a further 3 fields to the end of the line
+  if ( $lineitems > 155 )
+  {
+    print "newer log format - speed sensors: 1 $speedsensor1 mph 2 $speedsensor2 mph\n";
+  }
+
 }
 
 
