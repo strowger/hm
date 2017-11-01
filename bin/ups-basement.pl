@@ -41,7 +41,7 @@ $upstemp = $upsraw[53];
 if ( $upsstatus eq "OB" )
 { 
   print "UPS is on battery\n"; 
-  # TODO sms alert
+  `echo "basement UPS on battery" | /data/hm/bin/alert.pl`;
 }
 
 $timestamp = time();
