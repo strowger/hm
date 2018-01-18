@@ -127,6 +127,28 @@ $output = `rrdtool graph $graphdirectory/leafpackah${filename}.png -a PNG --vert
 # cell pair differences
 $output = `rrdtool graph $graphdirectory/leafcellpairsummary${filename}.png -a PNG --vertical-label "millivolts" -s ${starttime} -e ${endtime} -w 1024 -h 300 'DEF:max='$rrddirectory/ls-maxcpmv.rrd:maxcpmv:LAST 'DEF:min='$rrddirectory/ls-mincpmv.rrd:mincpmv:LAST 'DEF:avg='$rrddirectory/ls-avgcpmv.rrd:avgcpmv:LAST '${linetype}:max#${col01}:highest cell-pair voltage' '${linetype}:min#${col02}:lowest cell-pair voltage' '${linetype}:avg#${col03}:average cell-pair voltage' -W "${datestamp}" -t "nissan leaf traction battery cell-pair voltages"`;
 
+# 20180117 tesla
+#
+$output = `rrdtool graph $graphdirectory/teslabattery${filename}.png -a PNG  --vertical-label "percent" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:charge='$rrddirectory/teslabatterylevel.rrd:pc:LAST  \\
+'DEF:usable='$rrddirectory/teslabatterylevelusable.rrd:pc:LAST  \\
+'DEF:limit='$rrddirectory/teslachargelimit.rrd:pc:LAST  \\
+'${linetype}:charge#${col01}:battery level'  \\
+'${linetype}:usable#${col01}:usable battery level':dashes  \\
+'${linetype}:limit#${col12}:charging limit':dashes  \\
+-W "${datestamp}" -t "tesla battery charge"`;
+
+$output = `rrdtool graph $graphdirectory/teslachargeamps${filename}.png -a PNG  --vertical-label "amps" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:amps='$rrddirectory/teslachargeamps.rrd:pc:LAST \\
+'${linetype}:amps#${col01}:charging current' \\
+-W "${datestamp}" -t "tesla battery charging current"`;
+
+$output = `rrdtool graph $graphdirectory/teslachargevolts${filename}.png -a PNG  --vertical-label "volts" -s ${starttime} -e ${endtime} -w 1024 -h 300 \\
+'DEF:volts='$rrddirectory/teslachargevolts.rrd:pc:LAST \\
+'${linetype}:volts#${col01}:charging voltage' \\
+-W "${datestamp}" -t "tesla battery charging voltage"`;
+
+
 close LOCKFILE;
 unlink $lockfile;
 
