@@ -1145,3 +1145,35 @@ DS:${i}:COUNTER:86400:U:U \
 RRA:LAST:0.001:1:5500
 done
 
+# 20180116 the tesla
+
+# teslachargelimit 0-100
+# teslabatterylevel 0-100
+# teslabatterylevelusable 0-100
+# teslachargevolts 0 - 500? (>250 on a rapid/SuC?)
+# teslachargeamps 0 - 200? (>100 possible on rapid/SuC?)
+# starting timestamp 1516053000
+# (as per leaf, storing for 15 years)
+# xff (after "RRA") set to .99 so we still get data even if most values were unknown
+rrdtool create teslachargelimit.rrd --start  1516053000 --step 60 \
+DS:pc:GAUGE:6000:0:100 \
+RRA:LAST:0.99:1:7905600
+
+rrdtool create teslabatterylevel.rrd --start  1516053000 --step 60 \
+DS:pc:GAUGE:6000:0:100 \
+RRA:LAST:0.99:1:7905600
+
+rrdtool create teslabatterylevelusable.rrd --start  1516053000 --step 60 \
+DS:pc:GAUGE:6000:0:100 \
+RRA:LAST:0.99:1:7905600
+
+rrdtool create teslachargevolts.rrd --start  1516053000 --step 60 \
+DS:pc:GAUGE:6000:0:500 \
+RRA:LAST:0.99:1:7905600
+
+rrdtool create teslachargeamps.rrd --start  1516053000 --step 60 \
+DS:pc:GAUGE:6000:0:500 \
+RRA:LAST:0.99:1:7905600
+
+
+
