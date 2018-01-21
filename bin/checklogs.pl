@@ -16,9 +16,9 @@ $owerrorlog="1wireread-errors.log";
 $routererrorlog="router-errors.log";
 $alarmsyncerrorlog="alarmbox-rsync-errors.log";
 $officesyncerrorlog="office-rsync-errors.log";
-$leaferrorlog="leaf-errors.log";
+#$leaferrorlog="leaf-errors.log";
 $lockfile="/tmp/checklogs.lock";
-$leafspylog="leafspy.log";
+#$leafspylog="leafspy.log";
 
 if ( -f $lockfile ) 
 { die "Lockfile exists in $lockfile; exiting"; }
@@ -295,8 +295,9 @@ foreach $pdev (@cciamdevices)
     $lastline = `tail -1 $logdirectory/rtl433-cciam$pdev.log`;
     ($lasttime) = split(' ',$lastline);
     $lastvalage = $timestamp-$lasttime;
-    if ( $lastvalage > 900)
-      { print "power device $pdev last read $lastvalage seconds ago\n"; }
+#### this is too spammy for now
+####    if ( $lastvalage > 900)
+####      { print "power device $pdev last read $lastvalage seconds ago\n"; }
 #    # they tx every 6 seconds so this should catch a minimum of an hour
 #    $fileend = `tail -600 $logdirectory/rtl433-cciam$pdev.log`;
 #    @fileendar = split ('\n',$fileend);
@@ -348,40 +349,41 @@ foreach $pdev (@ccclampdevices)
   else { print "log for power device $pdev missing\n"; }
 }
 
+# 20181021 leaf is gone
+## same as above but for nissan leaf monitoring errors - we only poll 4 times
+## per hour so for now we care if we get even a single one - later we'll care 
+## less and probably reduce this
+#
+#if (-f "$logdirectory/$leaferrorlog" )
+#{
+#  $errorlinecount = 0;
+#  @errorlines = ();
+#  open LEAFERRLOG, "<", "$logdirectory/$leaferrorlog" or die $!;
+#  foreach $errorline (<LEAFERRLOG>)
+#  {
+#    $errorlinecount++;
+#    push(@errorlines, $errorline);
+#  }
+#  close LEAFERRLOG;
+#  if ($errorlinecount > 2)
+#  {
+#    print "More than 2 leaf.pl runs with errors in last hour:\n";
+#    print "@errorlines";
+#  }
+#  unlink "$logdirectory/$leaferrorlog";
+#}
+#
+## the leafspy log import script runs every minute and exits silently if a
+##  lockfile exists - we just alert here if it hasn't run successfully recently
+#
+#$timestamp = time();
+#$leaflast = `grep exiting $logdirectory/$leafspylog|tail -1|awk '{print \$3}'`;
+#$lastvalage = $timestamp-$leaflast;
+#if ($lastvalage > 1200)
+#{
+#  print "leafspy import script hasn't run successfully for 20 minutes";
+#}
 
-# same as above but for nissan leaf monitoring errors - we only poll 4 times
-# per hour so for now we care if we get even a single one - later we'll care 
-# less and probably reduce this
-
-if (-f "$logdirectory/$leaferrorlog" )
-{
-  $errorlinecount = 0;
-  @errorlines = ();
-  open LEAFERRLOG, "<", "$logdirectory/$leaferrorlog" or die $!;
-  foreach $errorline (<LEAFERRLOG>)
-  {
-    $errorlinecount++;
-    push(@errorlines, $errorline);
-  }
-  close LEAFERRLOG;
-  if ($errorlinecount > 2)
-  {
-    print "More than 2 leaf.pl runs with errors in last hour:\n";
-    print "@errorlines";
-  }
-  unlink "$logdirectory/$leaferrorlog";
-}
-
-# the leafspy log import script runs every minute and exits silently if a
-#  lockfile exists - we just alert here if it hasn't run successfully recently
-
-$timestamp = time();
-$leaflast = `grep exiting $logdirectory/$leafspylog|tail -1|awk '{print \$3}'`;
-$lastvalage = $timestamp-$leaflast;
-if ($lastvalage > 1200)
-{
-  print "leafspy import script hasn't run successfully for 20 minutes";
-}
 # disk space - assumes we're just using /root
 # from df loses a space
 $diskpercentused = `df -Ph|grep root|cut -d " " -f 12 |sed "s/\%//"`;
