@@ -84,6 +84,7 @@ foreach $file (@files)
   
   $endtime = time();
   $filetime = $endtime - $starttime;
+  unlink "$in/$file";
   print LOGFILE "finished with file $file in $filetime seconds for $linecount lines\n";
 }
 
