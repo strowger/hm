@@ -49,15 +49,19 @@ foreach $configline (<CONFIG>)
 }
 
 close CONFIG;
-
-$teslacmdoutput = `$teslacmd -u ${username} -p ${password} -c >&1`;
+# -Z 1: error if car is asleep and don't continue
+# -c: display charge state
+$teslacmdoutput = `$teslacmd -u ${username} -p ${password} -Z 1 -c >&1`;
 print TEMPLOGFILE "$teslacmdoutput\n";
 # splitting on space splits on any kind of whitespace incl newline
 @tc = split(" ",$teslacmdoutput);
 
 if (( $tc[0] =~ /Error/ ) || ( $tc[1] =~ /Error/ ))
 { 
-  print LOGFILE "Got error from tesla api, aborting\n";
+  print LOGFILE "Got error from tesla api, aborting";
+  if ( $tc[5] =~ /asleep/ )
+  { print LOGFILE " - car asleep"; }
+  print LOGFILE "\n";
   close LOCKFILE;
   unlink $lockfile;
   exit 1;
