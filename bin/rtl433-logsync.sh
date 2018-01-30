@@ -12,9 +12,13 @@ then
 fi
 touch /tmp/rtl433-logsync-lock
 # ignore-missing-args saves a whinge mail/log entry when there are no files to transfer on the source. required an rsync upgrade.
-rsync --remove-source-files --ignore-missing-args strowger@192.168.1.40:/data/hm/rtl/* /data/hm/rtl-in >> /data/hm/log/alarmbox-rsync-errors.log 2>> /data/hm/log/alarmbox-rsync-errors.log
+rsync --exclude 'debug.log' --remove-source-files --ignore-missing-args strowger@192.168.1.40:/data/hm/rtl/* /data/hm/rtl-in >> /data/hm/log/alarmbox-rsync-errors.log 2>> /data/hm/log/alarmbox-rsync-errors.log
+# debug.log is not mission critical & seems to generate errors where it changes during rsync, so ignore them
+rsync --remove-source-files --ignore-missing-args strowger@192.168.1.40:/data/hm/rtl/debug.log /data/hm/rtl-in >> /dev/null 2>> /dev/null
 
-rsync --remove-source-files --ignore-missing-args strowger@192.168.1.41:/data/hm/rtl/* /data/hm/rtl-in >> /data/hm/log/office-rsync-errors.log 2>> /data/hm/log/office-rsync-errors.log
+rsync --exclude 'debug.log' --remove-source-files --ignore-missing-args strowger@192.168.1.41:/data/hm/rtl/* /data/hm/rtl-in >> /data/hm/log/office-rsync-errors.log 2>> /data/hm/log/office-rsync-errors.log
+# debug.log is not mission critical & seems to generate errors where it changes during rsync, so ignore them
+rsync --remove-source-files --ignore-missing-args strowger@192.168.1.41:/data/hm/rtl/debug.log /data/hm/rtl-in >> /dev/null 2>> /dev/null
 
 rm /tmp/rtl433-logsync-lock
 
