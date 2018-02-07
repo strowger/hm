@@ -40,15 +40,82 @@ print TEMPLOGFILE "starting tesla.pl at $timestamp\n";
 foreach $configline (<CONFIG>)
 {
   # this is really just to keep the credentials out of git
-  ($username,$password) = split(',',$configline);
-  if (($username !~ /\#.*/) && (defined $password))
+  ($username,$password,$cammac) = split(',',$configline);
+  if (($username !~ /\#.*/) && (defined $password) && (defined $cammac))
   {
     chomp $password;
-    print LOGFILE "$timestamp: read username and password from config\n";
+    print LOGFILE "$timestamp: read username, password, and mac from config\n";
   }
 }
 
 close CONFIG;
+
+# find out if the car was home last time we polled
+$lasthomeline = `tail -1 $logdirectory/teslahome.log`;
+($lasthometime, $lasthome) = split(" ",$lasthomeline);
+undef $lasthometime;
+open LINE, ">>", "$logdirectory/teslahome.log" or die $!;
+# check for the presence of the car (or rather, the mac of the front dashcam)
+$camcheck = `ssh office /sbin/iwlist wlan1 scan |grep ${cammac}`;
+# if we successfully ssh'd and found the cam we'll have its mac in the grep
+# output, otherwise we'll get nothing (or an error)
+if ( $camcheck =~ /$cammac/ )
+{
+  print LOGFILE "$timestamp: dashcam present\n";
+  print LINE "$timestamp home\n";
+}
+else
+{
+  print LOGFILE "$timestamp: dashcam absent\n";
+  print LINE "$timestamp away\n";
+}
+close LINE;
+
+# when did we last get data and what was the state?
+# 'Charging' 'Disconnected' 'Complete' 'Stopped' 'Starting' 'NoPower'
+# if we weren't "Charging" or "Starting" then we're wasting battery polling if
+# the car isn't being used, so we need to let it sleep
+$laststateline = `tail -1 $logdirectory/teslastate.log`;
+($laststatetime, $laststate) = split(" ",$laststateline);
+#print "DEBUG: last state time $laststatetime last state $laststate\n";
+undef $laststatetime;
+# first check: is the car in a non-charging state?
+if (( $laststate =~ /Disconnected/) || ($laststate =~ /Stopped/) || ($laststate =~ /Complete/))
+{
+##  print "DEBUG: first check - in a non-charging state\n";
+  # second check: has the car just arrived or departed home?
+  # ie, has the camera's mac address appeared or disappeared?
+##  print "DEBUG: pre second check - camcheck $camcheck lasthome $lasthome\n";
+  if ( ( $camcheck =~ /$cammac/ and  $lasthome eq "home")
+     or ( ! $camcheck =~ /$cammac/ and $lasthome eq "away"))
+  {
+##    print "DEBUG: second check - cam consistently present or away\n";
+    # third check: is the battery (dis)charging?
+    $last3batterystates = `tail -3 $logdirectory/teslabatterylevel.log`;
+    ($time1, $state1, $time2, $state2, $time3, $state3) = split(" ",$last3batterystates);
+##    print "DEBUG: pre third check: battery levels $state1 $state2 $state3\n";
+    # supress run-time warnings about variables only used once
+    undef $time1;
+    undef $time2;
+    if (($state1 == $state2) && ($state2 == $state3))
+    {
+##      print "DEBUG: third check - last 3 battery charge percentages all same\n";
+      # battery status was the same for the last 3 polls
+      $interval = $timestamp - $time3;
+      # fourth check: is it <40min since last poll?
+      if ($interval < 2400)
+      {
+##        print "DEBUG: fourth check - last poll <40min ago\n";
+        print LOGFILE "car seems idle and last poll <40min ago, quitting to permit sleep\n";
+        close LOGFILE;
+        close LOCKFILE;
+        unlink $lockfile;
+        exit 0;
+      }
+    }
+  }
+}
+
 # -Z 1: error if car is asleep and don't continue
 # -c: display charge state
 $teslacmdoutput = `$teslacmd -u ${username} -p ${password} -Z 1 -c >&1`;
@@ -61,7 +128,7 @@ if (( $tc[0] =~ /Error/ ) || ( $tc[1] =~ /Error/ ))
   print LOGFILE "Got error from tesla api, aborting";
   if ( $tc[5] =~ /asleep/ )
   { print LOGFILE " - car asleep"; }
-  print LOGFILE "\n";
+  print LOGFILE "\n\n";
   close LOCKFILE;
   unlink $lockfile;
   exit 1;
@@ -95,6 +162,11 @@ print LOGFILE "charging state $chargingstate, max charge percent $chargelimit, m
 print LOGFILE "battery range/est/ideal $batteryrange $estbatteryrange $idealbatteryrange battery level/usable $batterylevel $batterylevelusable\n";
 print LOGFILE "charge energy added $chargenergyadded voltage $chargervoltage current pilot/actual $chargercurrentpilot $chargercurrentactual\n";
 print LOGFILE "charger power $chargerpower rate $chargerate\n";
+
+# we can use this to work out whether to keep polling or let the car sleep
+open LINE, ">>", "$logdirectory/teslastate.log" or die $!;
+print LINE "$timestamp $chargingstate\n";
+close LINE;
 
 open LINE, ">>", "$logdirectory/teslachargelimit.log" or die $!;
 print LINE "$timestamp $chargelimit\n";
