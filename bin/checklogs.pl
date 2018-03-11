@@ -318,7 +318,7 @@ foreach $pdev (@cciamdevices)
   else { print "log for power device $pdev missing\n"; }
 }
 
-@ccclampdevices = ("car", "heat", "cook");
+@ccclampdevices = ("car", "heat", "cook", "towelrail");
 foreach $pdev (@ccclampdevices)
 {
   if (-f "$logdirectory/rtl433-ccclamp$pdev.log" )
