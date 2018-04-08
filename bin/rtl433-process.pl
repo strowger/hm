@@ -2,12 +2,14 @@
 #
 # rtl433-process.pl - parse datafiles from rtl433
 #  based on leafspy-process.pl
-# this writes to rrds but not to any new logfiles, and is therefore
-# safe to repeatedly re-run over the same data.
 #
 # GH 2017-03-25
 # begun
-#
+# GH 2018-04-08 
+# influxdb added
+$influxcmd="curl -s -S -i -XPOST ";
+$influxurl="http://localhost:8086/";
+$influxdb="styes_power";
 
 if ($ARGV[0] eq "-process")  { $modeswitch = "process"; }
 if ($ARGV[0] eq "-dump")  { $modeswitch = "dump"; }
@@ -213,6 +215,8 @@ while (<STDIN>)
             $timelastccclamphouse = $linetime;
             # non-standard filename
             $output = `rrdtool update $rrddirectory/ccclampwatts.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'wholehouse_clamp value=${ccpower} ${linetime}000000000\n'`;
+            #print LOGFILE "influxdb said $output2\n";
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -228,6 +232,7 @@ while (<STDIN>)
           {
             $timelastccclampcar = $linetime;
             $output = `rrdtool update $rrddirectory/ccclampwattscar.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'car_charger value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -243,6 +248,7 @@ while (<STDIN>)
           {
             $timelastccclampheat = $linetime;
             $output = `rrdtool update $rrddirectory/ccclampwattsheating.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'central_heating value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -258,6 +264,7 @@ while (<STDIN>)
           {
             $timelastccclampcook = $linetime;
             $output = `rrdtool update $rrddirectory/ccclampwattscooker.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'cooker value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
              { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -274,6 +281,7 @@ while (<STDIN>)
           {
             $timelastcciamwasher = $linetime;
             $output = `rrdtool update $rrddirectory/cciamwasher.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'washing_machine value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -289,6 +297,7 @@ while (<STDIN>)
           {
             $timelastcciamdryer = $linetime;
             $output = `rrdtool update $rrddirectory/cciamdryer.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'dryer value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -304,6 +313,7 @@ while (<STDIN>)
           {
             $timelastcciamfridge = $linetime;
             $output = `rrdtool update $rrddirectory/cciamfridge.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'fridge value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -319,6 +329,7 @@ while (<STDIN>)
           {
             $timelastcciamdwasher = $linetime;
             $output = `rrdtool update $rrddirectory/cciamdwasher.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'dishwasher value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -334,6 +345,7 @@ while (<STDIN>)
           {
             $timelastcciamupsb = $linetime;
             $output = `rrdtool update $rrddirectory/cciamupsb.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'ups_basement value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -349,6 +361,7 @@ while (<STDIN>)
           {
             $timelastcciamofficedesk = $linetime;
             $output = `rrdtool update $rrddirectory/cciamofficedesk.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'office_desk value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -364,6 +377,7 @@ while (<STDIN>)
           {
             $timelastcciamupso = $linetime;
             $output = `rrdtool update $rrddirectory/cciamupso.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'ups_office value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -379,6 +393,7 @@ while (<STDIN>)
           {
             $timelastcciamtoaster = $linetime;
             $output = `rrdtool update $rrddirectory/cciamtoaster.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'toaster value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -394,6 +409,7 @@ while (<STDIN>)
           {
             $timelastcciamkettle = $linetime;
             $output = `rrdtool update $rrddirectory/cciamkettle.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'kettle value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
@@ -409,6 +425,7 @@ while (<STDIN>)
           {
             $timelastccclamptowelrail = $linetime;
             $output = `rrdtool update $rrddirectory/ccclampwattstowelrail.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'towelrail value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
             else
