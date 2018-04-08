@@ -10,6 +10,8 @@
 # 20170404 GH
 # stop logging the clamp meter as that's now the car charger and will
 # be handled by the new rtl433 scripts
+# 20180408 GH
+# influxdb added
 
 # log everything we get in the temp log, delete it at startup
 # log the values we capture in the power log and keep forever
@@ -18,6 +20,10 @@ $logdirectory="/data/hm/log";
 $templogfile="powertemp.log";
 $logfile="power.log";
 $rrddirectory="/data/hm/rrd";
+
+$influxcmd="curl -s -S -i -XPOST ";
+$influxurl="http://localhost:8086/";
+$influxdb="styes_power";
 
 # relies on udev having been configured to create a /dev/currentcost
 # pointing at the correct serial device and with suitable permissions
@@ -55,7 +61,8 @@ while ($line = <SERIAL>)
      $temp = $1;
      $poweropti = $2;
      print LOGFILE "$timestamp opti ${poweropti}W ${temp}C\n";
-     $output = `rrdtool update $rrddirectory/ccoptiwatts.rrd $timestamp:$poweropti`;     
+     $output = `rrdtool update $rrddirectory/ccoptiwatts.rrd $timestamp:$poweropti`;
+     $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'wholehouse_optical value=${poweropti} ${timestamp}000000000\n'`;
 #     print TEMPLOG "rrdtool said $output\n";
      $output = `rrdtool update $rrddirectory/cctemp.rrd $timestamp:$temp`;
 #     print TEMPLOG "rrdtool said $output\n";
