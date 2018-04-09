@@ -14,6 +14,10 @@ $errorlog="1wireread-errors.log";
 $lockfile="/tmp/1wireread.lock";
 $owread="/opt/owfs/bin/owread";
 
+$influxcmd="curl -s -S -i -XPOST ";
+$influxurl="http://localhost:8086/";
+$influxdb="styes_1wire";
+
 open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;
 
 if ( -f $lockfile ) 
@@ -167,6 +171,7 @@ foreach $line (<CONFIG>)
       # if the rrd doesn't exist, don't attempt to write
       if ( -f "$rrddirectory/${filename}.rrd" )
       {
+        `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary '${filename} value=${output} ${timestamp}000000000\n'`;
         $output = `rrdtool update $rrddirectory/$filename.rrd $timestamp:$output`;
         if (length $output)
         {
