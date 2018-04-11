@@ -270,6 +270,20 @@ if (-f "$logdirectory/$officesyncerrorlog" )
   unlink "$logdirectory/$officesyncerrorlog";
 }
 
+# the barompressure2 script which just fetches a url
+if (-f "$logdirectory/barompressure2-errors.log" )
+{
+  $errorlinecount = 0;
+  open BAROMLOG, "<", "$logdirectory/barompressure2-errors.log" or die $!;
+  foreach $errorline (<BAROMLOG>) { $errorlinecount++; }
+  close BAROMLOG;
+  if ($errorlinecount > 5)
+  {
+    print "More than 5 log lines from barompressure2 cron job: ${errorlinecount}\n";
+  }
+  unlink "$logdirectory/barompressure2-errors.log";
+}
+
 @rtlcollectors = ("alarmbox", "office");
 foreach $collector (@rtlcollectors)
 {
