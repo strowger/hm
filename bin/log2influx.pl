@@ -7,6 +7,135 @@
 
 $logdirectory="/data/hm/log";
 
+# 1-wire stuff
+
+$owconfig="/data/hm/conf/1wireread.conf";
+
+open OWCONFIG, "<", "$owconfig" or die $!;
+
+foreach $configline (<OWCONFIG>)
+{
+  ($configdevice, $configvalue, $configfilename) = split(',',$configline);
+  if (($configdevice !~ /\#.*/) && (defined $configdevice) && (defined $configvalue) && (defined $configfilename))
+  {
+    chomp $configfilename;
+    print "onewire: working on $configfilename\n";
+    open INPUT, "<", "$logdirectory/$configfilename.log" or die $!;
+    $result = "";
+    $influxcmdline = "";
+    while ( $line = <INPUT> )
+    {
+      ($timestamp, $value) = split(' ',$line);
+      if ( $configfilename =~ /hum$/ )
+      {
+        # just silently ignore humidity values that make no sense, of which there are quite a lot
+        if (( $value < 0 ) || ( $value > 100 )) { next }
+      }
+      $influxcmdline .= "${configfilename} value=${value} ${timestamp}000000000\n";
+
+      if (length($influxcmdline) > 10000)
+      {
+      $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_1wire' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+      $influxcmdline = "";
+      sleep 1;
+      }
+
+    }
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_1wire' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    sleep 1;
+  }
+}
+
+exit 0;
+
+# basement ups stuff
+
+open INPUT, "<", "$logdirectory/upsb-batterycharge.log" or die $!;
+print "opened ups battery charge log\n";
+$result = "";
+$influxcmdline = "";
+while ( $line = <INPUT> )
+{
+  ($timestamp, $value) = split(' ',$line);
+  $influxcmdline .= "ups_basement_charge value=${value} ${timestamp}000000000\n";
+
+  if (length($influxcmdline) > 10000)                                                                                                              {                                                                                                                                                  # -s - silent; -S - show errors
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_power' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    $influxcmdline = "";
+   }
+}
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_power' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";                                                                                                                                         close INPUT;
+
+
+open INPUT, "<", "$logdirectory/upsb-batteryvolts.log" or die $!;
+print "opened ups battery volts log\n";
+$result = "";
+$influxcmdline = "";
+while ( $line = <INPUT> )
+{
+  ($timestamp, $value) = split(' ',$line);
+  $influxcmdline .= "ups_basement_battery_volts value=${value} ${timestamp}000000000\n";
+
+  if (length($influxcmdline) > 10000)                                                                                                              {                                                                                                                                                  # -s - silent; -S - show errors
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_power' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    $influxcmdline = "";
+   }
+}
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_power' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";                                                                                                                                         close INPUT;
+
+
+open INPUT, "<", "$logdirectory/upsb-mainsfreq.log" or die $!;
+print "opened ups mains freq log\n";
+$result = "";
+$influxcmdline = "";
+while ( $line = <INPUT> )
+{
+  ($timestamp, $value) = split(' ',$line);
+  $influxcmdline .= "ups_basement_mains_frequency value=${value} ${timestamp}000000000\n";
+
+  if (length($influxcmdline) > 10000)                                                                                                              {                                                                                                                                                  # -s - silent; -S - show errors
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_power' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    $influxcmdline = "";
+   }
+}
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_power' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";                                                                                                                                         close INPUT;
+
+
+open INPUT, "<", "$logdirectory/upsb-mainsvolts.log" or die $!;
+print "opened ups mains volts log\n";
+$result = "";
+$influxcmdline = "";
+while ( $line = <INPUT> )
+{
+  ($timestamp, $value) = split(' ',$line);
+  $influxcmdline .= "ups_basement_mains_volts value=${value} ${timestamp}000000000\n";
+
+  if (length($influxcmdline) > 10000)                                                                                                              {                                                                                                                                                  # -s - silent; -S - show errors
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_power' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    $influxcmdline = "";
+   }
+}
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_power' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";                                                                                                                                         close INPUT;
+
+
+
+open INPUT, "<", "$logdirectory/upsb-outputvolts.log" or die $!;
+print "opened ups output volts log\n";
+$result = "";
+$influxcmdline = "";
+while ( $line = <INPUT> )
+{
+  ($timestamp, $value) = split(' ',$line);
+  $influxcmdline .= "ups_basement_output_volts value=${value} ${timestamp}000000000\n";
+
+  if (length($influxcmdline) > 10000)                                                                                                              {                                                                                                                                                  # -s - silent; -S - show errors
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_power' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    $influxcmdline = "";
+   }
+}
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_power' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";                                                                                                                                         close INPUT;
+
+
 
 # power stuff
 
