@@ -168,10 +168,20 @@ foreach $line (<CONFIG>)
       open LINE, ">>", "$logdirectory/$filename.log" or die $!;
       print LINE "$timestamp $output\n";
       close LINE;
+      # let's not write invalid values to RRDs or influx
+      # humidity devices end "hum" and shouldn't read >100 or <0
+      if ( $filename =~ /hum$/ )
+      {
+        if (( $output < 0 ) || ( $output > 100 ))
+        {
+          # print ERRORLOG "$timestamp discarding $filename $device invalid reading $output\n";
+          next;
+        }
+      }
+      `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary '${filename} value=${output} ${timestamp}000000000\n'`;
       # if the rrd doesn't exist, don't attempt to write
       if ( -f "$rrddirectory/${filename}.rrd" )
       {
-        `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary '${filename} value=${output} ${timestamp}000000000\n'`;
         $output = `rrdtool update $rrddirectory/$filename.rrd $timestamp:$output`;
         if (length $output)
         {
