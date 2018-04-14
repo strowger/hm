@@ -178,7 +178,7 @@ foreach $line (<CONFIG>)
           next;
         }
       }
-      `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary '${filename} value=${output} ${timestamp}000000000\n'`;
+      `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary '${filename} value=${output} ${timestamp}000000000\n'`  or warn "Could not run curl because $!\n";
       # if the rrd doesn't exist, don't attempt to write
       if ( -f "$rrddirectory/${filename}.rrd" )
       {
