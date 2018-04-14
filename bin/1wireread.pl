@@ -65,6 +65,7 @@ foreach $bus (0..2)
   open LINE, ">>", "$logdirectory/1wdevicecount$bus.log" or die $!;
   print LINE "$timestamp $buscount\n";
   close LINE;
+  `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary '1wiredevicecount${bus} value=${buscount} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";
   # if the rrd doesn't exist, don't attempt to write
   if ( -f "$rrddirectory/1wdevicecount$bus.rrd" )
   {
@@ -95,6 +96,7 @@ foreach $bus (0..2)
   open LINE, ">>", "$logdirectory/bus${bus}utilpercent.log" or die $!;
   print LINE "$timestamp $usedpercentrounded\n";
   close LINE;
+  `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'bus${bus}utilpercent value=${usedpercentrounded} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";
   if ( -f "$rrddirectory/bus${bus}utilpercent.rrd" )
   {
     $output = `rrdtool update $rrddirectory/bus${bus}utilpercent.rrd $timestamp:$usedpercentrounded`;
@@ -120,6 +122,7 @@ foreach $bus (0..2)
     open LINE, ">>", "$logdirectory/bus${bus}${errortype}.log" or die $!;
     print LINE "$timestamp $errorvalue\n";
     close LINE;
+    `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'bus${bus}${errortype} value=${errorvalue} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";
     if ( -f "$rrddirectory/bus${bus}${errortype}.rrd" )
     {
       $output = `rrdtool update $rrddirectory/bus${bus}${errortype}.rrd $timestamp:$errorvalue`;
@@ -213,6 +216,7 @@ $runtime = $endtime - $starttime;
 open LINE, ">>", "$logdirectory/runtime1w.log" or die $!;
 print LINE "$timestamp $runtime\n";
 close LINE;
+`${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'runtime1w value=${runtime} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";
 if ( -f "$rrddirectory/runtime1w.rrd" )
 {
   $output = `rrdtool update $rrddirectory/runtime1w.rrd $timestamp:$runtime`;
