@@ -12,6 +12,10 @@ $logdirectory="/data/hm/log";
 $logfile="ebusread.log";
 $lockfile="/tmp/ebusread.lock";
 
+$influxcmd="curl -s -S -i -XPOST ";
+$influxurl="http://localhost:8086/";
+$influxdb="styes_ebus";
+
 if ( -f $lockfile ) 
 {
   die "Lockfile exists in $lockfile; exiting";
@@ -65,6 +69,7 @@ foreach $line (<CONFIG>)
       open LINE, ">>", "$logdirectory/$localname.log" or die $!;
       print LINE "$timestamp $output\n";
       close LINE;
+      `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary '${localname} value=${output} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";
       # if the rrd doesn't exist, don't attempt to write
       if ( -f "$rrddirectory/${localname}.rrd" )
       {
@@ -79,9 +84,10 @@ foreach $line (<CONFIG>)
         print LOGFILE "rrd for $localname doesn't exist, skipping update\n";
       }
     }
-    # sleep 0.2sec - if we read ebus too fast, it fucks up
+    # reduced the sleep again when we added influxdb as the fork and request are more delay?
+    # sleep 0.1sec - if we read ebus too fast, it fucks up
     # 0.1 sec sleep consistently generates errors from ebusd
-    select(undef, undef, undef, 0.2);
+    select(undef, undef, undef, 0.1);
     $validcount++;
 
   }
@@ -102,6 +108,7 @@ $runtime = $endtime - $starttime;
 open LINE, ">>", "$logdirectory/runtimeeb.log" or die $!;
 print LINE "$timestamp $runtime\n";
 close LINE;
+`${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'runtimeeb value=${runtime} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";
 if ( -f "$rrddirectory/runtimeeb.rrd" )
 {
   $output = `rrdtool update $rrddirectory/runtimeeb.rrd $timestamp:$runtime`;
