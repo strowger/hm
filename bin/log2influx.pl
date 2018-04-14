@@ -7,7 +7,52 @@
 
 $logdirectory="/data/hm/log";
 
-# 1-wire stuff
+# ebus stuff
+
+$ebconfig="/data/hm/conf/ebusread.conf";
+
+open EBCONFIG, "<", "$ebconfig" or die $!;
+print "ebus devices: ";
+
+foreach $configline (<EBCONFIG>)
+{
+  ($valuex, $field, $circuit, $localname) = split(',',$configline);
+  # starts with hash means comment, so ignore
+  # ignore if there isn't a value for all items
+  if (($valuex !~ /\#.*/) && (defined $valuex) && (defined $field) && (defined $circuit) && (defined $localname))
+  {
+    # here is stuff we just do for each *valid* config line
+    chomp $localname;
+    print "$localname ";
+    open INPUT, "<", "$logdirectory/$localname.log" or die $!;
+    $result = "";
+    $influxcmdline = "";
+    while ( $line = <INPUT> )
+    {
+      ($timestamp, $value) = split(' ',$line);
+      if ( $value eq "" ) { next; }
+      $influxcmdline .= "${localname} value=${value} ${timestamp}000000000\n";
+      if (length($influxcmdline) > 20000)
+      {
+        $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_ebus' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+        $influxcmdline = "";
+        # attempt to sleep 100ms
+        select(undef, undef, undef, 0.1);
+      }
+    }
+  }
+
+}
+
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_ebus' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+$influxcmdline = "";
+
+close EBCONFIG;
+
+
+exit 0;
+
+# 1-wire stuff - the sleep after each curl will make this take a week to run
 
 $owconfig="/data/hm/conf/1wireread.conf";
 
@@ -26,14 +71,15 @@ foreach $configline (<OWCONFIG>)
     while ( $line = <INPUT> )
     {
       ($timestamp, $value) = split(' ',$line);
+      if ( $value eq "" ) { next; }
       if ( $configfilename =~ /hum$/ )
       {
         # just silently ignore humidity values that make no sense, of which there are quite a lot
-        if (( $value < 0 ) || ( $value > 100 )) { next }
+        if (( $value < 0 ) || ( $value > 100 )) { next; }
       }
       $influxcmdline .= "${configfilename} value=${value} ${timestamp}000000000\n";
 
-      if (length($influxcmdline) > 10000)
+      if (length($influxcmdline) > 20000)
       {
       $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_1wire' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
       $influxcmdline = "";
@@ -46,7 +92,6 @@ foreach $configline (<OWCONFIG>)
   }
 }
 
-exit 0;
 
 # basement ups stuff
 
