@@ -19,6 +19,11 @@ $config="/data/hm/conf/tesla.conf";
 $templogfile="teslatemp.log";
 $lockfile="/tmp/tesla.lock";
 
+
+$influxcmd="curl -s -S -i -XPOST ";
+$influxurl="http://localhost:8086/";
+$influxdb="tesla_api";
+
 if ( -f $lockfile )
 {
   die "Lockfile exists in $lockfile; exiting";
@@ -171,6 +176,7 @@ close LINE;
 open LINE, ">>", "$logdirectory/teslachargelimit.log" or die $!;
 print LINE "$timestamp $chargelimit\n";
 close LINE;
+`${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'chargelimit value=${chargelimit} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";
 if ( -f "$rrddirectory/teslachargelimit.rrd" )
 {
   $output = `rrdtool update $rrddirectory/teslachargelimit.rrd $timestamp:$chargelimit`;
@@ -182,6 +188,7 @@ else
 open LINE, ">>", "$logdirectory/teslabatterylevel.log" or die $!;
 print LINE "$timestamp $batterylevel\n";
 close LINE;
+`${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'batterylevel value=${batterylevel} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";
 if ( -f "$rrddirectory/teslabatterylevel.rrd" )
 {
   $output = `rrdtool update $rrddirectory/teslabatterylevel.rrd $timestamp:$batterylevel`;
@@ -193,6 +200,7 @@ else
 open LINE, ">>", "$logdirectory/teslabatterylevelusable.log" or die $!;
 print LINE "$timestamp $batterylevelusable\n";
 close LINE;
+`${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'batterylevel_usable value=${batterylevelusable} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";
 if ( -f "$rrddirectory/teslabatterylevelusable.rrd" )
 {
   $output = `rrdtool update $rrddirectory/teslabatterylevelusable.rrd $timestamp:$batterylevelusable`;
@@ -203,7 +211,8 @@ else
 
 open LINE, ">>", "$logdirectory/teslachargevolts.log" or die $!;         
 print LINE "$timestamp $chargervoltage\n";                                  
-close LINE;                                                                     
+close LINE;
+`${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'charging_volts value=${chargervoltage} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";                                                                     
 if ( -f "$rrddirectory/teslachargevolts.rrd" )                           
 {                                                                               
   $output = `rrdtool update $rrddirectory/teslachargevolts.rrd $timestamp:$chargervoltage`;                                                       
@@ -214,7 +223,8 @@ else
 
 open LINE, ">>", "$logdirectory/teslachargeamps.log" or die $!;
 print LINE "$timestamp $chargercurrentactual\n";
-close LINE; 
+close LINE;
+`${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'charging_amps_actual value=${chargercurrentactual} ${timestamp}000000000\n'` or warn "Could not run curl because $!\n";
 if ( -f "$rrddirectory/teslachargeamps.rrd" )
 { 
   $output = `rrdtool update $rrddirectory/teslachargeamps.rrd $timestamp:$chargercurrentactual`;
