@@ -7,6 +7,134 @@
 
 $logdirectory="/data/hm/log";
 
+# tesla api stuff
+
+
+open INPUT, "<", "$logdirectory/teslachargelimit.log" or die $!;
+print "opened file teslachargelimit";
+$influxcmdline = "";
+foreach $line (<INPUT>)
+{
+  ($timestamp, $value) = split(' ',$line); 
+  # exactly 10 digits only or the timestamp is bad
+  if ( $timestamp !~ /^\d{10}$/ ) { print "ignoring invalid timestamp $timestamp\n"; next; }
+  # digits only
+  if ( $value !~ /^\d+$/ ) { print "ignoring invalid value $value\n"; next; }
+  $influxcmdline .= "chargelimit value=${value} ${timestamp}000000000\n";
+
+  if (length($influxcmdline) > 15000)
+  {
+    # -s - silent; -S - show errors
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_api' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    print ".";
+    $influxcmdline = "";
+  }
+}
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_api' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+print "\n";
+close INPUT;
+
+open INPUT, "<", "$logdirectory/teslabatterylevel.log" or die $!;
+print "opened file teslabatterylevel";
+$influxcmdline = "";
+foreach $line (<INPUT>)
+{
+  ($timestamp, $value) = split(' ',$line); 
+  # exactly 10 digits only or the timestamp is bad
+  if ( $timestamp !~ /^\d{10}$/ ) { print "ignoring invalid timestamp $timestamp\n"; next; }
+  # digits only
+  if ( $value !~ /^\d+$/ ) { print "ignoring invalid value $value\n"; next; }
+  $influxcmdline .= "batterylevel value=${value} ${timestamp}000000000\n";
+
+  if (length($influxcmdline) > 15000)
+  {
+    # -s - silent; -S - show errors
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_api' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    print ".";
+    $influxcmdline = "";
+  }
+}
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_api' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+print "\n";
+close INPUT;
+
+open INPUT, "<", "$logdirectory/teslabatterylevelusable.log" or die $!;
+print "opened file teslabatterylevelusable";
+$influxcmdline = "";
+foreach $line (<INPUT>)
+{
+  ($timestamp, $value) = split(' ',$line); 
+  # exactly 10 digits only or the timestamp is bad
+  if ( $timestamp !~ /^\d{10}$/ ) { print "ignoring invalid timestamp $timestamp\n"; next; }
+  # digits only
+  if ( $value !~ /^\d+$/ ) { print "ignoring invalid value $value\n"; next; }
+  $influxcmdline .= "batterylevel_usable value=${value} ${timestamp}000000000\n";
+
+  if (length($influxcmdline) > 15000)
+  {
+    # -s - silent; -S - show errors
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_api' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    print ".";
+    $influxcmdline = "";
+  }
+}
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_api' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+print "\n";
+close INPUT;
+
+open INPUT, "<", "$logdirectory/teslachargevolts.log" or die $!;
+print "opened file teslachargevolts";
+$influxcmdline = "";
+foreach $line (<INPUT>)
+{
+  ($timestamp, $value) = split(' ',$line); 
+  # exactly 10 digits only or the timestamp is bad
+  if ( $timestamp !~ /^\d{10}$/ ) { print "ignoring invalid timestamp $timestamp\n"; next; }
+  # digits only
+  if ( $value !~ /^\d+$/ ) { print "ignoring invalid value $value\n"; next; }
+  $influxcmdline .= "charging_volts value=${value} ${timestamp}000000000\n";
+
+  if (length($influxcmdline) > 15000)
+  {
+    # -s - silent; -S - show errors
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_api' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    print ".";
+    $influxcmdline = "";
+  }
+}
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_api' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+print "\n";
+close INPUT;
+
+open INPUT, "<", "$logdirectory/teslachargeamps.log" or die $!;
+print "opened file teslachargeamps";
+$influxcmdline = "";
+foreach $line (<INPUT>)
+{
+  ($timestamp, $value) = split(' ',$line); 
+  # exactly 10 digits only or the timestamp is bad
+  if ( $timestamp !~ /^\d{10}$/ ) { print "ignoring invalid timestamp $timestamp\n"; next; }
+  # digits only
+  if ( $value !~ /^\d+$/ ) { print "ignoring invalid value $value\n"; next; }
+  $influxcmdline .= "charging_amps_actual value=${value} ${timestamp}000000000\n";
+
+  if (length($influxcmdline) > 15000)
+  {
+    # -s - silent; -S - show errors
+    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_api' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+    print ".";
+    $influxcmdline = "";
+  }
+}
+$result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_api' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
+print "\n";
+close INPUT;
+
+
+
+exit 0;
+
+
 # ebus stuff
 
 $ebconfig="/data/hm/conf/ebusread.conf";
@@ -48,9 +176,6 @@ $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=styes_ebus' --da
 $influxcmdline = "";
 
 close EBCONFIG;
-
-
-exit 0;
 
 # 1-wire stuff - the sleep after each curl will make this take a week to run
 
