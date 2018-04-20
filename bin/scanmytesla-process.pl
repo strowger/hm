@@ -258,11 +258,28 @@ while (<INPUT>)
   $tempacair = $line[$logoffset+92];
   $floorventl = $line[$logoffset+93];
   $floorventr = $line[$logoffset+94];
-
+  $midventl = $line[$logoffset+95];
+  $midventr = $line[$logoffset+96];
+  # these are flaps within the hvac system 
+  # measurement units unsure, perhaps degrees? 16-250 = 0-100%
+  # from facebook convo with scanmytesla author
+  $louver1 = $line[$logoffset+97];
+  $louver2 = $line[$logoffset+98];
+  $louver3 = $line[$logoffset+99];
+  $louver4 = $line[$logoffset+100];
+  $louver5 = $line[$logoffset+101];
+  $louver6 = $line[$logoffset+102];
+  $louver7 = $line[$logoffset+103];
+  $louver8 = $line[$logoffset+104];
   # these refer to vents being enabled - 1 on 0 off
-  $hvacfloor = $line[$logoffset+105];
+  $hvacflr = $line[$logoffset+105];
   $hvacmid = $line[$logoffset+106];
-  $hvacwindow = $line[$logoffset+107];
+  $hvacwin = $line[$logoffset+107];
+  $hvacac = $line[$logoffset+108];
+  $hvacoff = $line[$logoffset+109];
+  $hvacfanspeed = $line[$logoffset+110];
+  $hvactempleft = $line[$logoffset+111];
+  $hvactempright = $line[$logoffset+112];
 
   $celltempmin = $line[$logoffset+113];
   $celltempavg = $line[$logoffset+114];
@@ -460,6 +477,34 @@ while (<INPUT>)
 #  never reads?
   if ( ! $coolantinletrr eq "" ) { $influxcmdline .= "temp_inlet_rear value=${coolantinletrr} ${timestampline}000000\n"; print "coolant rear $coolantinletrr\n"; } 
   if ( ! $inverterpcbrr eq "" ) { $influxcmdline .= "temp_inverterpcb_rear value=${inverterpcbrr} ${timestampline}000000\n"; }
+
+  if ( ! $tempoutfilt eq "" ) { $influxcmdline .= "temp_outside_filtered value=${tempoutfilt} ${timestampline}000000\n"; }
+  if ( ! $tempin eq "" ) { $influxcmdline .= "temp_inside value=${tempin} ${timestampline}000000\n"; }
+  if ( ! $tempacair eq "" ) { $influxcmdline .= "temp_aircon_air value=${tempacair} ${timestampline}000000\n"; }
+  if ( ! $floorventl eq "" ) { $influxcmdline .= "temp_floor_vent_l value=${floorventl} ${timestampline}000000\n"; }
+  if ( ! $floorventr eq "" ) { $influxcmdline .= "temp_floor_vent_r value=${floorventr} ${timestampline}000000\n"; }
+  if ( ! $midventl eq "" ) { $influxcmdline .= "temp_mid_vent_l value=${midventl} ${timestampline}000000\n"; }
+  if ( ! $midventr eq "" ) { $influxcmdline .= "temp_mid_vent_r value=${midventr} ${timestampline}000000\n"; }
+  if ( ! $hvactempleft eq "" ) { $influxcmdline .= "temp_set_left value=${hvactempleft} ${timestampline}000000\n"; }
+  if ( ! $hvactempright eq "" ) { $influxcmdline .= "temp_set_right value=${hvactempright} ${timestampline}000000\n"; }
+  if ( ! $hvacfanspeed eq "" ) { $influxcmdline .= "cabin_fan_speed value=${hvacfanspeed} ${timestampline}000000\n"; }
+
+
+
+#$floorventl = $line[$logoffset+93];
+#$floorventr = $line[$logoffset+94];
+#$midventl = $line[$logoffset+95];
+#$midventr = $line[$logoffset+96];
+#$louver1 = $line[$logoffset+97];
+#[...]
+#  $louver8 = $line[$logoffset+104];                                                                                                                  # these refer to vents being enabled - 1 on 0 off
+#  $hvacflr = $line[$logoffset+105];
+#  $hvacmid = $line[$logoffset+106];
+#  $hvacwin = $line[$logoffset+107];
+#  $hvacac = $line[$logoffset+108];
+#  $hvacoff = $line[$logoffset+109];
+
+
 
   # nonsense values spike graphs
   if ( ! $celltempmin eq "" ) { if ( $celltempmin > -20 ) { $influxcmdline .= "cell_temp_min value=${celltempmin} ${timestampline}000000\n"; } }
