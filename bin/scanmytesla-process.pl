@@ -47,11 +47,6 @@ else
   die "no file specified\n";
 }
 
-##
-### symbolic references don't 'count' so we get a load of 'only used once' warnings
-##no warnings 'once';
-
-$rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="scanmytesla-process.log";
 
@@ -152,6 +147,10 @@ $filetimestupid = $filetime * 1000;
 $influxcmdline="";
 $influxcmdlinevolts="";
 $logversion="";
+%cellvolts;
+%cellvoltslast;
+%celltemp;
+%celltemplast;
 while (<INPUT>)
 {
   @line = split(",",$_);
@@ -289,134 +288,134 @@ while (<INPUT>)
   $cellavg = $line[$logoffset+118];
   $cellmax = $line[$logoffset+119];
   $celldiff = $line[$logoffset+120];
-  $cellvolts01 = $line[$logoffset+121];
-  $cellvolts02 = $line[$logoffset+122];
-  $cellvolts03 = $line[$logoffset+123];
-  $celltemp01 = $line[$logoffset+124];
-  $cellvolts04 = $line[$logoffset+125];
-  $cellvolts05 = $line[$logoffset+126];
-  $cellvolts06 = $line[$logoffset+127];
-  $celltemp02 = $line[$logoffset+128];
-  $cellvolts07 = $line[$logoffset+129];
-  $cellvolts08 = $line[$logoffset+130];
-  $cellvolts09 = $line[$logoffset+131];
-  $celltemp03 = $line[$logoffset+132];
-  $cellvolts10 = $line[$logoffset+133];
-  $cellvolts11 = $line[$logoffset+134];
-  $cellvolts12 = $line[$logoffset+135];
-  $celltemp04 = $line[$logoffset+136];
-  $cellvolts13 = $line[$logoffset+137];
-  $cellvolts14 = $line[$logoffset+138];
-  $cellvolts15 = $line[$logoffset+139];
-  $celltemp05 = $line[$logoffset+140];
-  $cellvolts16 = $line[$logoffset+141];
-  $cellvolts17 = $line[$logoffset+142];
-  $cellvolts18 = $line[$logoffset+143];
-  $celltemp06 = $line[$logoffset+144];
-  $cellvolts19 = $line[$logoffset+145];
-  $cellvolts20 = $line[$logoffset+146];
-  $cellvolts21 = $line[$logoffset+147];
-  $celltemp07 = $line[$logoffset+148];
-  $cellvolts22 = $line[$logoffset+149];
-  $cellvolts23 = $line[$logoffset+150];
-  $cellvolts24 = $line[$logoffset+151];
-  $celltemp08 = $line[$logoffset+152];
-  $cellvolts25 = $line[$logoffset+153];
-  $cellvolts26 = $line[$logoffset+154];
-  $cellvolts27 = $line[$logoffset+155];
-  $celltemp09 = $line[$logoffset+156];
-  $cellvolts28 = $line[$logoffset+157];
-  $cellvolts29 = $line[$logoffset+158];
-  $cellvolts30 = $line[$logoffset+159];
-  $celltemp10 = $line[$logoffset+160];
-  $cellvolts31 = $line[$logoffset+161];
-  $cellvolts32 = $line[$logoffset+162];
-  $cellvolts33 = $line[$logoffset+163];
-  $celltemp11 = $line[$logoffset+164];
-  $cellvolts34 = $line[$logoffset+165];
-  $cellvolts35 = $line[$logoffset+166];
-  $cellvolts36 = $line[$logoffset+167];
-  $celltemp12 = $line[$logoffset+168];
-  $cellvolts37 = $line[$logoffset+169];
-  $cellvolts38 = $line[$logoffset+170];
-  $cellvolts39 = $line[$logoffset+171];
-  $celltemp13 = $line[$logoffset+172];
-  $cellvolts40 = $line[$logoffset+173];
-  $cellvolts41 = $line[$logoffset+174];
-  $cellvolts42 = $line[$logoffset+175];
-  $celltemp14 = $line[$logoffset+176];
-  $cellvolts43 = $line[$logoffset+177];
-  $cellvolts44 = $line[$logoffset+178];
-  $cellvolts45 = $line[$logoffset+179];
-  $celltemp15 = $line[$logoffset+180];
-  $cellvolts46 = $line[$logoffset+181];
-  $cellvolts47 = $line[$logoffset+182];
-  $cellvolts48 = $line[$logoffset+183];
-  $celltemp16 = $line[$logoffset+184];
-  $cellvolts49 = $line[$logoffset+185];
-  $cellvolts50 = $line[$logoffset+186];
-  $cellvolts51 = $line[$logoffset+187];
-  $celltemp17 = $line[$logoffset+188];
-  $cellvolts52 = $line[$logoffset+189];
-  $cellvolts53 = $line[$logoffset+190];
-  $cellvolts54 = $line[$logoffset+191];
-  $celltemp18 = $line[$logoffset+192];
-  $cellvolts55 = $line[$logoffset+193];
-  $cellvolts56 = $line[$logoffset+194];
-  $cellvolts57 = $line[$logoffset+195];
-  $celltemp19 = $line[$logoffset+196];
-  $cellvolts58 = $line[$logoffset+197];
-  $cellvolts59 = $line[$logoffset+198];
-  $cellvolts60 = $line[$logoffset+199];
-  $celltemp20 = $line[$logoffset+200];
-  $cellvolts61 = $line[$logoffset+201];
-  $cellvolts62 = $line[$logoffset+202];
-  $cellvolts63 = $line[$logoffset+203];
-  $celltemp21 = $line[$logoffset+204];
-  $cellvolts64 = $line[$logoffset+205];
-  $cellvolts65 = $line[$logoffset+206];
-  $cellvolts66 = $line[$logoffset+207];
-  $celltemp22 = $line[$logoffset+208];
-  $cellvolts67 = $line[$logoffset+209];
-  $cellvolts68 = $line[$logoffset+210];
-  $cellvolts69 = $line[$logoffset+211];
-  $celltemp23 = $line[$logoffset+212];
-  $cellvolts70 = $line[$logoffset+213];
-  $cellvolts71 = $line[$logoffset+214];
-  $cellvolts72 = $line[$logoffset+215];
-  $celltemp24 = $line[$logoffset+216];
-  $cellvolts73 = $line[$logoffset+217];
-  $cellvolts74 = $line[$logoffset+218];
-  $cellvolts75 = $line[$logoffset+219];
-  $celltemp25 = $line[$logoffset+220];
-  $cellvolts76 = $line[$logoffset+221];
-  $cellvolts77 = $line[$logoffset+222];
-  $cellvolts78 = $line[$logoffset+223];
-  $celltemp26 = $line[$logoffset+224];
-  $cellvolts79 = $line[$logoffset+225];
-  $cellvolts80 = $line[$logoffset+226];
-  $cellvolts81 = $line[$logoffset+227];
-  $celltemp27 = $line[$logoffset+228];
-  $cellvolts82 = $line[$logoffset+229];
-  $cellvolts83 = $line[$logoffset+230];
-  $cellvolts84 = $line[$logoffset+231];
-  $celltemp28 = $line[$logoffset+232];
-  $cellvolts85 = $line[$logoffset+233];
-  $cellvolts86 = $line[$logoffset+234];
-  $cellvolts87 = $line[$logoffset+235];
-  $celltemp29 = $line[$logoffset+236];
-  $cellvolts88 = $line[$logoffset+237];
-  $cellvolts89 = $line[$logoffset+238];
-  $cellvolts90 = $line[$logoffset+239];
-  $celltemp30 = $line[$logoffset+240];
-  $cellvolts91 = $line[$logoffset+241];
-  $cellvolts92 = $line[$logoffset+242];
-  $cellvolts93 = $line[$logoffset+243];
-  $celltemp31 = $line[$logoffset+244];
-  $cellvolts94 = $line[$logoffset+245];
-  $cellvolts95 = $line[$logoffset+246];
-  $cellvolts96 = $line[$logoffset+247];
-  $celltemp32 = $line[$logoffset+248];
+  $cellvolts{'01'} = $line[$logoffset+121];
+  $cellvolts{'02'} = $line[$logoffset+122]; 
+  $cellvolts{'03'} = $line[$logoffset+123]; 
+  $celltemp{'01'} = $line[$logoffset+124];
+  $cellvolts{'04'} = $line[$logoffset+125];
+  $cellvolts{'05'} = $line[$logoffset+126];
+  $cellvolts{'06'} = $line[$logoffset+127];
+  $celltemp{'02'} = $line[$logoffset+128];
+  $cellvolts{'07'} = $line[$logoffset+129];
+  $cellvolts{'08'} = $line[$logoffset+130];
+  $cellvolts{'09'} = $line[$logoffset+131];
+  $celltemp{'03'} = $line[$logoffset+132];
+  $cellvolts{'10'} = $line[$logoffset+133];
+  $cellvolts{'11'} = $line[$logoffset+134];
+  $cellvolts{'12'} = $line[$logoffset+135];
+  $celltemp{'04'} = $line[$logoffset+136];
+  $cellvolts{'13'} = $line[$logoffset+137];
+  $cellvolts{'14'} = $line[$logoffset+138];
+  $cellvolts{'15'} = $line[$logoffset+139];
+  $celltemp{'05'} = $line[$logoffset+140];
+  $cellvolts{'16'} = $line[$logoffset+141];
+  $cellvolts{'17'} = $line[$logoffset+142];
+  $cellvolts{'18'} = $line[$logoffset+143];
+  $celltemp{'06'} = $line[$logoffset+144];
+  $cellvolts{'19'} = $line[$logoffset+145];
+  $cellvolts{'20'} = $line[$logoffset+146];
+  $cellvolts{'21'} = $line[$logoffset+147];
+  $celltemp{'07'} = $line[$logoffset+148];
+  $cellvolts{'22'} = $line[$logoffset+149];
+  $cellvolts{'23'} = $line[$logoffset+150];
+  $cellvolts{'24'} = $line[$logoffset+151];
+  $celltemp{'08'} = $line[$logoffset+152];
+  $cellvolts{'25'} = $line[$logoffset+153];
+  $cellvolts{'26'} = $line[$logoffset+154];
+  $cellvolts{'27'} = $line[$logoffset+155];
+  $celltemp{'09'} = $line[$logoffset+156];
+  $cellvolts{'28'} = $line[$logoffset+157];
+  $cellvolts{'29'} = $line[$logoffset+158];
+  $cellvolts{'30'} = $line[$logoffset+159];
+  $celltemp{'10'} = $line[$logoffset+160];
+  $cellvolts{'31'} = $line[$logoffset+161];
+  $cellvolts{'32'} = $line[$logoffset+162];
+  $cellvolts{'33'} = $line[$logoffset+163];
+  $celltemp{'11'} = $line[$logoffset+164];
+  $cellvolts{'34'} = $line[$logoffset+165];
+  $cellvolts{'35'} = $line[$logoffset+166];
+  $cellvolts{'36'} = $line[$logoffset+167];
+  $celltemp{'12'} = $line[$logoffset+168];
+  $cellvolts{'37'} = $line[$logoffset+169];
+  $cellvolts{'38'} = $line[$logoffset+170];
+  $cellvolts{'39'} = $line[$logoffset+171];
+  $celltemp{'13'} = $line[$logoffset+172];
+  $cellvolts{'40'} = $line[$logoffset+173];
+  $cellvolts{'41'} = $line[$logoffset+174];
+  $cellvolts{'42'} = $line[$logoffset+175];
+  $celltemp{'14'} = $line[$logoffset+176];
+  $cellvolts{'43'} = $line[$logoffset+177];
+  $cellvolts{'44'} = $line[$logoffset+178];
+  $cellvolts{'45'} = $line[$logoffset+179];
+  $celltemp{'15'} = $line[$logoffset+180];
+  $cellvolts{'46'} = $line[$logoffset+181];
+  $cellvolts{'47'} = $line[$logoffset+182];
+  $cellvolts{'48'} = $line[$logoffset+183];
+  $celltemp{'16'} = $line[$logoffset+184];
+  $cellvolts{'49'} = $line[$logoffset+185];
+  $cellvolts{'50'} = $line[$logoffset+186];
+  $cellvolts{'51'} = $line[$logoffset+187];
+  $celltemp{'17'} = $line[$logoffset+188];
+  $cellvolts{'52'} = $line[$logoffset+189];
+  $cellvolts{'53'} = $line[$logoffset+190];
+  $cellvolts{'54'} = $line[$logoffset+191];
+  $celltemp{'18'} = $line[$logoffset+192];
+  $cellvolts{'55'} = $line[$logoffset+193];
+  $cellvolts{'56'} = $line[$logoffset+194];
+  $cellvolts{'57'} = $line[$logoffset+195];
+  $celltemp{'19'} = $line[$logoffset+196];
+  $cellvolts{'58'} = $line[$logoffset+197];
+  $cellvolts{'59'} = $line[$logoffset+198];
+  $cellvolts{'60'} = $line[$logoffset+199];
+  $celltemp{'20'} = $line[$logoffset+200];
+  $cellvolts{'61'} = $line[$logoffset+201];
+  $cellvolts{'62'} = $line[$logoffset+202];
+  $cellvolts{'63'} = $line[$logoffset+203];
+  $celltemp{'21'} = $line[$logoffset+204];
+  $cellvolts{'64'} = $line[$logoffset+205];
+  $cellvolts{'65'} = $line[$logoffset+206];
+  $cellvolts{'66'} = $line[$logoffset+207];
+  $celltemp{'22'} = $line[$logoffset+208];
+  $cellvolts{'67'} = $line[$logoffset+209];
+  $cellvolts{'68'} = $line[$logoffset+210];
+  $cellvolts{'69'} = $line[$logoffset+211];
+  $celltemp{'23'} = $line[$logoffset+212];
+  $cellvolts{'70'} = $line[$logoffset+213];
+  $cellvolts{'71'} = $line[$logoffset+214];
+  $cellvolts{'72'} = $line[$logoffset+215];
+  $celltemp{'24'} = $line[$logoffset+216];
+  $cellvolts{'73'} = $line[$logoffset+217];
+  $cellvolts{'74'} = $line[$logoffset+218];
+  $cellvolts{'75'} = $line[$logoffset+219];
+  $celltemp{'25'} = $line[$logoffset+220];
+  $cellvolts{'76'} = $line[$logoffset+221];
+  $cellvolts{'77'} = $line[$logoffset+222];
+  $cellvolts{'78'} = $line[$logoffset+223];
+  $celltemp{'26'} = $line[$logoffset+224];
+  $cellvolts{'79'} = $line[$logoffset+225];
+  $cellvolts{'80'} = $line[$logoffset+226];
+  $cellvolts{'81'} = $line[$logoffset+227];
+  $celltemp{'27'} = $line[$logoffset+228];
+  $cellvolts{'82'} = $line[$logoffset+229];
+  $cellvolts{'83'} = $line[$logoffset+230];
+  $cellvolts{'84'} = $line[$logoffset+231];
+  $celltemp{'28'} = $line[$logoffset+232];
+  $cellvolts{'85'} = $line[$logoffset+233];
+  $cellvolts{'86'} = $line[$logoffset+234];
+  $cellvolts{'87'} = $line[$logoffset+235];
+  $celltemp{'29'} = $line[$logoffset+236];
+  $cellvolts{'88'} = $line[$logoffset+237];
+  $cellvolts{'89'} = $line[$logoffset+238];
+  $cellvolts{'90'} = $line[$logoffset+239];
+  $celltemp{'30'} = $line[$logoffset+240];
+  $cellvolts{'91'} = $line[$logoffset+241];
+  $cellvolts{'92'} = $line[$logoffset+242];
+  $cellvolts{'93'} = $line[$logoffset+243];
+  $celltemp{'31'} = $line[$logoffset+244];
+  $cellvolts{'94'} = $line[$logoffset+245];
+  $cellvolts{'95'} = $line[$logoffset+246];
+  $cellvolts{'96'} = $line[$logoffset+247];
+  $celltemp{'32'} = $line[$logoffset+248];
 
 
   if ( ! $battvolts eq "" ) { $influxcmdline .= "battery_voltage value=${battvolts} ${timestampline}000000\n"; }
@@ -431,9 +430,8 @@ while (<INPUT>)
 #  if ( ! $dcdcoutpower eq "" ) { $influxcmdline .= "dcdc_amps value=${dcdcoutpower} ${timestampline}000000\n"; }
 #  if ( ! $dcdcefficiency eq "" ) { $influxcmdline .= "dcdc_amps value=${dcdcefficiency} ${timestampline}000000\n"; }
   if ( ! $sys400v eq "" ) { $influxcmdline .= "hv_kw value=${sys400v} ${timestampline}000000\n"; }
-# units make no sense here, it goes up to 40 which means it can't be kw
-  if ( ! $heatingcooling eq "" ) { $influxcmdline .= "hvac value=${heatingcooling} ${timestampline}000000\n"; }
-
+# this is meant to be heating/cooling but suffers from spikes and nonsense data
+  if ( ! $heatingcooling eq "" ) { if ( ( $heatingcooling > -12) && ( $heatingcooling < 12 )) { $influxcmdline .= "hvac value=${heatingcooling} ${timestampline}000000\n"; } }
 
   if ( ! $batteryinlettemp eq "" ) { $influxcmdline .= "temp_battery_coolantin value=${batteryinlettemp} ${timestampline}000000\n"; }
   if ( ! $ptinlettemp eq "" ) { $influxcmdline .= "temp_pt_coolantin value=${ptinlettemp} ${timestampline}000000\n"; }
@@ -478,16 +476,16 @@ while (<INPUT>)
   if ( ! $coolantinletrr eq "" ) { $influxcmdline .= "temp_inlet_rear value=${coolantinletrr} ${timestampline}000000\n"; print "coolant rear $coolantinletrr\n"; } 
   if ( ! $inverterpcbrr eq "" ) { $influxcmdline .= "temp_inverterpcb_rear value=${inverterpcbrr} ${timestampline}000000\n"; }
 
-  if ( ! $tempoutfilt eq "" ) { $influxcmdline .= "temp_outside_filtered value=${tempoutfilt} ${timestampline}000000\n"; }
-  if ( ! $tempin eq "" ) { $influxcmdline .= "temp_inside value=${tempin} ${timestampline}000000\n"; }
-  if ( ! $tempacair eq "" ) { $influxcmdline .= "temp_aircon_air value=${tempacair} ${timestampline}000000\n"; }
-  if ( ! $floorventl eq "" ) { $influxcmdline .= "temp_floor_vent_l value=${floorventl} ${timestampline}000000\n"; }
-  if ( ! $floorventr eq "" ) { $influxcmdline .= "temp_floor_vent_r value=${floorventr} ${timestampline}000000\n"; }
-  if ( ! $midventl eq "" ) { $influxcmdline .= "temp_mid_vent_l value=${midventl} ${timestampline}000000\n"; }
-  if ( ! $midventr eq "" ) { $influxcmdline .= "temp_mid_vent_r value=${midventr} ${timestampline}000000\n"; }
-  if ( ! $hvactempleft eq "" ) { $influxcmdline .= "temp_set_left value=${hvactempleft} ${timestampline}000000\n"; }
-  if ( ! $hvactempright eq "" ) { $influxcmdline .= "temp_set_right value=${hvactempright} ${timestampline}000000\n"; }
-  if ( ! $hvacfanspeed eq "" ) { $influxcmdline .= "cabin_fan_speed value=${hvacfanspeed} ${timestampline}000000\n"; }
+  if ( ! $tempoutfilt eq "" ) { if (( $tempoutfilt > -40 ) && ( $tempoutfilt < 60 )) { $influxcmdline .= "temp_outside_filtered value=${tempoutfilt} ${timestampline}000000\n"; } }
+  if ( ! $tempin eq "" ) { if (( $tempin > -40 ) && ( $tempin <70 )) { $influxcmdline .= "temp_inside value=${tempin} ${timestampline}000000\n"; } }
+  if ( ! $tempacair eq "" ) { if (( $tempacair > -40 ) && ( $tempacair < 80 )) { $influxcmdline .= "temp_aircon_air value=${tempacair} ${timestampline}000000\n"; } }
+  if ( ! $floorventl eq "" ) { if (( $floorventl > -40 ) && ( $floorventl < 80 )) { $influxcmdline .= "temp_floor_vent_l value=${floorventl} ${timestampline}000000\n"; } }
+  if ( ! $floorventr eq "" ) { if (( $floorventr > -40 ) && ( $floorventr < 80 )) { $influxcmdline .= "temp_floor_vent_r value=${floorventr} ${timestampline}000000\n"; } }
+  if ( ! $midventl eq "" ) { if (( $midventl > -40 ) && ( $midventl < 60 )) { $influxcmdline .= "temp_mid_vent_l value=${midventl} ${timestampline}000000\n"; } }
+  if ( ! $midventr eq "" ) { if (( $midventr > -40 ) && ( $midventr < 60 )) { $influxcmdline .= "temp_mid_vent_r value=${midventr} ${timestampline}000000\n"; } }
+  if ( ! $hvactempleft eq "" ) { if (( $hvactempleft > 0 ) && ( $hvactempleft < 60 )) { $influxcmdline .= "temp_set_left value=${hvactempleft} ${timestampline}000000\n"; } }
+  if ( ! $hvactempright eq "" ) { if (( $hvactempright > 0 ) && ( $hvactempright < 60 )) { $influxcmdline .= "temp_set_right value=${hvactempright} ${timestampline}000000\n"; } }
+  if ( ! $hvacfanspeed eq "" ) { if (( $hvacfanspeed > 0 ) && ( $hvacfanspeed < 12 )) { $influxcmdline .= "cabin_fan_speed value=${hvacfanspeed} ${timestampline}000000\n"; } }
 
 
 
@@ -505,157 +503,99 @@ while (<INPUT>)
 #  $hvacoff = $line[$logoffset+109];
 
 
+  if ( ! $celltempmin eq "" ) 
+  { 
+    if ( ! defined $celltempminlast ) { $celltempminlast = $celltempmin; }
+    $ctdiff = abs ($celltempmin - $celltempminlast);
+    if (( $ctdiff < 5 ) && ( $celltempmin > -25 ) && ( $celltempmin < 75 ))
+    { 
+      $influxcmdline .= "cell_temp_min value=${celltempmin} ${timestampline}000000\n"; 
+    } 
+    $celltempminlast = $celltempmin;
+  }
 
-  # nonsense values spike graphs
-  if ( ! $celltempmin eq "" ) { if ( $celltempmin > -20 ) { $influxcmdline .= "cell_temp_min value=${celltempmin} ${timestampline}000000\n"; } }
-  if ( ! $celltempavg eq "" ) { $influxcmdline .= "cell_temp_avg value=${celltempavg} ${timestampline}000000\n"; }
-  if ( ! $celltempmax eq "" ) { $influxcmdline .= "cell_temp_max value=${celltempmax} ${timestampline}000000\n"; }
-  # nonsense values spike graphs
+  if ( ! $celltempavg eq "" ) 
+  { 
+    if ( ! defined $celltempavglast ) { $celltempavglast = $celltempavg; }
+    $ctdiff = abs ($celltempavg - $celltempavglast);
+    if (( $ctdiff < 5 ) && ( $celltempavg > -25 ) && ( $celltempavg < 75))
+    { 
+      $influxcmdline .= "cell_temp_avg value=${celltempavg} ${timestampline}000000\n"; 
+    } 
+    $celltempavglast = $celltempavg;
+  }
+
+  if ( ! $celltempmax eq "" ) 
+  { 
+    if ( ! defined $celltempmaxlast ) { $celltempmaxlast = $celltempmax; }
+    $ctdiff = abs ($celltempmax - $celltempmaxlast);
+    if (( $ctdiff < 5 ) && ( $celltempmax > -25 ) && ( $celltempmax < 75))
+    { 
+      $influxcmdline .= "cell_temp_max value=${celltempmax} ${timestampline}000000\n"; 
+    } 
+    $celltempmaxlast = $celltempmax;
+  }
+
   if ( ! $celltempdiff eq "" ) { if ( $celltempdiff < 30 ) { $influxcmdline .= "cell_temp_diff value=${celltempdiff} ${timestampline}000000\n"; } }
 
-  if ( ! $celltemp01 eq "" ) { if ( $celltemp01 > -20 ) { $influxcmdline .= "cell_temp_01 value=${celltemp01} ${timestampline}000000\n"; } }
-  if ( ! $celltemp02 eq "" ) { if ( $celltemp02 > -20 ) { $influxcmdline .= "cell_temp_02 value=${celltemp02} ${timestampline}000000\n"; } }
-  if ( ! $celltemp03 eq "" ) { if ( $celltemp03 > -20 ) { $influxcmdline .= "cell_temp_03 value=${celltemp03} ${timestampline}000000\n"; } }
-  if ( ! $celltemp04 eq "" ) { if ( $celltemp04 > -20 ) { $influxcmdline .= "cell_temp_04 value=${celltemp04} ${timestampline}000000\n"; } }
-  if ( ! $celltemp05 eq "" ) { if ( $celltemp05 > -20 ) { $influxcmdline .= "cell_temp_05 value=${celltemp05} ${timestampline}000000\n"; } }
-  if ( ! $celltemp06 eq "" ) { if ( $celltemp06 > -20 ) { $influxcmdline .= "cell_temp_06 value=${celltemp06} ${timestampline}000000\n"; } }
-  if ( ! $celltemp07 eq "" ) { if ( $celltemp07 > -20 ) { $influxcmdline .= "cell_temp_07 value=${celltemp07} ${timestampline}000000\n"; } }
-  if ( ! $celltemp08 eq "" ) { if ( $celltemp08 > -20 ) { $influxcmdline .= "cell_temp_08 value=${celltemp08} ${timestampline}000000\n"; } }
-  if ( ! $celltemp09 eq "" ) { if ( $celltemp09 > -20 ) { $influxcmdline .= "cell_temp_09 value=${celltemp09} ${timestampline}000000\n"; } }
-  if ( ! $celltemp10 eq "" ) { if ( $celltemp10 > -20 ) { $influxcmdline .= "cell_temp_10 value=${celltemp10} ${timestampline}000000\n"; } }
-  if ( ! $celltemp11 eq "" ) { if ( $celltemp11 > -20 ) { $influxcmdline .= "cell_temp_11 value=${celltemp11} ${timestampline}000000\n"; } }
-  if ( ! $celltemp12 eq "" ) { if ( $celltemp12 > -20 ) { $influxcmdline .= "cell_temp_12 value=${celltemp12} ${timestampline}000000\n"; } }
-  if ( ! $celltemp13 eq "" ) { if ( $celltemp13 > -20 ) { $influxcmdline .= "cell_temp_13 value=${celltemp13} ${timestampline}000000\n"; } }
-  if ( ! $celltemp14 eq "" ) { if ( $celltemp14 > -20 ) { $influxcmdline .= "cell_temp_14 value=${celltemp14} ${timestampline}000000\n"; } }
-  if ( ! $celltemp15 eq "" ) { if ( $celltemp15 > -20 ) { $influxcmdline .= "cell_temp_15 value=${celltemp15} ${timestampline}000000\n"; } }
-  if ( ! $celltemp16 eq "" ) { if ( $celltemp16 > -20 ) { $influxcmdline .= "cell_temp_16 value=${celltemp16} ${timestampline}000000\n"; } }
-  if ( ! $celltemp17 eq "" ) { if ( $celltemp17 > -20 ) { $influxcmdline .= "cell_temp_17 value=${celltemp17} ${timestampline}000000\n"; } }
-  if ( ! $celltemp18 eq "" ) { if ( $celltemp18 > -20 ) { $influxcmdline .= "cell_temp_18 value=${celltemp18} ${timestampline}000000\n"; } }
-  if ( ! $celltemp19 eq "" ) { if ( $celltemp19 > -20 ) { $influxcmdline .= "cell_temp_19 value=${celltemp19} ${timestampline}000000\n"; } }
-  if ( ! $celltemp20 eq "" ) { if ( $celltemp20 > -20 ) { $influxcmdline .= "cell_temp_20 value=${celltemp20} ${timestampline}000000\n"; } }
-  if ( ! $celltemp21 eq "" ) { if ( $celltemp21 > -20 ) { $influxcmdline .= "cell_temp_21 value=${celltemp21} ${timestampline}000000\n"; } }
-  if ( ! $celltemp22 eq "" ) { if ( $celltemp22 > -20 ) { $influxcmdline .= "cell_temp_22 value=${celltemp22} ${timestampline}000000\n"; } }
-  if ( ! $celltemp23 eq "" ) { if ( $celltemp23 > -20 ) { $influxcmdline .= "cell_temp_23 value=${celltemp23} ${timestampline}000000\n"; } }
-  if ( ! $celltemp24 eq "" ) { if ( $celltemp24 > -20 ) { $influxcmdline .= "cell_temp_24 value=${celltemp24} ${timestampline}000000\n"; } }
-  if ( ! $celltemp25 eq "" ) { if ( $celltemp25 > -20 ) { $influxcmdline .= "cell_temp_25 value=${celltemp25} ${timestampline}000000\n"; } }
-  if ( ! $celltemp26 eq "" ) { if ( $celltemp26 > -20 ) { $influxcmdline .= "cell_temp_26 value=${celltemp26} ${timestampline}000000\n"; } }
-  if ( ! $celltemp27 eq "" ) { if ( $celltemp27 > -20 ) { $influxcmdline .= "cell_temp_27 value=${celltemp27} ${timestampline}000000\n"; } }
-  if ( ! $celltemp28 eq "" ) { if ( $celltemp28 > -20 ) { $influxcmdline .= "cell_temp_28 value=${celltemp28} ${timestampline}000000\n"; } }
-  if ( ! $celltemp29 eq "" ) { if ( $celltemp29 > -20 ) { $influxcmdline .= "cell_temp_29 value=${celltemp29} ${timestampline}000000\n"; } }
-  if ( ! $celltemp30 eq "" ) { if ( $celltemp30 > -20 ) { $influxcmdline .= "cell_temp_30 value=${celltemp30} ${timestampline}000000\n"; } }
-  if ( ! $celltemp31 eq "" ) { if ( $celltemp31 > -20 ) { $influxcmdline .= "cell_temp_31 value=${celltemp31} ${timestampline}000000\n"; } }
-  if ( ! $celltemp32 eq "" ) { if ( $celltemp32 > -20 ) { $influxcmdline .= "cell_temp_32 value=${celltemp32} ${timestampline}000000\n"; } }
+# need these numbers in "" in order to preserve the leading zeros
+  foreach $ctno("01".."32")
+  {
+    # if we actually got a value for it on this line...
+    if ( ! $celltemp{$ctno} eq "" )
+    {
+#      print "celltemp debug: ctno $ctno temp $celltemp{$ctno}\n";
+      # if this is the first of these we've had, we need to populate the hash of last values
+      if ( ! defined $celltemplast{$ctno} ) { $celltemplast{$ctno} = $celltemp{$ctno}; }
+      # if we haven't had an avg yet, we'll bodge it
+      # we want to bin values that are too far from the average
+      if ( ! $celltempavglast eq "" ) { $avgtemp = $celltempavglast; }
+      else { $avgtemp = $celltemp{$ctno}; }
+      $avgdiff = abs ($celltemp{$ctno} - $avgtemp);
+      # if the value we've got seems sane
+      $ctdiff = abs ($celltemp{$ctno} - $celltemplast{$ctno});
+      # if the current value is more than 5 deg different to previous, it's bogus; also ignore clearly nonsense values
+#      print "celltemp debug: ctno $ctno temp $celltemp{$ctno} diff $ctdiff last $celltemplast{$ctno}\n";
+      if (( $ctdiff < 5 ) && ( $celltemp{$ctno} > -25 ) && ( $celltemp{$ctno} < 75 ) && ( $avgdiff < 10))
+      {
+        $influxcmdline .= "cell_temp_$ctno value=$celltemp{$ctno} ${timestampline}000000\n";     
+      }
+      $celltemplast{$ctno} = $celltemp{$ctno};  
+    }
+  }
 
-  if ( ! $cellvolts01 eq "" ) { if ( ( $cellvolts01 > 2) && ( $cellvolts01 < 5 )) { $influxcmdlinevolts .= "cell_volts_01 value=${cellvolts01} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts02 eq "" ) { if ( ( $cellvolts02 > 2) && ( $cellvolts02 < 5 )) { $influxcmdlinevolts .= "cell_volts_02 value=${cellvolts02} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts03 eq "" ) { if ( ( $cellvolts03 > 2) && ( $cellvolts03 < 5 )) { $influxcmdlinevolts .= "cell_volts_03 value=${cellvolts03} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts04 eq "" ) { if ( ( $cellvolts04 > 2) && ( $cellvolts04 < 5 )) { $influxcmdlinevolts .= "cell_volts_04 value=${cellvolts04} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts05 eq "" ) { if ( ( $cellvolts05 > 2) && ( $cellvolts05 < 5 )) { $influxcmdlinevolts .= "cell_volts_05 value=${cellvolts05} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts06 eq "" ) { if ( ( $cellvolts06 > 2) && ( $cellvolts06 < 5 )) { $influxcmdlinevolts .= "cell_volts_06 value=${cellvolts06} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts07 eq "" ) { if ( ( $cellvolts07 > 2) && ( $cellvolts07 < 5 )) { $influxcmdlinevolts .= "cell_volts_07 value=${cellvolts07} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts08 eq "" ) { if ( ( $cellvolts08 > 2) && ( $cellvolts08 < 5 )) { $influxcmdlinevolts .= "cell_volts_08 value=${cellvolts08} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts09 eq "" ) { if ( ( $cellvolts09 > 2) && ( $cellvolts09 < 5 )) { $influxcmdlinevolts .= "cell_volts_09 value=${cellvolts09} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts10 eq "" ) { if ( ( $cellvolts10 > 2) && ( $cellvolts10 < 5 )) { $influxcmdlinevolts .= "cell_volts_10 value=${cellvolts10} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts11 eq "" ) { if ( ( $cellvolts11 > 2) && ( $cellvolts11 < 5 )) { $influxcmdlinevolts .= "cell_volts_11 value=${cellvolts11} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts12 eq "" ) { if ( ( $cellvolts12 > 2) && ( $cellvolts12 < 5 )) { $influxcmdlinevolts .= "cell_volts_12 value=${cellvolts12} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts13 eq "" ) { if ( ( $cellvolts13 > 2) && ( $cellvolts13 < 5 )) { $influxcmdlinevolts .= "cell_volts_13 value=${cellvolts13} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts14 eq "" ) { if ( ( $cellvolts14 > 2) && ( $cellvolts14 < 5 )) { $influxcmdlinevolts .= "cell_volts_14 value=${cellvolts14} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts15 eq "" ) { if ( ( $cellvolts15 > 2) && ( $cellvolts15 < 5 )) { $influxcmdlinevolts .= "cell_volts_15 value=${cellvolts15} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts16 eq "" ) { if ( ( $cellvolts16 > 2) && ( $cellvolts16 < 5 )) { $influxcmdlinevolts .= "cell_volts_16 value=${cellvolts16} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts17 eq "" ) { if ( ( $cellvolts17 > 2) && ( $cellvolts17 < 5 )) { $influxcmdlinevolts .= "cell_volts_17 value=${cellvolts17} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts18 eq "" ) { if ( ( $cellvolts18 > 2) && ( $cellvolts18 < 5 )) { $influxcmdlinevolts .= "cell_volts_18 value=${cellvolts18} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts19 eq "" ) { if ( ( $cellvolts19 > 2) && ( $cellvolts19 < 5 )) { $influxcmdlinevolts .= "cell_volts_19 value=${cellvolts19} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts20 eq "" ) { if ( ( $cellvolts20 > 2) && ( $cellvolts20 < 5 )) { $influxcmdlinevolts .= "cell_volts_20 value=${cellvolts20} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts21 eq "" ) { if ( ( $cellvolts21 > 2) && ( $cellvolts21 < 5 )) { $influxcmdlinevolts .= "cell_volts_21 value=${cellvolts21} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts22 eq "" ) { if ( ( $cellvolts22 > 2) && ( $cellvolts22 < 5 )) { $influxcmdlinevolts .= "cell_volts_22 value=${cellvolts22} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts23 eq "" ) { if ( ( $cellvolts23 > 2) && ( $cellvolts23 < 5 )) { $influxcmdlinevolts .= "cell_volts_23 value=${cellvolts23} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts24 eq "" ) { if ( ( $cellvolts24 > 2) && ( $cellvolts24 < 5 )) { $influxcmdlinevolts .= "cell_volts_24 value=${cellvolts24} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts25 eq "" ) { if ( ( $cellvolts25 > 2) && ( $cellvolts25 < 5 )) { $influxcmdlinevolts .= "cell_volts_25 value=${cellvolts25} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts26 eq "" ) { if ( ( $cellvolts26 > 2) && ( $cellvolts26 < 5 )) { $influxcmdlinevolts .= "cell_volts_26 value=${cellvolts26} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts27 eq "" ) { if ( ( $cellvolts27 > 2) && ( $cellvolts27 < 5 )) { $influxcmdlinevolts .= "cell_volts_27 value=${cellvolts27} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts28 eq "" ) { if ( ( $cellvolts28 > 2) && ( $cellvolts28 < 5 )) { $influxcmdlinevolts .= "cell_volts_28 value=${cellvolts28} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts29 eq "" ) { if ( ( $cellvolts29 > 2) && ( $cellvolts29 < 5 )) { $influxcmdlinevolts .= "cell_volts_29 value=${cellvolts29} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts30 eq "" ) { if ( ( $cellvolts30 > 2) && ( $cellvolts30 < 5 )) { $influxcmdlinevolts .= "cell_volts_30 value=${cellvolts30} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts31 eq "" ) { if ( ( $cellvolts31 > 2) && ( $cellvolts31 < 5 )) { $influxcmdlinevolts .= "cell_volts_31 value=${cellvolts31} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts32 eq "" ) { if ( ( $cellvolts32 > 2) && ( $cellvolts32 < 5 )) { $influxcmdlinevolts .= "cell_volts_32 value=${cellvolts32} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts33 eq "" ) { if ( ( $cellvolts33 > 2) && ( $cellvolts33 < 5 )) { $influxcmdlinevolts .= "cell_volts_33 value=${cellvolts33} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts34 eq "" ) { if ( ( $cellvolts34 > 2) && ( $cellvolts34 < 5 )) { $influxcmdlinevolts .= "cell_volts_34 value=${cellvolts34} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts35 eq "" ) { if ( ( $cellvolts35 > 2) && ( $cellvolts35 < 5 )) { $influxcmdlinevolts .= "cell_volts_35 value=${cellvolts35} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts36 eq "" ) { if ( ( $cellvolts36 > 2) && ( $cellvolts36 < 5 )) { $influxcmdlinevolts .= "cell_volts_36 value=${cellvolts36} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts37 eq "" ) { if ( ( $cellvolts37 > 2) && ( $cellvolts37 < 5 )) { $influxcmdlinevolts .= "cell_volts_37 value=${cellvolts37} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts38 eq "" ) { if ( ( $cellvolts38 > 2) && ( $cellvolts38 < 5 )) { $influxcmdlinevolts .= "cell_volts_38 value=${cellvolts38} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts39 eq "" ) { if ( ( $cellvolts39 > 2) && ( $cellvolts39 < 5 )) { $influxcmdlinevolts .= "cell_volts_39 value=${cellvolts39} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts40 eq "" ) { if ( ( $cellvolts40 > 2) && ( $cellvolts40 < 5 )) { $influxcmdlinevolts .= "cell_volts_40 value=${cellvolts40} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts41 eq "" ) { if ( ( $cellvolts41 > 2) && ( $cellvolts41 < 5 )) { $influxcmdlinevolts .= "cell_volts_41 value=${cellvolts41} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts42 eq "" ) { if ( ( $cellvolts42 > 2) && ( $cellvolts42 < 5 )) { $influxcmdlinevolts .= "cell_volts_42 value=${cellvolts42} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts43 eq "" ) { if ( ( $cellvolts43 > 2) && ( $cellvolts43 < 5 )) { $influxcmdlinevolts .= "cell_volts_43 value=${cellvolts43} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts44 eq "" ) { if ( ( $cellvolts44 > 2) && ( $cellvolts44 < 5 )) { $influxcmdlinevolts .= "cell_volts_44 value=${cellvolts44} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts45 eq "" ) { if ( ( $cellvolts45 > 2) && ( $cellvolts45 < 5 )) { $influxcmdlinevolts .= "cell_volts_45 value=${cellvolts45} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts46 eq "" ) { if ( ( $cellvolts46 > 2) && ( $cellvolts46 < 5 )) { $influxcmdlinevolts .= "cell_volts_46 value=${cellvolts46} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts47 eq "" ) { if ( ( $cellvolts47 > 2) && ( $cellvolts47 < 5 )) { $influxcmdlinevolts .= "cell_volts_47 value=${cellvolts47} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts48 eq "" ) { if ( ( $cellvolts48 > 2) && ( $cellvolts48 < 5 )) { $influxcmdlinevolts .= "cell_volts_48 value=${cellvolts48} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts49 eq "" ) { if ( ( $cellvolts49 > 2) && ( $cellvolts49 < 5 )) { $influxcmdlinevolts .= "cell_volts_49 value=${cellvolts49} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts50 eq "" ) { if ( ( $cellvolts50 > 2) && ( $cellvolts50 < 5 )) { $influxcmdlinevolts .= "cell_volts_50 value=${cellvolts50} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts51 eq "" ) { if ( ( $cellvolts51 > 2) && ( $cellvolts51 < 5 )) { $influxcmdlinevolts .= "cell_volts_51 value=${cellvolts51} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts52 eq "" ) { if ( ( $cellvolts52 > 2) && ( $cellvolts52 < 5 )) { $influxcmdlinevolts .= "cell_volts_52 value=${cellvolts52} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts53 eq "" ) { if ( ( $cellvolts53 > 2) && ( $cellvolts53 < 5 )) { $influxcmdlinevolts .= "cell_volts_53 value=${cellvolts53} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts54 eq "" ) { if ( ( $cellvolts54 > 2) && ( $cellvolts54 < 5 )) { $influxcmdlinevolts .= "cell_volts_54 value=${cellvolts54} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts55 eq "" ) { if ( ( $cellvolts55 > 2) && ( $cellvolts55 < 5 )) { $influxcmdlinevolts .= "cell_volts_55 value=${cellvolts55} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts56 eq "" ) { if ( ( $cellvolts56 > 2) && ( $cellvolts56 < 5 )) { $influxcmdlinevolts .= "cell_volts_56 value=${cellvolts56} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts57 eq "" ) { if ( ( $cellvolts57 > 2) && ( $cellvolts57 < 5 )) { $influxcmdlinevolts .= "cell_volts_57 value=${cellvolts57} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts58 eq "" ) { if ( ( $cellvolts58 > 2) && ( $cellvolts58 < 5 )) { $influxcmdlinevolts .= "cell_volts_58 value=${cellvolts58} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts59 eq "" ) { if ( ( $cellvolts59 > 2) && ( $cellvolts59 < 5 )) { $influxcmdlinevolts .= "cell_volts_59 value=${cellvolts59} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts60 eq "" ) { if ( ( $cellvolts60 > 2) && ( $cellvolts60 < 5 )) { $influxcmdlinevolts .= "cell_volts_60 value=${cellvolts60} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts61 eq "" ) { if ( ( $cellvolts61 > 2) && ( $cellvolts61 < 5 )) { $influxcmdlinevolts .= "cell_volts_61 value=${cellvolts61} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts62 eq "" ) { if ( ( $cellvolts62 > 2) && ( $cellvolts62 < 5 )) { $influxcmdlinevolts .= "cell_volts_62 value=${cellvolts62} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts63 eq "" ) { if ( ( $cellvolts63 > 2) && ( $cellvolts63 < 5 )) { $influxcmdlinevolts .= "cell_volts_63 value=${cellvolts63} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts64 eq "" ) { if ( ( $cellvolts64 > 2) && ( $cellvolts64 < 5 )) { $influxcmdlinevolts .= "cell_volts_64 value=${cellvolts64} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts65 eq "" ) { if ( ( $cellvolts65 > 2) && ( $cellvolts65 < 5 )) { $influxcmdlinevolts .= "cell_volts_65 value=${cellvolts65} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts66 eq "" ) { if ( ( $cellvolts66 > 2) && ( $cellvolts66 < 5 )) { $influxcmdlinevolts .= "cell_volts_66 value=${cellvolts66} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts67 eq "" ) { if ( ( $cellvolts67 > 2) && ( $cellvolts67 < 5 )) { $influxcmdlinevolts .= "cell_volts_67 value=${cellvolts67} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts68 eq "" ) { if ( ( $cellvolts68 > 2) && ( $cellvolts68 < 5 )) { $influxcmdlinevolts .= "cell_volts_68 value=${cellvolts68} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts69 eq "" ) { if ( ( $cellvolts69 > 2) && ( $cellvolts69 < 5 )) { $influxcmdlinevolts .= "cell_volts_69 value=${cellvolts69} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts70 eq "" ) { if ( ( $cellvolts70 > 2) && ( $cellvolts70 < 5 )) { $influxcmdlinevolts .= "cell_volts_70 value=${cellvolts70} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts71 eq "" ) { if ( ( $cellvolts71 > 2) && ( $cellvolts71 < 5 )) { $influxcmdlinevolts .= "cell_volts_71 value=${cellvolts71} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts72 eq "" ) { if ( ( $cellvolts72 > 2) && ( $cellvolts72 < 5 )) { $influxcmdlinevolts .= "cell_volts_72 value=${cellvolts72} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts73 eq "" ) { if ( ( $cellvolts73 > 2) && ( $cellvolts73 < 5 )) { $influxcmdlinevolts .= "cell_volts_73 value=${cellvolts73} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts74 eq "" ) { if ( ( $cellvolts74 > 2) && ( $cellvolts74 < 5 )) { $influxcmdlinevolts .= "cell_volts_74 value=${cellvolts74} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts75 eq "" ) { if ( ( $cellvolts75 > 2) && ( $cellvolts75 < 5 )) { $influxcmdlinevolts .= "cell_volts_75 value=${cellvolts75} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts76 eq "" ) { if ( ( $cellvolts76 > 2) && ( $cellvolts76 < 5 )) { $influxcmdlinevolts .= "cell_volts_76 value=${cellvolts76} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts77 eq "" ) { if ( ( $cellvolts77 > 2) && ( $cellvolts77 < 5 )) { $influxcmdlinevolts .= "cell_volts_77 value=${cellvolts77} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts78 eq "" ) { if ( ( $cellvolts78 > 2) && ( $cellvolts78 < 5 )) { $influxcmdlinevolts .= "cell_volts_78 value=${cellvolts78} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts79 eq "" ) { if ( ( $cellvolts79 > 2) && ( $cellvolts79 < 5 )) { $influxcmdlinevolts .= "cell_volts_79 value=${cellvolts79} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts80 eq "" ) { if ( ( $cellvolts80 > 2) && ( $cellvolts80 < 5 )) { $influxcmdlinevolts .= "cell_volts_80 value=${cellvolts80} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts81 eq "" ) { if ( ( $cellvolts81 > 2) && ( $cellvolts81 < 5 )) { $influxcmdlinevolts .= "cell_volts_81 value=${cellvolts81} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts82 eq "" ) { if ( ( $cellvolts82 > 2) && ( $cellvolts82 < 5 )) { $influxcmdlinevolts .= "cell_volts_82 value=${cellvolts82} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts83 eq "" ) { if ( ( $cellvolts83 > 2) && ( $cellvolts83 < 5 )) { $influxcmdlinevolts .= "cell_volts_83 value=${cellvolts83} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts84 eq "" ) { if ( ( $cellvolts84 > 2) && ( $cellvolts84 < 5 )) { $influxcmdlinevolts .= "cell_volts_84 value=${cellvolts84} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts85 eq "" ) { if ( ( $cellvolts85 > 2) && ( $cellvolts85 < 5 )) { $influxcmdlinevolts .= "cell_volts_85 value=${cellvolts85} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts86 eq "" ) { if ( ( $cellvolts86 > 2) && ( $cellvolts86 < 5 )) { $influxcmdlinevolts .= "cell_volts_86 value=${cellvolts86} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts87 eq "" ) { if ( ( $cellvolts87 > 2) && ( $cellvolts87 < 5 )) { $influxcmdlinevolts .= "cell_volts_87 value=${cellvolts87} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts88 eq "" ) { if ( ( $cellvolts88 > 2) && ( $cellvolts88 < 5 )) { $influxcmdlinevolts .= "cell_volts_88 value=${cellvolts88} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts89 eq "" ) { if ( ( $cellvolts89 > 2) && ( $cellvolts89 < 5 )) { $influxcmdlinevolts .= "cell_volts_89 value=${cellvolts89} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts90 eq "" ) { if ( ( $cellvolts90 > 2) && ( $cellvolts90 < 5 )) { $influxcmdlinevolts .= "cell_volts_90 value=${cellvolts90} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts91 eq "" ) { if ( ( $cellvolts91 > 2) && ( $cellvolts91 < 5 )) { $influxcmdlinevolts .= "cell_volts_91 value=${cellvolts91} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts92 eq "" ) { if ( ( $cellvolts92 > 2) && ( $cellvolts92 < 5 )) { $influxcmdlinevolts .= "cell_volts_92 value=${cellvolts92} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts93 eq "" ) { if ( ( $cellvolts93 > 2) && ( $cellvolts93 < 5 )) { $influxcmdlinevolts .= "cell_volts_93 value=${cellvolts93} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts94 eq "" ) { if ( ( $cellvolts94 > 2) && ( $cellvolts94 < 5 )) { $influxcmdlinevolts .= "cell_volts_94 value=${cellvolts94} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts95 eq "" ) { if ( ( $cellvolts95 > 2) && ( $cellvolts95 < 5 )) { $influxcmdlinevolts .= "cell_volts_95 value=${cellvolts95} ${timestampline}000000\n"; } }
-  if ( ! $cellvolts96 eq "" ) { if ( ( $cellvolts96 > 2) && ( $cellvolts96 < 5 )) { $influxcmdlinevolts .= "cell_volts_96 value=${cellvolts96} ${timestampline}000000\n"; } }
+  foreach $cvno("01".."96")
+  {
+    # if we actually got a value for it on this line...
+    if ( ! $cellvolts{$cvno} eq "" )
+    {
+      # if this is the first of these we've had, we need to populate the hash of last values
+      if ( ! defined $cellvoltslast{$cvno} ) { $cellvoltslast{$cvno} = $cellvolts{$cvno}; }
+      # if the value we've got seems sane
+      $cvdiff = abs ($cellvolts{$cvno} - $cellvoltslast{$cvno});
+      # if the current value is more than 1 volt different to previous, it's bogus; also ignore clearly nonsense values
+#      print "cell volts debug - cell $cvno difference $cvdiff voltage $cellvolts{$cvno}\n";
+      if (( $cvdiff < 1 ) && ( $cellvolts{$cvno} < 5 ) && ( $cellvolts{$cvno} > 2 ))
+      {
+        $influxcmdlinevolts .= "cell_volts_$cvno value=$cellvolts{$cvno} ${timestampline}000000\n";
+      }
+      $cellvoltslast{$cvno} = $cellvolts{$cvno};  
+    }
+  }
+
  
 # grafana only permits 100 measurements per datastore so we split over more than 1 
 
   if (length($influxcmdline) > 10000)
   {
     # -s - silent; -S - show errors
-    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla' --data-binary '${influxcmdline}'`;
-##    print "$result \n";
+    `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla' --data-binary '${influxcmdline}'` or warn "Could not run curl because $!\n";
     $influxcmdline = "";
   }
 
   if (length($influxcmdlinevolts) > 10000)
   {
-    $result = `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_cell_voltages' --data-binary '${influxcmdlinevolts}'`;
+    `curl -s -S -i -XPOST 'http://localhost:8086/write?db=tesla_cell_voltages' --data-binary '${influxcmdlinevolts}'` or warn "Could not run curl because $!\n";
     $influxcmdlinevolts = "";
   }
 
