@@ -405,6 +405,80 @@ chomp $diskpercentused;
 if ($diskpercentused > 85)
   { print "Disk utilisation ${diskpercentused}%"; }
 
+
+# 20180429 
+# check/correct date/time in central heating
+# this used to maintain itself, perhaps a backup battery failed?
+$vfulldate = `/usr/bin/ebusctl read -f -c 470 date`;
+# it's got 2 carriage returns after it
+chomp $vfulldate; chomp $vfulldate;
+if (($vfulldate =~ /error/ ) || ($vfulldate =~ /ERR/ ))
+  { print "got error trying to read date from central heating\n"; }
+else
+{
+  ($vday,$vmonth,$vyear) = split(/\./, $vfulldate);
+#  print "vaillant year $vyear month $vmonth day $vday\n";
+  $year = `/usr/bin/date +%Y`;
+  chomp $year;
+  $month = `/usr/bin/date +%m`;
+  chomp $month;
+  $day = `/usr/bin/date +%d`;
+  chomp $day;
+ 
+#  print "system year $year month $month day $day\n";
+ 
+  if (($year eq $vyear) && ($month eq $vmonth) && ($day eq $vday))
+  { 
+#    print "date is good!\n"
+  }
+  else
+  {
+    # we could be racing ebusread so go slow
+    sleep 1;
+    print "central heating date wrong - setting to $day $month $year\n";
+    $output = `/usr/bin/ebusctl write -c 470 date $day.$month.$year`;
+    if (($output =~ /error/ ) || ($output =~ /ERR/ ))
+      { print "got error trying to write date to central heating\n"; }
+  }
+}
+# again we could be racing so go slow
+sleep 1;
+$vfulltime = `/usr/bin/ebusctl read -f -c 470 time`;
+# it's got 2 carriage returns after it
+chomp $vfulltime; chomp $vfulltime;
+if (($vfulltime =~ /error/ ) || ($vfulltime =~ /ERR/ ))
+  { print "got error trying to read time from central heating\n"; }
+else
+{
+#  print "full $vfulltime\n";
+  ($vhour,$vmin,$vsec) = split(/:/, $vfulltime);
+# just avoid the 'only used once'
+  chomp $vsec;
+#  print "vaillant hour $vhour minute $vmin second $vsec\n";
+  $hour = `/usr/bin/date +%H`;
+  chomp $hour;
+  $min = `/usr/bin/date +%M`;
+  chomp $min;
+
+#  print "system hour $hour minute $min\n";
+  if (($min eq $vmin) && ($hour eq $vhour))
+  {
+#    print "time is good!\n";
+  }
+  else
+  {
+    sleep 1;
+    # we didn't obtain this earlier for comparison
+    $sec = `/usr/bin/date +%S`;
+    chomp $sec;
+    print "central heating time wrong - setting to $hour $min $sec\n";
+    $output = `/usr/bin/ebusctl write -c 470 time $hour:$min:$sec`;
+    if (($output =~ /error/ ) || ($output =~ /ERR/ ))
+      { print "got error trying to write time to central heating\n"; }
+  }
+}
+
+
 close LOCKFILE;
 unlink $lockfile;
 
