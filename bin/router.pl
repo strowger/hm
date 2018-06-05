@@ -7,7 +7,8 @@
 # begun
 #
 $config="/data/hm/conf/router.conf";
-$rrddirectory="/data/hm/rrd";
+## 20180506 
+#$rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="router.log";
 $errorlog="router-errors.log";
@@ -70,18 +71,19 @@ foreach $line (<CONFIG>)
       print LINE "$timestamp in $invalue out $outvalue\n";
       close LINE;
       # if the rrd doesn't exist, don't attempt to write
-      if ( -f "$rrddirectory/${filename}.rrd" )
-      {
-        $output = `rrdtool update $rrddirectory/$filename.rrd $timestamp:$invalue:$outvalue`;
-        if (length $output)
-        {
-          print LOGFILE "rrdtool errored $output\n";
-        }
-      }
-      else
-      {
-        print LOGFILE "rrd for $filename doesn't exist, skipping update\n";
-      }
+## 20180506 bought ubnt, disabled wifi radio on asus, this started to error
+#      if ( -f "$rrddirectory/${filename}.rrd" )
+#      {
+#        $output = `rrdtool update $rrddirectory/$filename.rrd $timestamp:$invalue:$outvalue`;
+#        if (length $output)
+#        {
+#          print LOGFILE "rrdtool errored $output\n";
+#        }
+#      }
+#      else
+#      {
+#        print LOGFILE "rrd for $filename doesn't exist, skipping update\n";
+#      }
     }
     $validcount++;
 
