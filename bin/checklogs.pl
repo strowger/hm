@@ -300,7 +300,7 @@ foreach $collector (@rtlcollectors)
   }
 }
 
-@cciamdevices = ("upsb", "upso", "officedesk", "fridge", "washer", "dryer", "dwasher", "kettle", "toaster");
+@cciamdevices = ("upsb", "upso", "officedesk", "fridge", "fridge2", "washer", "dryer", "dwasher", "kettle", "toaster", "car2");
 foreach $pdev (@cciamdevices)
 {
   if (-f "$logdirectory/rtl433-cciam$pdev.log" )
