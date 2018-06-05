@@ -34,9 +34,12 @@ $logccclampheat="rtl433-ccclampheat.log";
 $logccclampcook="rtl433-ccclampcook.log";
 $logccclamptowelrail="rtl433-ccclamptowelrail.log";
 $logcciamdryer="rtl433-cciamdryer.log";
+$logcciamcar2="rtl433-cciamcar2.log";
 $logcciamwasher="rtl433-cciamwasher.log";
 $logcciamfridge="rtl433-cciamfridge.log";
+$logcciamfridge2="rtl433-cciamfridge2.log";
 $logcciamdwasher="rtl433-cciamdwasher.log";
+$logcciammwave="rtl433-cciammwave.log";
 $logcciamupsb="rtl433-cciamupsb.log";
 $logcciamofficedesk="rtl433-cciamofficedesk.log";
 $logcciamupso="rtl433-cciamupso.log";
@@ -62,9 +65,12 @@ $timelastccclampheat=`tail -1 $logdirectory/$logccclampheat|awk '{print \$1}'`;
 $timelastccclampcook=`tail -1 $logdirectory/$logccclampcook|awk '{print \$1}'`;
 $timelastccclamptowelrail=`tail -1 $logdirectory/$logccclamptowelrail|awk '{print \$1}'`;
 $timelastcciamdryer=`tail -1 $logdirectory/$logcciamdryer|awk '{print \$1}'`;
+$timelastcciamcar2=`tail -1 $logdirectory/$logcciamcar2|awk '{print \$1}'`;
 $timelastcciamwasher=`tail -1 $logdirectory/$logcciamwasher|awk '{print \$1}'`;
 $timelastcciamfridge=`tail -1 $logdirectory/$logcciamfridge|awk '{print \$1}'`;
+$timelastcciamfridge2=`tail -1 $logdirectory/$logcciamfridge2|awk '{print \$1}'`;
 $timelastcciamdwasher=`tail -1 $logdirectory/$logcciamdwasher|awk '{print \$1}'`;
+$timelastcciammwave=`tail -1 $logdirectory/$logcciammwave|awk '{print \$1}'`;
 $timelastcciamupsb=`tail -1 $logdirectory/$logcciamupsb|awk '{print \$1}'`;
 $timelastcciamofficedesk=`tail -1 $logdirectory/$logcciamofficedesk|awk '{print \$1}'`;
 $timelastcciamupso=`tail -1 $logdirectory/$logcciamupso|awk '{print \$1}'`;
@@ -82,9 +88,12 @@ open CCCLAMPCAR, ">>", "$logdirectory/$logccclampcar" or die $!;
 open CCCLAMPCOOK, ">>", "$logdirectory/$logccclampcook" or die $!;
 open CCCLAMPTOWELRAIL, ">>", "$logdirectory/$logccclamptowelrail" or die $!;
 open CCIAMDRYER, ">>", "$logdirectory/$logcciamdryer" or die $!;
+open CCIAMCAR2, ">>", "$logdirectory/$logcciamcar2" or die $!;
 open CCIAMWASHER, ">>", "$logdirectory/$logcciamwasher" or die $!;
 open CCIAMFRIDGE, ">>", "$logdirectory/$logcciamfridge" or die $!;
+open CCIAMFRIDGE2, ">>", "$logdirectory/$logcciamfridge2" or die $!;
 open CCIAMDWASHER, ">>", "$logdirectory/$logcciamdwasher" or die $!;
+open CCIAMMWAVE, ">>", "$logdirectory/$logcciammwave" or die $!;
 open CCIAMUPSB, ">>", "$logdirectory/$logcciamupsb" or die $!;
 open CCIAMOFFICEDESK, ">>", "$logdirectory/$logcciamofficedesk" or die $!;
 open CCIAMUPSO, ">>", "$logdirectory/$logcciamupso" or die $!;
@@ -156,19 +165,23 @@ while (<STDIN>)
       # $ccdevid is the "Device Id" output by the currentcost transmitter
       # they seem set randomly 
       # 0    = optical transmitter on whole house
-      # 77   = clamp transmitter on car charger
+      # 77   = clamp transmitter on car charger, still in place but unused as comms unreliable
       # 910  = clamp on ch
-      # 996  = clamp transmitter SPARE - ?inaccurate
+      # 996  = clamp transmitter SPARE - inaccurate, under-reads
       # 2267 = clamp - went to euan
       # 1090 = clamp transmitter on cooker
       # 1048 = clamp on whole house
       # 2232 = clamp - went to euan
+      # 3107 = clamp transmitter on car charger line in fusebox 20180524
       # 3957 - clamp - master bedroom ensuite towel rail
+      # 272  = iam car2 (granny cable for imiev)
       # 921  = iam washing machine
       # 1971 = iam dryer
       # 3037 = iam fridge
+      # 1130 - iam fridge2 (basement)
       # 3214 = iam dishwasher
       # 1314 = iam basement ups
+      # 1430 = iam microwave
       # 2829 = iam office desk 10bar
       # 3879 = iam office ups
       # 2071 = iam toaster
@@ -176,6 +189,8 @@ while (<STDIN>)
       # 1039 = counter - gasmart on gas meter
       # 2977 = counter - pulse counter on electricity meter led - same physical device as id 0
       #  but outputting a different frame type with the count in it
+      # 3083 = unknown/lost device - seems to be outputting zero - could be gasmart unit?
+      #
       if (($midtx == 1) && ($txtype eq "currentcost-tx")) { $ccdevid = $line[2]; }
       if (($midtx == 1) && ($txtype eq "currentcost-counter")) { $ccdevid = $line[2]; }
     }
@@ -226,7 +241,40 @@ while (<STDIN>)
             { print "$linetime clamp sensor whole-house power $ccpower watts\n"; }
         }
 
-        if ( $ccdevid == 77 )
+#        if ( $ccdevid == 77 )
+#        {
+#          if (($modeswitch eq "process") && ($linetime > $timelastccclampcar))
+#          {
+#            $timelastccclampcar = $linetime;
+#            $output = `rrdtool update $rrddirectory/ccclampwattscar.rrd $linetime:$ccpower`;
+#            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'car_charger value=${ccpower} ${linetime}000000000\n'`;
+#            if (length $output)
+#              { chomp $output; print LOGFILE "got error $output..."; }
+#            else
+#              { print CCCLAMPCAR "$linetime $ccpower\n"; }
+#          }
+#          if ($modeswitch eq "dump")
+#            { print "$linetime clamp sensor car power $ccpower watts\n"; }
+#        }
+
+#        if ( $ccdevid == 996 )
+#        {
+#          if (($modeswitch eq "process") && ($linetime > $timelastccclampcar2))
+#          {
+#            $timelastccclampcar2 = $linetime;
+#            $output = `rrdtool update $rrddirectory/ccclampwattscar.rrd $linetime:$ccpower`;
+#            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'car_charger2 value=${ccpower} ${linetime}000000000\n'`;
+#            if (length $output)
+#              { chomp $output; print LOGFILE "got error $output..."; }
+#            else
+#              { print CCCLAMPCAR2 "$linetime $ccpower\n"; }
+#            print CCCLAMPCAR2 "$linetime $ccpower\n";
+#          }
+#          if ($modeswitch eq "dump")
+#            { print "$linetime clamp sensor car2 power $ccpower watts\n"; }
+#        }
+
+        if ( $ccdevid == 3107 )
         {
           if (($modeswitch eq "process") && ($linetime > $timelastccclampcar))
           {
@@ -241,6 +289,8 @@ while (<STDIN>)
           if ($modeswitch eq "dump")
             { print "$linetime clamp sensor car power $ccpower watts\n"; }
         }
+
+
 
         if ( $ccdevid == 910 )
         {
@@ -272,6 +322,18 @@ while (<STDIN>)
           }
           if ($modeswitch eq "dump")
             { print "$linetime clamp sensor cooker power $ccpower watts\n"; }
+        }
+
+        if ( $ccdevid == 272 )
+        {
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamcar2))
+          {
+            $timelastcciamcar2 = $linetime;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'car2 value=${ccpower} ${linetime}000000000\n'`;
+            print CCIAMCAR2 "$linetime $ccpower\n"; 
+          }
+          if ($modeswitch eq "dump")
+            { print "$linetime iam car2 sensor power $ccpower watts\n"; }
         }
 
 
@@ -322,6 +384,31 @@ while (<STDIN>)
           if ($modeswitch eq "dump")
             { print "$linetime iam fridge sensor power $ccpower watts\n"; }
         }
+
+        if ( $ccdevid == 1130 )
+        {
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamfridge2))
+          {
+            $timelastcciamfridge2 = $linetime;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'fridge2 value=${ccpower} ${linetime}000000000\n'`;
+            print CCIAMFRIDGE2 "$linetime $ccpower\n"; 
+          }
+          if ($modeswitch eq "dump")
+            { print "$linetime iam fridge2 sensor power $ccpower watts\n"; }
+        }
+
+        if ( $ccdevid == 1430 )
+        {
+          if (($modeswitch eq "process") && ($linetime > $timelastcciammwave))
+          {
+            $timelastcciammwave = $linetime;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'mwave value=${ccpower} ${linetime}000000000\n'`;
+            print CCIAMMWAVE "$linetime $ccpower\n"; 
+          }
+          if ($modeswitch eq "dump")
+            { print "$linetime iam mwave sensor power $ccpower watts\n"; }
+        }
+
 
         if ( $ccdevid == 3214 )
         {
