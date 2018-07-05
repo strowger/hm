@@ -7,6 +7,9 @@
 # begun
 # GH 2018-04-08 
 # influxdb added
+# GH 2018-07-04
+# prologue sensors added
+#
 $influxcmd="curl -s -S -i -XPOST ";
 $influxurl="http://localhost:8086/";
 # we should rename this to styes_rtl really
@@ -56,8 +59,12 @@ $logccclamphouse="rtl433-ccclamphouse.log";
 # "prologue" cheap aliexpress temp/humidity sensors
 $logproltempconservatory="rtl433-proltempconservatory.log";
 $logproltempfridgeds="rtl433-proltempfridgeds.log";
+$logproltempfridge="rtl433-proltempfridge.log"; 
+$logproltempfreezer="rtl433-proltempfreezer.log"; 
 $logprolhumconservatory="rtl433-prolhumconservatory.log";
 $logprolhumfridgeds="rtl433-prolhumfridgeds.log";
+$logprolhumfridge="rtl433-prolhumfridge.log";                                 
+$logprolhumfreezer="rtl433-prolhumfreezer.log"; 
 
 
 $timestamp = time();                                                                                  
@@ -90,9 +97,12 @@ $timelastcccountoptical=`tail -1 $logdirectory/$logcccountoptical|awk '{print \$
 $timelastcccountgas=`tail -1 $logdirectory/$logcccountgas|awk '{print \$1}'`;
 $timelastproltempconservatory=`tail -1 $logdirectory/$logproltempconservatory|awk '{print \$1}'`;
 $timelastproltempfridgeds=`tail -1 $logdirectory/$logproltempfridgeds|awk '{print \$1}'`;
+$timelastproltempfridge=`tail -1 $logdirectory/$logproltempfridge|awk '{print\$1}'`;
+$timelastproltempfreezer=`tail -1 $logdirectory/$logproltempfreezer|awk '{print\$1}'`; 
 $timelastprolhumconservatory=`tail -1 $logdirectory/$logprolhumconservatory|awk '{print \$1}'`;
 $timelastprolhumfridgeds=`tail -1 $logdirectory/$logprolhumfridgeds|awk '{print \$1}'`;
-
+$timelastprolhumfridge=`tail -1 $logdirectory/$logprolhumfridge|awk '{print\$1}'`;                 
+$timelastprolhumfreezer=`tail -1 $logdirectory/$logprolhumfreezer|awk '{print\$1}'`; 
 
 #open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
 open CCCLAMPHEAT, ">>", "$logdirectory/$logccclampheat" or die $!;
@@ -118,9 +128,12 @@ open CCCOUNTOPTICAL, ">>", "$logdirectory/$logcccountoptical" or die $!;
 open CCCOUNTGAS, ">>", "$logdirectory/$logcccountgas" or die $!;
 open PROLTEMPCONSERVATORY, ">>", "$logdirectory/$logproltempconservatory" or die $!;
 open PROLTEMPFRIDGEDS, ">>", "$logdirectory/$logproltempfridgeds" or die $!; 
+open PROLTEMPFRIDGE, ">>", "$logdirectory/$logproltempfridge" or die $!;
+open PROLTEMPFREEZER, ">>", "$logdirectory/$logproltempfreezer" or die $!;
 open PROLHUMCONSERVATORY, ">>", "$logdirectory/$logprolhumconservatory" or die $!;
 open PROLHUMFRIDGEDS, ">>", "$logdirectory/$logprolhumfridgeds" or die $!;
-
+open PROLHUMFRIDGE, ">>", "$logdirectory/$logprolhumfridge" or die $!;                             
+open PROLHUMFREEZER, ">>", "$logdirectory/$logprolhumfreezer" or die $!; 
 
 # each received transmission occupies multiple lines in the output, so we have to be stateful
 $midtx = 0;
@@ -196,6 +209,7 @@ while (<STDIN>)
     # ids (remember they change on power-cycle/battery-change)
     # 172: conservatory
     # 25: downstairs fridge
+    # 27: fridge; 209: freezer (if it survives)
     if (( $txtype eq "prologue-sensor" ) && ( $line[0] eq "Temperature:" ))
     {
       $prologuetemp = $line[1];
@@ -223,6 +237,31 @@ while (<STDIN>)
         if ($modeswitch eq "dump")
           { print "$linetime prologue sensor fridge_ds temperature $prologuetemp c\n"; }
       }      
+
+      if ( $prologuedevid == 27 )                                                                    
+      {                                                                                              
+        if (($modeswitch eq "process") && ($linetime > $timelastproltempfridge))                   
+        {                                                                                            
+          $timelastproltempfridge = $linetime;                                                     
+          $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'temp_fridge value=${prologuetemp} ${linetime}000000000\n'`;                                                       
+          print PROLTEMPFRIDGE "$linetime $prologuetemp\n";                                        
+        }                                                                                            
+        if ($modeswitch eq "dump")                                                                   
+          { print "$linetime prologue sensor fridge temperature $prologuetemp c\n"; } 
+      }
+
+      if ( $prologuedevid == 209 )                                                                    
+      {                                                                                              
+        if (($modeswitch eq "process") && ($linetime > $timelastproltempfreezer))                
+        {                                                                                            
+          $timelastproltempfreezer = $linetime;                                                     
+          $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'temp_freezer value=${prologuetemp} ${linetime}000000000\n'`;                                                       
+          print PROLTEMPFREEZER "$linetime $prologuetemp\n";                                        
+        }                                                                                            
+        if ($modeswitch eq "dump")                                                                   
+          { print "$linetime prologue sensor freezer temperature $prologuetemp c\n"; } 
+       }
+
 
     }
 
@@ -253,6 +292,32 @@ while (<STDIN>)
         if ($modeswitch eq "dump")
           { print "$linetime prologue sensor fridge_ds humidity $prologuehum %\n"; }
       }
+
+      if ( $prologuedevid == 27 )                                                                    
+      {                                                                                              
+        if (($modeswitch eq "process") && ($linetime > $timelastprolhumfridge))                   
+        {                                                                                            
+          $timelastprolhumfridge = $linetime;                                                     
+          $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'hum_fridge value=${prologuehum} ${linetime}000000000\n'`;                                                       
+          print PROLHUMFRIDGE "$linetime $prologuehum\n";                                        
+        }                                                                                            
+        if ($modeswitch eq "dump")                                                                   
+          { print "$linetime prologue sensor fridge humidity $prologuehum c\n"; } 
+      }
+
+      if ( $prologuedevid == 209 )                                                                    
+      {                                                                                              
+        if (($modeswitch eq "process") && ($linetime > $timelastprolhumfreezer))                
+        {                                                                                            
+          $timelastprolhumfreezer = $linetime;                                                     
+          $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'hum_freezer value=${prologuehum} ${linetime}000000000\n'`;                                                       
+          print PROLHUMFREEZER "$linetime $prologuehum\n";                                        
+        }                                                                                            
+        if ($modeswitch eq "dump")                                                                   
+          { print "$linetime prologue sensor freezer humidity $prologuehum c\n"; } 
+       }
+
+
 
     # humidity is the last thing in a prologue temp/humidity sensor tx
     $midtx = 0;
