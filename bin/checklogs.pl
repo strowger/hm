@@ -16,6 +16,7 @@ $owerrorlog="1wireread-errors.log";
 $routererrorlog="router-errors.log";
 $alarmsyncerrorlog="alarmbox-rsync-errors.log";
 $officesyncerrorlog="office-rsync-errors.log";
+$rtlprocesserrorslog="combined-rsync-errors.log";
 #$leaferrorlog="leaf-errors.log";
 $lockfile="/tmp/checklogs.lock";
 #$leafspylog="leafspy.log";
@@ -269,6 +270,30 @@ if (-f "$logdirectory/$officesyncerrorlog" )
   }
   unlink "$logdirectory/$officesyncerrorlog";
 }
+
+# these are errors from the script which processes the above rpi rtl433 logs
+# $rtlprocesserrorslog
+
+if (-f "$logdirectory/$rtlprocesserrorslog" )
+{
+  $errorlinecount = 0;
+  @errorlines = ();
+  open AWRSLOG, "<", "$logdirectory/$rtlprocesserrorslog" or die $!;
+  foreach $errorline (<AWRSLOG>)
+  {
+    $errorlinecount++;
+    push(@errorlines, $errorline);
+  }
+  close AWRSLOG;
+  if ($errorlinecount > 5)
+  {
+    print "More than 5 log lines from rtl433 processing log:\n";
+    print "@errorlines";
+  }
+  unlink "$logdirectory/$rtlprocesserrorslog";
+}
+
+
 
 # the barompressure2 script which just fetches a url
 if (-f "$logdirectory/barompressure2-errors.log" )
