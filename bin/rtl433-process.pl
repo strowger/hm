@@ -29,6 +29,8 @@ use Time::Local;
 $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="rtl433-process.log";
+# unknown frames/devices received
+$alienlogfile="rtl433-aliens.log";
 
 # power devices - currentcost
 #$logccopti="rtl433-ccoptical.log";
@@ -104,6 +106,7 @@ $timelastprolhumfridgeds=`tail -1 $logdirectory/$logprolhumfridgeds|awk '{print 
 $timelastprolhumfridge=`tail -1 $logdirectory/$logprolhumfridge|awk '{print\$1}'`;                 
 $timelastprolhumfreezer=`tail -1 $logdirectory/$logprolhumfreezer|awk '{print\$1}'`; 
 
+open ALIENS, ">>", "$logdirectory/$alienlogfile" or die $!;
 #open CCOPTI, ">>", "$logdirectory/$logccopti" or die $!;
 open CCCLAMPHEAT, ">>", "$logdirectory/$logccclampheat" or die $!;
 #open CCCLAMPHEAT2, ">>", "$logdirectory/$logccclampheat2" or die $!;
@@ -139,8 +142,8 @@ open PROLHUMFREEZER, ">>", "$logdirectory/$logprolhumfreezer" or die $!;
 $midtx = 0;
 # we're not dealing with a device we didn't expect
 $alien = 0;
+$aliencount = 0;
 # this is the type of packet/frame/transmission we're dealing with
-$txtype = "";
 $linecount = 0;
 # this will read from either stdin or a file specified on the commandline
 while (<STDIN>)
@@ -165,11 +168,12 @@ while (<STDIN>)
     # timegm requires months in range 0-11 (!)
     $stupidmonth = $month -1;
     $linetime = timegm($second, $minute, $hour, $day, $stupidmonth, $year);
+    $txtype = "";
     $alien = 0;
     # we are part-way through parsing a transmission now
     if ($midtx == 1) 
     { 
-      print STDERR "\n$linetime started new transmission without proper end to previous\n"; 
+      print STDERR "\n$linetime started new transmission without proper end to previous at line $linecount: @line\n"; 
     }
     $midtx = 1;
 
@@ -198,6 +202,7 @@ while (<STDIN>)
       # we don't know what to do with this so we ignore the next lines
       $midtx = 0;
       $alien = 1;
+      $aliencount = $aliencount + 1;
     }
   }
 
@@ -693,7 +698,7 @@ while (<STDIN>)
         # we don't care about subsequent "Power x:" lines as they're all zero
         $midtx = 0;
       }
-      else { print STDERR "$linetime got a currentcost power line without a preceding deviceid\n"; }
+      else { print STDERR "$linetime got a currentcost power line without a preceding deviceid at line $linecount: @line\n"; }
     }
 
     # FIXME why does this never trigger??
@@ -731,7 +736,7 @@ while (<STDIN>)
         }
         $midtx = 0;
       }
-      else { print STDERR "$linetime got a currentcost count line without a preceding deviceid\n"; }
+      else { print STDERR "$linetime got a currentcost count line without a preceding deviceid at line $linecount: @line\n"; }
     }
 
     if ( $alien eq "1" ) { print LOGFILE "@line\n"; }
@@ -742,9 +747,14 @@ while (<STDIN>)
 
 }
 
+$output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'rtl_aliens value=${aliencount} ${linetime}000000000\n'`;
+print ALIENS "$starttime $aliencount\n";
+
 $endtime = time();
 $runtime = $endtime - $starttime;
 
-print LOGFILE "exiting successfully after $linecount lines in $runtime seconds \n\n";
+
+
+print LOGFILE "exiting successfully after $linecount lines with $aliencount unknown tx in $runtime seconds \n\n";
 
 close LOGFILE;
