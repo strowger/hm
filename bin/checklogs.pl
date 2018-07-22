@@ -23,6 +23,7 @@ $lockfile="/tmp/checklogs.lock";
 $fridgelog="rtl433-proltempfridge.log";
 $freezerlog="rtl433-proltempfreezer.log";
 $fridgedslog="rtl433-proltempfridgeds.log";
+$conslog="rtl433-proltempconservatory.log";
 
 if ( -f $lockfile ) 
 { die "Lockfile exists in $lockfile; exiting"; }
@@ -188,11 +189,12 @@ $lastvalage = $timestamp-$lasttime;
 if ($lastvalage > 600)
   { print "kitchen air sensor hasn't output for $lastvalage seconds\n"; }
 
-# 20180705 the rtl433/prologue sensors in the fridges
+# 20180705 the rtl433/prologue sensors 
+# longer timeouts as these are flakey
 $lastline = `tail -1 $logdirectory/$fridgelog`;
 ($lasttime,$temp) = split(' ',$lastline);
 $lastvalage = $timestamp-$lasttime;
-if ($lastvalage > 600)
+if ($lastvalage > 2000)
   { print "fridge temperature sensor hasn't output for $lastvalage seconds\n"; }
 # these sensors are shite, this one reads high
 if ($temp > 10)
@@ -201,7 +203,7 @@ if ($temp > 10)
 $lastline = `tail -1 $logdirectory/$freezerlog`;
 ($lasttime,$temp) = split(' ',$lastline);
 $lastvalage = $timestamp-$lasttime;
-if ($lastvalage > 600)
+if ($lastvalage > 2000)
   { print "freezer temperature sensor hasn't output for $lastvalage seconds\n"; }
 # these sensors are shite, this one reads high
 if ($temp > -15 )
@@ -210,13 +212,17 @@ if ($temp > -15 )
 $lastline = `tail -1 $logdirectory/$fridgedslog`;
 ($lasttime,$temp) = split(' ',$lastline);
 $lastvalage = $timestamp-$lasttime;
-if ($lastvalage > 600)
+if ($lastvalage > 2000)
   { print "downstairs fridge temperature sensor hasn't output for $lastvalage seconds\n"; }
 # these sensors are shite, this one reads high
 if ($temp > 7)
   { print "downstairs fridge temperature is too high: $temp\n"; }
 
-
+$lastline = `tail -1 $logdirectory/$conslog`;
+($lasttime,$temp) = split(' ',$lastline);
+$lastvalage = $timestamp-$lasttime;
+if ($lastvalage > 2000)
+  { print "conservatory temperature sensor hasn't output for $lastvalage seconds\n"; }
 
 # if there are no owfs errors then that's all good, no need to warn 
 # that the file isn't there
