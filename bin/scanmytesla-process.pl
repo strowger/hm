@@ -161,6 +161,8 @@ while (<INPUT>)
     $logoffset1 = 0;
     $logoffset2 = 0;
     $logoffset3a = 0;
+    $logoffset3b = 0;
+    $logoffset3c = 0;
     # scanmytesla 1.4.0(ish), we call this "version 1"
     if (( $lineitems == 250) && ($line[4] =~/DC-DC current/ ))
     {
@@ -332,7 +334,7 @@ while (<INPUT>)
   $rearleft = $line[$logoffset1+$logoffset2+$logoffset3a+86];
   $rearright = $line[$logoffset1+$logoffset2+$logoffset3a+87];
   $rrdriveratio = $line[$logoffset1+$logoffset2+$logoffset3a+88];
-# logoffset3a/logoffset3b change here FIXME different after here
+# logoffset3a/logoffset3b change here 
   $tempout = $line[$logoffset1+$logoffset2+$logoffset3b+89];
   $tempoutfilt = $line[$logoffset1+$logoffset2+$logoffset3b+90];
   $tempin = $line[$logoffset1+$logoffset2+$logoffset3b+91];
@@ -518,6 +520,8 @@ while (<INPUT>)
   if ( ! $heatingcooling eq "" ) { if ( ( $heatingcooling > -12) && ( $heatingcooling < 12 )) { $influxcmdline .= "hvac value=${heatingcooling} ${timestampline}000000\n"; } }
 
   if ( ! $batteryinlettemp eq "" ) { $influxcmdline .= "temp_battery_coolantin value=${batteryinlettemp} ${timestampline}000000\n"; }
+# debug/test
+#  if ( ! $batteryinlettemp eq "" ) { print "battery inlet temp $batteryinlettemp\n"; }
   if ( ! $ptinlettemp eq "" ) { $influxcmdline .= "temp_pt_coolantin value=${ptinlettemp} ${timestampline}000000\n"; }
 
   if ( ! $battodom eq "")
