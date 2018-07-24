@@ -15,6 +15,9 @@
 #
 # 2018-04-{01-04}
 # while brian james and d were here, influxdb and grafana'd with the eye infection
+#
+# 2018-07-24
+# while brian was here, the big new 1.5.0 release with automatic logging and new values
 
 # for calculating epoch from logfile values
 use Time::Local;
@@ -155,11 +158,13 @@ while (<INPUT>)
   # the first line of the file starts like this
   if ( $timeoffset =~ /Time/ ) 
   { 
+    $logoffset1 = 0;
+    $logoffset2 = 0;
+    $logoffset3a = 0;
     # scanmytesla 1.4.0(ish), we call this "version 1"
     if (( $lineitems == 250) && ($line[4] =~/DC-DC current/ ))
     {
       $logversion = 1;
-      $logoffset1 = 0;
       print "file is version 1 format\n";
     }
     # scanmytesla 1.4.3 20180321 added 2 new values, now 252 items per line, we call this "version 2"
@@ -177,6 +182,19 @@ while (<INPUT>)
       $logoffset2 = 2;
       print "file is version 3 format\n";
     }
+    # scanmytesla 1.5.0 20180720 adds 13(!) new values, we call this "version 4"
+    if (( $lineitems == 267) && ( $line[58] =~/SOC Min/ )) 
+    {
+      $logoffset1 = 2;
+      $logversion = 4;
+      $logoffset2 = 2;
+      # this version inserts new values at several places in the csv, grrrr
+      $logoffset3a = 1;
+      $logoffset3b = 10;
+      $logoffset3c = 13;
+      print "file is version 4 format\n";
+    }
+
 
     # if we didn't positively identify a log format, quit
     if ( $logversion eq "" ) { die "first line of file appears corrupt or unknown scanmytesla format\n"; }
@@ -201,264 +219,287 @@ while (<INPUT>)
   if ( $logversion >2 )
   {
     # soc min
-    $socmin = $line[57];
+    $socmin = $line[$logoffset3a+57];
     # soc ui
-    $socui = $line[58];
+    $socui = $line[$logoffset3a+58];
   }
-  $dcdcamps = $line[$logoffset1+4];
-  $dcdcvolts = $line[$logoffset1+5];
-  $dcdccoolantin = $line[$logoffset1+6];
-  $dcdcinpower = $line[$logoffset1+7];
-  $sys12v = $line[$logoffset1+8];
-  $dcdcoutpower = $line[$logoffset1+9];
-  $dcdcefficiency = $line[$logoffset1+10];
-  $sys400v = $line[$logoffset1+11];
-  $heatingcooling = $line[$logoffset1+12];
-  $torquefr = $line[$logoffset1+13];
-  $torquebias = $line[$logoffset1+14];
-  $torquerr = $line[$logoffset1+15];
-  $wattpedal = $line[$logoffset1+16];
-  $mechpowerfr = $line[$logoffset1+17];
-  $dissipationfr = $line[$logoffset1+18];
-  $inpowerfr = $line[$logoffset1+19];
-  $hpfr = $line[$logoffset1+20];  
-  $statorampsfr = $line[$logoffset1+21];
-  $drivepowermaxfr = $line[$logoffset1+22];
-  $combinedmotorpower = $line[$logoffset1+23];
-  $combinedhp = $line[$logoffset1+24];
-  $efficiencyfr = $line[$logoffset1+25];
-  $rrinverter12v = $line[$logoffset1+26];
-  $mechpowerrr = $line[$logoffset1+27];
-  $dissipationfr = $line[$logoffset1+28];
-  $inpowerrr = $line[$logoffset1+29];
-  $propulsion = $line[$logoffset1+30];
-  $hprr = $line[$logoffset1+31];
-  $statorampsrr = $line[$logoffset1+32];
-  $regenpowermaxrr = $line[$logoffset1+33];
-  $drivepowermaxrr = $line[$logoffset1+34];
-  $efficiencyrr = $line[$logoffset1+35];
-  $torqueestfr = $line[$logoffset1+36];
-  $torqueestrr = $line[$logoffset1+37];
-  $speed = $line[$logoffset1+38];
-  $consumption = $line[$logoffset1+39];
-  $coolantinletrr = $line[$logoffset1+40];
-  $inverterpcbrr = $line[$logoffset1+41];
-  $statorrr = $line[$logoffset1+42];
-  $dccapacitorrr = $line[$logoffset1+43];
-  $heatsinkrr = $line[$logoffset1+44];
-  $inverterrr = $line[$logoffset1+45];
-  $packnominalfull = $line[$logoffset1+46];
-  $packnominalremain = $line[$logoffset1+47];
-  $packexpectedremain = $line[$logoffset1+48];
-  $packidealremain = $line[$logoffset1+49];
+  if ( $logversion >3 )
+  {
+    # coolant temperature leaving the battery heater
+    $coolantheateroutlettemp = $line[6];
+    # these pumps/bypass/heaters all read in percent (of max?)
+    # coolant circulation mode see https://teslamotorsclub.com/tmc/threads/scan-my-tesla-a-canbus-reader-for-android.112636/page-7
+    $seriesparallel = $line[94];
+    $pumpbattery1 = $line[95];
+    $pumpbattery2 = $line[96];
+    $pumppowertrain1 = $line[97];
+    $bypassradiator = $line[98];
+    $bypasschiller = $line[99];
+    $heatercoolant = $line[100];
+    $heaterptc = $line[101];
+    # has a questionmark in the description, perhaps authoer is unsure or doens't have a D car
+    $pumppowertrain2 = $line[102];
+    $refrigeranttemp = $line[107];
+    $heaterl = $line[108];
+    $heaterr = $line[109];
+  }
+  $dcdcamps = $line[$logoffset1+$logoffset3a+4];
+  $dcdcvolts = $line[$logoffset1+$logoffset3a+5];
+  $dcdccoolantin = $line[$logoffset1+$logoffset3a+6];
+  $dcdcinpower = $line[$logoffset1+$logoffset3a+7];
+  $sys12v = $line[$logoffset1+$logoffset3a+8];
+  $dcdcoutpower = $line[$logoffset1+$logoffset3a+9];
+  $dcdcefficiency = $line[$logoffset1+$logoffset3a+10];
+  $sys400v = $line[$logoffset1+$logoffset3a+11];
+  $heatingcooling = $line[$logoffset1+$logoffset3a+12];
+  $torquefr = $line[$logoffset1+$logoffset3a+13];
+  $torquebias = $line[$logoffset1+$logoffset3a+14];
+  $torquerr = $line[$logoffset1+$logoffset3a+15];
+  $wattpedal = $line[$logoffset1+$logoffset3a+16];
+  $mechpowerfr = $line[$logoffset1+$logoffset3a+17];
+  $dissipationfr = $line[$logoffset1+$logoffset3a+18];
+  $inpowerfr = $line[$logoffset1+$logoffset3a+19];
+  $hpfr = $line[$logoffset1+$logoffset3a+20];  
+  $statorampsfr = $line[$logoffset1+$logoffset3a+21];
+  $drivepowermaxfr = $line[$logoffset1+$logoffset3a+22];
+  $combinedmotorpower = $line[$logoffset1+$logoffset3a+23];
+  $combinedhp = $line[$logoffset1+$logoffset3a+24];
+  $efficiencyfr = $line[$logoffset1+$logoffset3a+25];
+  $rrinverter12v = $line[$logoffset1+$logoffset3a+26];
+  $mechpowerrr = $line[$logoffset1+$logoffset3a+27];
+  $dissipationfr = $line[$logoffset1+$logoffset3a+28];
+  $inpowerrr = $line[$logoffset1+$logoffset3a+29];
+  $propulsion = $line[$logoffset1+$logoffset3a+30];
+  $hprr = $line[$logoffset1+$logoffset3a+31];
+  $statorampsrr = $line[$logoffset1+$logoffset3a+32];
+  $regenpowermaxrr = $line[$logoffset1+$logoffset3a+33];
+  $drivepowermaxrr = $line[$logoffset1+$logoffset3a+34];
+  $efficiencyrr = $line[$logoffset1+$logoffset3a+35];
+  $torqueestfr = $line[$logoffset1+$logoffset3a+36];
+  $torqueestrr = $line[$logoffset1+$logoffset3a+37];
+  $speed = $line[$logoffset1+$logoffset3a+38];
+  $consumption = $line[$logoffset1+$logoffset3a+39];
+  $coolantinletrr = $line[$logoffset1+$logoffset3a+40];
+  $inverterpcbrr = $line[$logoffset1+$logoffset3a+41];
+  $statorrr = $line[$logoffset1+$logoffset3a+42];
+  $dccapacitorrr = $line[$logoffset1+$logoffset3a+43];
+  $heatsinkrr = $line[$logoffset1+$logoffset3a+44];
+  $inverterrr = $line[$logoffset1+$logoffset3a+45];
+  $packnominalfull = $line[$logoffset1+$logoffset3a+46];
+  $packnominalremain = $line[$logoffset1+$logoffset3a+47];
+  $packexpectedremain = $line[$logoffset1+$logoffset3a+48];
+  $packidealremain = $line[$logoffset1+$logoffset3a+49];
   # only see this while charging?
-  $chargetocomplete = $line[$logoffset1+50];
+  $chargetocomplete = $line[$logoffset1+$logoffset3a+50];
   # "permanently" reads 4 - kwh anti-bricking reserve?
-  $energybuffer = $line[$logoffset1+51];
-  $soc = $line[$logoffset1+52];
-  $packfullusable = $line[$logoffset1+53];
-  $packremainingusable = $line[$logoffset1+54];
+  $energybuffer = $line[$logoffset1+$logoffset3a+51];
+  $soc = $line[$logoffset1+$logoffset3a+52];
+  $packfullusable = $line[$logoffset1+$logoffset3a+53];
+  $packremainingusable = $line[$logoffset1+$logoffset3a+54];
   # this is where the v2/v3 difference starts
-  $chargetotaldc = $line[$logoffset1+$logoffset2+55];
-  $chargetotalac = $line[$logoffset1+$logoffset2+56];
-  $chargedc = $line[$logoffset1+$logoffset2+57];
-  $chargeac = $line[$logoffset1+$logoffset2+58];
-  $chargetotal = $line[$logoffset1+$logoffset2+59];
-  $bmsdischargetotal = $line[$logoffset1+$logoffset2+60]; 
-  $bmsregen = $line[$logoffset1+$logoffset2+61];
-  $bmstotal = $line[$logoffset1+$logoffset2+62];
-  $bmsdischarge = $line[$logoffset1+$logoffset2+63];
-  $bmscharge = $line[$logoffset1+$logoffset2+64];
-  $bmsregentotal = $line[$logoffset1+$logoffset2+65];
-  $bmsregenpercent = $line[$logoffset1+$logoffset2+66];
-  $bmsdischargecycles = $line[$logoffset1+$logoffset2+67];
-  $bmschargecycles = $line[$logoffset1+$logoffset2+68];
-  $battodom = $line[$logoffset1+$logoffset2+69];
-  $tripdistance = $line[$logoffset1+$logoffset2+70];
-  $tripconsumption = $line[$logoffset1+$logoffset2+71];
-  $frrpm = $line[$logoffset1+$logoffset2+72];
-  $rrrpm = $line[$logoffset1+$logoffset2+73];
-  $bmsmaxdischarge = $line[$logoffset1+$logoffset2+74];
-  $bmsmaxregen = $line[$logoffset1+$logoffset2+75];
-  $brakepedal = $line[$logoffset1+$logoffset2+76];
-  $steeringangle = $line[$logoffset1+$logoffset2+77];
-  $rangerated = $line[$logoffset1+$logoffset2+78];
-  $rangetypical = $line[$logoffset1+$logoffset2+79];
-  $rangefullrated = $line[$logoffset1+$logoffset2+80];
-  $rangefulltypical = $line[$logoffset1+$logoffset2+81];
+  $chargetotaldc = $line[$logoffset1+$logoffset2+$logoffset3a+55];
+  $chargetotalac = $line[$logoffset1+$logoffset2+$logoffset3a+56];
+  $chargedc = $line[$logoffset1+$logoffset2+$logoffset3a+57];
+  $chargeac = $line[$logoffset1+$logoffset2+$logoffset3a+58];
+  $chargetotal = $line[$logoffset1+$logoffset2+$logoffset3a+59];
+  $bmsdischargetotal = $line[$logoffset1+$logoffset2+$logoffset3a+60]; 
+  $bmsregen = $line[$logoffset1+$logoffset2+$logoffset3a+61];
+  $bmstotal = $line[$logoffset1+$logoffset2+$logoffset3a+62];
+  $bmsdischarge = $line[$logoffset1+$logoffset2+$logoffset3a+63];
+  $bmscharge = $line[$logoffset1+$logoffset2+$logoffset3a+64];
+  $bmsregentotal = $line[$logoffset1+$logoffset2+$logoffset3a+65];
+  $bmsregenpercent = $line[$logoffset1+$logoffset2+$logoffset3a+66];
+  $bmsdischargecycles = $line[$logoffset1+$logoffset2+$logoffset3a+67];
+  $bmschargecycles = $line[$logoffset1+$logoffset2+$logoffset3a+68];
+  $battodom = $line[$logoffset1+$logoffset2+$logoffset3a+69];
+  $tripdistance = $line[$logoffset1+$logoffset2+$logoffset3a+70];
+  $tripconsumption = $line[$logoffset1+$logoffset2+$logoffset3a+71];
+  $frrpm = $line[$logoffset1+$logoffset2+$logoffset3a+72];
+  $rrrpm = $line[$logoffset1+$logoffset2+$logoffset3a+73];
+  $bmsmaxdischarge = $line[$logoffset1+$logoffset2+$logoffset3a+74];
+  $bmsmaxregen = $line[$logoffset1+$logoffset2+$logoffset3a+75];
+  $brakepedal = $line[$logoffset1+$logoffset2+$logoffset3a+76];
+  $steeringangle = $line[$logoffset1+$logoffset2+$logoffset3a+77];
+  $rangerated = $line[$logoffset1+$logoffset2+$logoffset3a+78];
+  $rangetypical = $line[$logoffset1+$logoffset2+$logoffset3a+79];
+  $rangefullrated = $line[$logoffset1+$logoffset2+$logoffset3a+80];
+  $rangefulltypical = $line[$logoffset1+$logoffset2+$logoffset3a+81];
 # this isn't useful
-#  $lastcellupdated = $line[$logoffset1+$logoffset2+82];
-  $frontleft = $line[$logoffset1+$logoffset2+83];
-  $frontright = $line[$logoffset1+$logoffset2+84];
-  $frdriveratio = $line[$logoffset1+$logoffset2+85];
-  $rearleft = $line[$logoffset1+$logoffset2+86];
-  $rearright = $line[$logoffset1+$logoffset2+87];
-  $rrdriveratio = $line[$logoffset1+$logoffset2+88];
-  $tempout = $line[$logoffset1+$logoffset2+89];
-  $tempoutfilt = $line[$logoffset1+$logoffset2+90];
-  $tempin = $line[$logoffset1+$logoffset2+91];
-  $tempacair = $line[$logoffset1+$logoffset2+92];
-  $floorventl = $line[$logoffset1+$logoffset2+93];
-  $floorventr = $line[$logoffset1+$logoffset2+94];
-  $midventl = $line[$logoffset1+$logoffset2+95];
-  $midventr = $line[$logoffset1+$logoffset2+96];
+#  $lastcellupdated = $line[$logoffset1+$logoffset2+$logoffset3a+82];
+  $frontleft = $line[$logoffset1+$logoffset2+$logoffset3a+83];
+  $frontright = $line[$logoffset1+$logoffset2+$logoffset3a+84];
+  $frdriveratio = $line[$logoffset1+$logoffset2+$logoffset3a+85];
+  $rearleft = $line[$logoffset1+$logoffset2+$logoffset3a+86];
+  $rearright = $line[$logoffset1+$logoffset2+$logoffset3a+87];
+  $rrdriveratio = $line[$logoffset1+$logoffset2+$logoffset3a+88];
+# logoffset3a/logoffset3b change here FIXME different after here
+  $tempout = $line[$logoffset1+$logoffset2+$logoffset3b+89];
+  $tempoutfilt = $line[$logoffset1+$logoffset2+$logoffset3b+90];
+  $tempin = $line[$logoffset1+$logoffset2+$logoffset3b+91];
+  $tempacair = $line[$logoffset1+$logoffset2+$logoffset3b+92];
+# logoffset3b/3c change here
+# FIXME at some point the floorvent was SWITCHED to be AFTER the midvent grrr
+  $floorventl = $line[$logoffset1+$logoffset2+$logoffset3c+93];
+  $floorventr = $line[$logoffset1+$logoffset2+$logoffset3c+94];
+  $midventl = $line[$logoffset1+$logoffset2+$logoffset3c+95];
+  $midventr = $line[$logoffset1+$logoffset2+$logoffset3c+96];
   # these are flaps within the hvac system 
   # measurement units unsure, perhaps degrees? 16-250 = 0-100%
   # from facebook convo with scanmytesla author
-  $louver1 = $line[$logoffset1+$logoffset2+97];
-  $louver2 = $line[$logoffset1+$logoffset2+98];
-  $louver3 = $line[$logoffset1+$logoffset2+99];
-  $louver4 = $line[$logoffset1+$logoffset2+100];
-  $louver5 = $line[$logoffset1+$logoffset2+101];
-  $louver6 = $line[$logoffset1+$logoffset2+102];
-  $louver7 = $line[$logoffset1+$logoffset2+103];
-  $louver8 = $line[$logoffset1+$logoffset2+104];
+  $louver1 = $line[$logoffset1+$logoffset2+$logoffset3c+97];
+  $louver2 = $line[$logoffset1+$logoffset2+$logoffset3c+98];
+  $louver3 = $line[$logoffset1+$logoffset2+$logoffset3c+99];
+  $louver4 = $line[$logoffset1+$logoffset2+$logoffset3c+100];
+  $louver5 = $line[$logoffset1+$logoffset2+$logoffset3c+101];
+  $louver6 = $line[$logoffset1+$logoffset2+$logoffset3c+102];
+  $louver7 = $line[$logoffset1+$logoffset2+$logoffset3c+103];
+  $louver8 = $line[$logoffset1+$logoffset2+$logoffset3c+104];
   # these refer to vents being enabled - 1 on 0 off
-  $hvacflr = $line[$logoffset1+$logoffset2+105];
-  $hvacmid = $line[$logoffset1+$logoffset2+106];
-  $hvacwin = $line[$logoffset1+$logoffset2+107];
-  $hvacac = $line[$logoffset1+$logoffset2+108];
-  $hvacoff = $line[$logoffset1+$logoffset2+109];
-  $hvacfanspeed = $line[$logoffset1+$logoffset2+110];
-  $hvactempleft = $line[$logoffset1+$logoffset2+111];
-  $hvactempright = $line[$logoffset1+$logoffset2+112];
+  $hvacflr = $line[$logoffset1+$logoffset2+$logoffset3c+105];
+  $hvacmid = $line[$logoffset1+$logoffset2+$logoffset3c+106];
+  $hvacwin = $line[$logoffset1+$logoffset2+$logoffset3c+107];
+  $hvacac = $line[$logoffset1+$logoffset2+$logoffset3c+108];
+  $hvacoff = $line[$logoffset1+$logoffset2+$logoffset3c+109];
+  $hvacfanspeed = $line[$logoffset1+$logoffset2+$logoffset3c+110];
+  $hvactempleft = $line[$logoffset1+$logoffset2+$logoffset3c+111];
+  $hvactempright = $line[$logoffset1+$logoffset2+$logoffset3c+112];
 
-  $celltempmin = $line[$logoffset1+$logoffset2+113];
-  $celltempavg = $line[$logoffset1+$logoffset2+114];
-  $celltempmax = $line[$logoffset1+$logoffset2+115];
-  $celltempdiff = $line[$logoffset1+$logoffset2+116];
-  $cellmin = $line[$logoffset1+$logoffset2+117];
-  $cellavg = $line[$logoffset1+$logoffset2+118];
-  $cellmax = $line[$logoffset1+$logoffset2+119];
-  $celldiff = $line[$logoffset1+$logoffset2+120];
-  $cellvolts{'01'} = $line[$logoffset1+$logoffset2+121];
-  $cellvolts{'02'} = $line[$logoffset1+$logoffset2+122]; 
-  $cellvolts{'03'} = $line[$logoffset1+$logoffset2+123]; 
-  $celltemp{'01'} = $line[$logoffset1+$logoffset2+124];
-  $cellvolts{'04'} = $line[$logoffset1+$logoffset2+125];
-  $cellvolts{'05'} = $line[$logoffset1+$logoffset2+126];
-  $cellvolts{'06'} = $line[$logoffset1+$logoffset2+127];
-  $celltemp{'02'} = $line[$logoffset1+$logoffset2+128];
-  $cellvolts{'07'} = $line[$logoffset1+$logoffset2+129];
-  $cellvolts{'08'} = $line[$logoffset1+$logoffset2+130];
-  $cellvolts{'09'} = $line[$logoffset1+$logoffset2+131];
-  $celltemp{'03'} = $line[$logoffset1+$logoffset2+132];
-  $cellvolts{'10'} = $line[$logoffset1+$logoffset2+133];
-  $cellvolts{'11'} = $line[$logoffset1+$logoffset2+134];
-  $cellvolts{'12'} = $line[$logoffset1+$logoffset2+135];
-  $celltemp{'04'} = $line[$logoffset1+$logoffset2+136];
-  $cellvolts{'13'} = $line[$logoffset1+$logoffset2+137];
-  $cellvolts{'14'} = $line[$logoffset1+$logoffset2+138];
-  $cellvolts{'15'} = $line[$logoffset1+$logoffset2+139];
-  $celltemp{'05'} = $line[$logoffset1+$logoffset2+140];
-  $cellvolts{'16'} = $line[$logoffset1+$logoffset2+141];
-  $cellvolts{'17'} = $line[$logoffset1+$logoffset2+142];
-  $cellvolts{'18'} = $line[$logoffset1+$logoffset2+143];
-  $celltemp{'06'} = $line[$logoffset1+$logoffset2+144];
-  $cellvolts{'19'} = $line[$logoffset1+$logoffset2+145];
-  $cellvolts{'20'} = $line[$logoffset1+$logoffset2+146];
-  $cellvolts{'21'} = $line[$logoffset1+$logoffset2+147];
-  $celltemp{'07'} = $line[$logoffset1+$logoffset2+148];
-  $cellvolts{'22'} = $line[$logoffset1+$logoffset2+149];
-  $cellvolts{'23'} = $line[$logoffset1+$logoffset2+150];
-  $cellvolts{'24'} = $line[$logoffset1+$logoffset2+151];
-  $celltemp{'08'} = $line[$logoffset1+$logoffset2+152];
-  $cellvolts{'25'} = $line[$logoffset1+$logoffset2+153];
-  $cellvolts{'26'} = $line[$logoffset1+$logoffset2+154];
-  $cellvolts{'27'} = $line[$logoffset1+$logoffset2+155];
-  $celltemp{'09'} = $line[$logoffset1+$logoffset2+156];
-  $cellvolts{'28'} = $line[$logoffset1+$logoffset2+157];
-  $cellvolts{'29'} = $line[$logoffset1+$logoffset2+158];
-  $cellvolts{'30'} = $line[$logoffset1+$logoffset2+159];
-  $celltemp{'10'} = $line[$logoffset1+$logoffset2+160];
-  $cellvolts{'31'} = $line[$logoffset1+$logoffset2+161];
-  $cellvolts{'32'} = $line[$logoffset1+$logoffset2+162];
-  $cellvolts{'33'} = $line[$logoffset1+$logoffset2+163];
-  $celltemp{'11'} = $line[$logoffset1+$logoffset2+164];
-  $cellvolts{'34'} = $line[$logoffset1+$logoffset2+165];
-  $cellvolts{'35'} = $line[$logoffset1+$logoffset2+166];
-  $cellvolts{'36'} = $line[$logoffset1+$logoffset2+167];
-  $celltemp{'12'} = $line[$logoffset1+$logoffset2+168];
-  $cellvolts{'37'} = $line[$logoffset1+$logoffset2+169];
-  $cellvolts{'38'} = $line[$logoffset1+$logoffset2+170];
-  $cellvolts{'39'} = $line[$logoffset1+$logoffset2+171];
-  $celltemp{'13'} = $line[$logoffset1+$logoffset2+172];
-  $cellvolts{'40'} = $line[$logoffset1+$logoffset2+173];
-  $cellvolts{'41'} = $line[$logoffset1+$logoffset2+174];
-  $cellvolts{'42'} = $line[$logoffset1+$logoffset2+175];
-  $celltemp{'14'} = $line[$logoffset1+$logoffset2+176];
-  $cellvolts{'43'} = $line[$logoffset1+$logoffset2+177];
-  $cellvolts{'44'} = $line[$logoffset1+$logoffset2+178];
-  $cellvolts{'45'} = $line[$logoffset1+$logoffset2+179];
-  $celltemp{'15'} = $line[$logoffset1+$logoffset2+180];
-  $cellvolts{'46'} = $line[$logoffset1+$logoffset2+181];
-  $cellvolts{'47'} = $line[$logoffset1+$logoffset2+182];
-  $cellvolts{'48'} = $line[$logoffset1+$logoffset2+183];
-  $celltemp{'16'} = $line[$logoffset1+$logoffset2+184];
-  $cellvolts{'49'} = $line[$logoffset1+$logoffset2+185];
-  $cellvolts{'50'} = $line[$logoffset1+$logoffset2+186];
-  $cellvolts{'51'} = $line[$logoffset1+$logoffset2+187];
-  $celltemp{'17'} = $line[$logoffset1+$logoffset2+188];
-  $cellvolts{'52'} = $line[$logoffset1+$logoffset2+189];
-  $cellvolts{'53'} = $line[$logoffset1+$logoffset2+190];
-  $cellvolts{'54'} = $line[$logoffset1+$logoffset2+191];
-  $celltemp{'18'} = $line[$logoffset1+$logoffset2+192];
-  $cellvolts{'55'} = $line[$logoffset1+$logoffset2+193];
-  $cellvolts{'56'} = $line[$logoffset1+$logoffset2+194];
-  $cellvolts{'57'} = $line[$logoffset1+$logoffset2+195];
-  $celltemp{'19'} = $line[$logoffset1+$logoffset2+196];
-  $cellvolts{'58'} = $line[$logoffset1+$logoffset2+197];
-  $cellvolts{'59'} = $line[$logoffset1+$logoffset2+198];
-  $cellvolts{'60'} = $line[$logoffset1+$logoffset2+199];
-  $celltemp{'20'} = $line[$logoffset1+$logoffset2+200];
-  $cellvolts{'61'} = $line[$logoffset1+$logoffset2+201];
-  $cellvolts{'62'} = $line[$logoffset1+$logoffset2+202];
-  $cellvolts{'63'} = $line[$logoffset1+$logoffset2+203];
-  $celltemp{'21'} = $line[$logoffset1+$logoffset2+204];
-  $cellvolts{'64'} = $line[$logoffset1+$logoffset2+205];
-  $cellvolts{'65'} = $line[$logoffset1+$logoffset2+206];
-  $cellvolts{'66'} = $line[$logoffset1+$logoffset2+207];
-  $celltemp{'22'} = $line[$logoffset1+$logoffset2+208];
-  $cellvolts{'67'} = $line[$logoffset1+$logoffset2+209];
-  $cellvolts{'68'} = $line[$logoffset1+$logoffset2+210];
-  $cellvolts{'69'} = $line[$logoffset1+$logoffset2+211];
-  $celltemp{'23'} = $line[$logoffset1+$logoffset2+212];
-  $cellvolts{'70'} = $line[$logoffset1+$logoffset2+213];
-  $cellvolts{'71'} = $line[$logoffset1+$logoffset2+214];
-  $cellvolts{'72'} = $line[$logoffset1+$logoffset2+215];
-  $celltemp{'24'} = $line[$logoffset1+$logoffset2+216];
-  $cellvolts{'73'} = $line[$logoffset1+$logoffset2+217];
-  $cellvolts{'74'} = $line[$logoffset1+$logoffset2+218];
-  $cellvolts{'75'} = $line[$logoffset1+$logoffset2+219];
-  $celltemp{'25'} = $line[$logoffset1+$logoffset2+220];
-  $cellvolts{'76'} = $line[$logoffset1+$logoffset2+221];
-  $cellvolts{'77'} = $line[$logoffset1+$logoffset2+222];
-  $cellvolts{'78'} = $line[$logoffset1+$logoffset2+223];
-  $celltemp{'26'} = $line[$logoffset1+$logoffset2+224];
-  $cellvolts{'79'} = $line[$logoffset1+$logoffset2+225];
-  $cellvolts{'80'} = $line[$logoffset1+$logoffset2+226];
-  $cellvolts{'81'} = $line[$logoffset1+$logoffset2+227];
-  $celltemp{'27'} = $line[$logoffset1+$logoffset2+228];
-  $cellvolts{'82'} = $line[$logoffset1+$logoffset2+229];
-  $cellvolts{'83'} = $line[$logoffset1+$logoffset2+230];
-  $cellvolts{'84'} = $line[$logoffset1+$logoffset2+231];
-  $celltemp{'28'} = $line[$logoffset1+$logoffset2+232];
-  $cellvolts{'85'} = $line[$logoffset1+$logoffset2+233];
-  $cellvolts{'86'} = $line[$logoffset1+$logoffset2+234];
-  $cellvolts{'87'} = $line[$logoffset1+$logoffset2+235];
-  $celltemp{'29'} = $line[$logoffset1+$logoffset2+236];
-  $cellvolts{'88'} = $line[$logoffset1+$logoffset2+237];
-  $cellvolts{'89'} = $line[$logoffset1+$logoffset2+238];
-  $cellvolts{'90'} = $line[$logoffset1+$logoffset2+239];
-  $celltemp{'30'} = $line[$logoffset1+$logoffset2+240];
-  $cellvolts{'91'} = $line[$logoffset1+$logoffset2+241];
-  $cellvolts{'92'} = $line[$logoffset1+$logoffset2+242];
-  $cellvolts{'93'} = $line[$logoffset1+$logoffset2+243];
-  $celltemp{'31'} = $line[$logoffset1+$logoffset2+244];
-  $cellvolts{'94'} = $line[$logoffset1+$logoffset2+245];
-  $cellvolts{'95'} = $line[$logoffset1+$logoffset2+246];
-  $cellvolts{'96'} = $line[$logoffset1+$logoffset2+247];
-  $celltemp{'32'} = $line[$logoffset1+$logoffset2+248];
+  $celltempmin = $line[$logoffset1+$logoffset2+$logoffset3c+113];
+  $celltempavg = $line[$logoffset1+$logoffset2+$logoffset3c+114];
+  $celltempmax = $line[$logoffset1+$logoffset2+$logoffset3c+115];
+  $celltempdiff = $line[$logoffset1+$logoffset2+$logoffset3c+116];
+  $cellmin = $line[$logoffset1+$logoffset2+$logoffset3c+117];
+  $cellavg = $line[$logoffset1+$logoffset2+$logoffset3c+118];
+  $cellmax = $line[$logoffset1+$logoffset2+$logoffset3c+119];
+  $celldiff = $line[$logoffset1+$logoffset2+$logoffset3c+120];
+  $cellvolts{'01'} = $line[$logoffset1+$logoffset2+$logoffset3c+121];
+  $cellvolts{'02'} = $line[$logoffset1+$logoffset2+$logoffset3c+122]; 
+  $cellvolts{'03'} = $line[$logoffset1+$logoffset2+$logoffset3c+123]; 
+  $celltemp{'01'} = $line[$logoffset1+$logoffset2+$logoffset3c+124];
+  $cellvolts{'04'} = $line[$logoffset1+$logoffset2+$logoffset3c+125];
+  $cellvolts{'05'} = $line[$logoffset1+$logoffset2+$logoffset3c+126];
+  $cellvolts{'06'} = $line[$logoffset1+$logoffset2+$logoffset3c+127];
+  $celltemp{'02'} = $line[$logoffset1+$logoffset2+$logoffset3c+128];
+  $cellvolts{'07'} = $line[$logoffset1+$logoffset2+$logoffset3c+129];
+  $cellvolts{'08'} = $line[$logoffset1+$logoffset2+$logoffset3c+130];
+  $cellvolts{'09'} = $line[$logoffset1+$logoffset2+$logoffset3c+131];
+  $celltemp{'03'} = $line[$logoffset1+$logoffset2+$logoffset3c+132];
+  $cellvolts{'10'} = $line[$logoffset1+$logoffset2+$logoffset3c+133];
+  $cellvolts{'11'} = $line[$logoffset1+$logoffset2+$logoffset3c+134];
+  $cellvolts{'12'} = $line[$logoffset1+$logoffset2+$logoffset3c+135];
+  $celltemp{'04'} = $line[$logoffset1+$logoffset2+$logoffset3c+136];
+  $cellvolts{'13'} = $line[$logoffset1+$logoffset2+$logoffset3c+137];
+  $cellvolts{'14'} = $line[$logoffset1+$logoffset2+$logoffset3c+138];
+  $cellvolts{'15'} = $line[$logoffset1+$logoffset2+$logoffset3c+139];
+  $celltemp{'05'} = $line[$logoffset1+$logoffset2+$logoffset3c+140];
+  $cellvolts{'16'} = $line[$logoffset1+$logoffset2+$logoffset3c+141];
+  $cellvolts{'17'} = $line[$logoffset1+$logoffset2+$logoffset3c+142];
+  $cellvolts{'18'} = $line[$logoffset1+$logoffset2+$logoffset3c+143];
+  $celltemp{'06'} = $line[$logoffset1+$logoffset2+$logoffset3c+144];
+  $cellvolts{'19'} = $line[$logoffset1+$logoffset2+$logoffset3c+145];
+  $cellvolts{'20'} = $line[$logoffset1+$logoffset2+$logoffset3c+146];
+  $cellvolts{'21'} = $line[$logoffset1+$logoffset2+$logoffset3c+147];
+  $celltemp{'07'} = $line[$logoffset1+$logoffset2+$logoffset3c+148];
+  $cellvolts{'22'} = $line[$logoffset1+$logoffset2+$logoffset3c+149];
+  $cellvolts{'23'} = $line[$logoffset1+$logoffset2+$logoffset3c+150];
+  $cellvolts{'24'} = $line[$logoffset1+$logoffset2+$logoffset3c+151];
+  $celltemp{'08'} = $line[$logoffset1+$logoffset2+$logoffset3c+152];
+  $cellvolts{'25'} = $line[$logoffset1+$logoffset2+$logoffset3c+153];
+  $cellvolts{'26'} = $line[$logoffset1+$logoffset2+$logoffset3c+154];
+  $cellvolts{'27'} = $line[$logoffset1+$logoffset2+$logoffset3c+155];
+  $celltemp{'09'} = $line[$logoffset1+$logoffset2+$logoffset3c+156];
+  $cellvolts{'28'} = $line[$logoffset1+$logoffset2+$logoffset3c+157];
+  $cellvolts{'29'} = $line[$logoffset1+$logoffset2+$logoffset3c+158];
+  $cellvolts{'30'} = $line[$logoffset1+$logoffset2+$logoffset3c+159];
+  $celltemp{'10'} = $line[$logoffset1+$logoffset2+$logoffset3c+160];
+  $cellvolts{'31'} = $line[$logoffset1+$logoffset2+$logoffset3c+161];
+  $cellvolts{'32'} = $line[$logoffset1+$logoffset2+$logoffset3c+162];
+  $cellvolts{'33'} = $line[$logoffset1+$logoffset2+$logoffset3c+163];
+  $celltemp{'11'} = $line[$logoffset1+$logoffset2+$logoffset3c+164];
+  $cellvolts{'34'} = $line[$logoffset1+$logoffset2+$logoffset3c+165];
+  $cellvolts{'35'} = $line[$logoffset1+$logoffset2+$logoffset3c+166];
+  $cellvolts{'36'} = $line[$logoffset1+$logoffset2+$logoffset3c+167];
+  $celltemp{'12'} = $line[$logoffset1+$logoffset2+$logoffset3c+168];
+  $cellvolts{'37'} = $line[$logoffset1+$logoffset2+$logoffset3c+169];
+  $cellvolts{'38'} = $line[$logoffset1+$logoffset2+$logoffset3c+170];
+  $cellvolts{'39'} = $line[$logoffset1+$logoffset2+$logoffset3c+171];
+  $celltemp{'13'} = $line[$logoffset1+$logoffset2+$logoffset3c+172];
+  $cellvolts{'40'} = $line[$logoffset1+$logoffset2+$logoffset3c+173];
+  $cellvolts{'41'} = $line[$logoffset1+$logoffset2+$logoffset3c+174];
+  $cellvolts{'42'} = $line[$logoffset1+$logoffset2+$logoffset3c+175];
+  $celltemp{'14'} = $line[$logoffset1+$logoffset2+$logoffset3c+176];
+  $cellvolts{'43'} = $line[$logoffset1+$logoffset2+$logoffset3c+177];
+  $cellvolts{'44'} = $line[$logoffset1+$logoffset2+$logoffset3c+178];
+  $cellvolts{'45'} = $line[$logoffset1+$logoffset2+$logoffset3c+179];
+  $celltemp{'15'} = $line[$logoffset1+$logoffset2+$logoffset3c+180];
+  $cellvolts{'46'} = $line[$logoffset1+$logoffset2+$logoffset3c+181];
+  $cellvolts{'47'} = $line[$logoffset1+$logoffset2+$logoffset3c+182];
+  $cellvolts{'48'} = $line[$logoffset1+$logoffset2+$logoffset3c+183];
+  $celltemp{'16'} = $line[$logoffset1+$logoffset2+$logoffset3c+184];
+  $cellvolts{'49'} = $line[$logoffset1+$logoffset2+$logoffset3c+185];
+  $cellvolts{'50'} = $line[$logoffset1+$logoffset2+$logoffset3c+186];
+  $cellvolts{'51'} = $line[$logoffset1+$logoffset2+$logoffset3c+187];
+  $celltemp{'17'} = $line[$logoffset1+$logoffset2+$logoffset3c+188];
+  $cellvolts{'52'} = $line[$logoffset1+$logoffset2+$logoffset3c+189];
+  $cellvolts{'53'} = $line[$logoffset1+$logoffset2+$logoffset3c+190];
+  $cellvolts{'54'} = $line[$logoffset1+$logoffset2+$logoffset3c+191];
+  $celltemp{'18'} = $line[$logoffset1+$logoffset2+$logoffset3c+192];
+  $cellvolts{'55'} = $line[$logoffset1+$logoffset2+$logoffset3c+193];
+  $cellvolts{'56'} = $line[$logoffset1+$logoffset2+$logoffset3c+194];
+  $cellvolts{'57'} = $line[$logoffset1+$logoffset2+$logoffset3c+195];
+  $celltemp{'19'} = $line[$logoffset1+$logoffset2+$logoffset3c+196];
+  $cellvolts{'58'} = $line[$logoffset1+$logoffset2+$logoffset3c+197];
+  $cellvolts{'59'} = $line[$logoffset1+$logoffset2+$logoffset3c+198];
+  $cellvolts{'60'} = $line[$logoffset1+$logoffset2+$logoffset3c+199];
+  $celltemp{'20'} = $line[$logoffset1+$logoffset2+$logoffset3c+200];
+  $cellvolts{'61'} = $line[$logoffset1+$logoffset2+$logoffset3c+201];
+  $cellvolts{'62'} = $line[$logoffset1+$logoffset2+$logoffset3c+202];
+  $cellvolts{'63'} = $line[$logoffset1+$logoffset2+$logoffset3c+203];
+  $celltemp{'21'} = $line[$logoffset1+$logoffset2+$logoffset3c+204];
+  $cellvolts{'64'} = $line[$logoffset1+$logoffset2+$logoffset3c+205];
+  $cellvolts{'65'} = $line[$logoffset1+$logoffset2+$logoffset3c+206];
+  $cellvolts{'66'} = $line[$logoffset1+$logoffset2+$logoffset3c+207];
+  $celltemp{'22'} = $line[$logoffset1+$logoffset2+$logoffset3c+208];
+  $cellvolts{'67'} = $line[$logoffset1+$logoffset2+$logoffset3c+209];
+  $cellvolts{'68'} = $line[$logoffset1+$logoffset2+$logoffset3c+210];
+  $cellvolts{'69'} = $line[$logoffset1+$logoffset2+$logoffset3c+211];
+  $celltemp{'23'} = $line[$logoffset1+$logoffset2+$logoffset3c+212];
+  $cellvolts{'70'} = $line[$logoffset1+$logoffset2+$logoffset3c+213];
+  $cellvolts{'71'} = $line[$logoffset1+$logoffset2+$logoffset3c+214];
+  $cellvolts{'72'} = $line[$logoffset1+$logoffset2+$logoffset3c+215];
+  $celltemp{'24'} = $line[$logoffset1+$logoffset2+$logoffset3c+216];
+  $cellvolts{'73'} = $line[$logoffset1+$logoffset2+$logoffset3c+217];
+  $cellvolts{'74'} = $line[$logoffset1+$logoffset2+$logoffset3c+218];
+  $cellvolts{'75'} = $line[$logoffset1+$logoffset2+$logoffset3c+219];
+  $celltemp{'25'} = $line[$logoffset1+$logoffset2+$logoffset3c+220];
+  $cellvolts{'76'} = $line[$logoffset1+$logoffset2+$logoffset3c+221];
+  $cellvolts{'77'} = $line[$logoffset1+$logoffset2+$logoffset3c+222];
+  $cellvolts{'78'} = $line[$logoffset1+$logoffset2+$logoffset3c+223];
+  $celltemp{'26'} = $line[$logoffset1+$logoffset2+$logoffset3c+224];
+  $cellvolts{'79'} = $line[$logoffset1+$logoffset2+$logoffset3c+225];
+  $cellvolts{'80'} = $line[$logoffset1+$logoffset2+$logoffset3c+226];
+  $cellvolts{'81'} = $line[$logoffset1+$logoffset2+$logoffset3c+227];
+  $celltemp{'27'} = $line[$logoffset1+$logoffset2+$logoffset3c+228];
+  $cellvolts{'82'} = $line[$logoffset1+$logoffset2+$logoffset3c+229];
+  $cellvolts{'83'} = $line[$logoffset1+$logoffset2+$logoffset3c+230];
+  $cellvolts{'84'} = $line[$logoffset1+$logoffset2+$logoffset3c+231];
+  $celltemp{'28'} = $line[$logoffset1+$logoffset2+$logoffset3c+232];
+  $cellvolts{'85'} = $line[$logoffset1+$logoffset2+$logoffset3c+233];
+  $cellvolts{'86'} = $line[$logoffset1+$logoffset2+$logoffset3c+234];
+  $cellvolts{'87'} = $line[$logoffset1+$logoffset2+$logoffset3c+235];
+  $celltemp{'29'} = $line[$logoffset1+$logoffset2+$logoffset3c+236];
+  $cellvolts{'88'} = $line[$logoffset1+$logoffset2+$logoffset3c+237];
+  $cellvolts{'89'} = $line[$logoffset1+$logoffset2+$logoffset3c+238];
+  $cellvolts{'90'} = $line[$logoffset1+$logoffset2+$logoffset3c+239];
+  $celltemp{'30'} = $line[$logoffset1+$logoffset2+$logoffset3c+240];
+  $cellvolts{'91'} = $line[$logoffset1+$logoffset2+$logoffset3c+241];
+  $cellvolts{'92'} = $line[$logoffset1+$logoffset2+$logoffset3c+242];
+  $cellvolts{'93'} = $line[$logoffset1+$logoffset2+$logoffset3c+243];
+  $celltemp{'31'} = $line[$logoffset1+$logoffset2+$logoffset3c+244];
+  $cellvolts{'94'} = $line[$logoffset1+$logoffset2+$logoffset3c+245];
+  $cellvolts{'95'} = $line[$logoffset1+$logoffset2+$logoffset3c+246];
+  $cellvolts{'96'} = $line[$logoffset1+$logoffset2+$logoffset3c+247];
+  $celltemp{'32'} = $line[$logoffset1+$logoffset2+$logoffset3c+248];
 
 
   if ( ! $battvolts eq "" ) { $influxcmdline .= "battery_voltage value=${battvolts} ${timestampline}000000\n"; }
@@ -491,6 +532,23 @@ while (<INPUT>)
 
   if ( ! $frrpm eq "" ) { $influxcmdline .= "rpm_front value=${frrpm} ${timestampline}000000\n"; }
   if ( ! $rrrpm eq "" ) { $influxcmdline .= "rpm_rear value=${rrrpm} ${timestampline}000000\n"; }
+
+
+  if ( ! $seriesparallel eq "" ) { $influxcmdline .= "coolant_mode_series_parallel value=${seriesparallel} ${timestampline}000000\n"; }
+  if ( ! $pumpbattery1 eq "" ) { $influxcmdline .= "coolant_pump_battery1 value=${pumpbattery1} ${timestampline}000000\n"; }
+  if ( ! $pumpbattery2 eq "" ) { $influxcmdline .= "coolant_pump_battery2 value=${pumpbattery2} ${timestampline}000000\n"; }
+  if ( ! $pumppowertrain1 eq "" ) { $influxcmdline .= "coolant_pump_powertrain1 value=${pumppowertrain1} ${timestampline}000000\n"; }
+  if ( ! $pumppowertrain2 eq "" ) { $influxcmdline .= "coolant_pump_powertrain2 value=${pumppowertrain2} ${timestampline}000000\n"; }
+  if ( ! $bypassradiator eq "" ) { $influxcmdline .= "radiator_bypass value=${bypassradiator} ${timestampline}000000\n"; }
+  if ( ! $bypasschiller eq "" ) { $influxcmdline .= "chiller_bypass value=${bypasschiller} ${timestampline}000000\n"; }
+  if ( ! $heatercoolant eq "" ) { $influxcmdline .= "coolant_heater value=${heatercoolant} ${timestampline}000000\n"; }
+  if ( ! $heaterptc eq "" ) { $influxcmdline .= "ptc_heater value=${heaterptc} ${timestampline}000000\n"; }
+  if ( ! $refrigeranttemp eq "" ) { $influxcmdline .= "temp_refrigerant value=${refrigeranttemp} ${timestampline}000000\n"; }
+  if ( ! $heaterl eq "" ) { $influxcmdline .= "heater_left value=${heaterl} ${timestampline}000000\n"; }
+  if ( ! $heaterr eq "" ) { $influxcmdline .= "heater_left value=${heaterr} ${timestampline}000000\n"; }
+
+#print "debug: coolant series/parallel $seriesparallel battery pump1 $pumpbattery1 pump2 $pumpbattery2 powertrain pump1 $pumppowertrain1 pump2 $pumppowertrain2\n";
+#print "debug: bypasses rad $bypassradiator chiller $bypasschiller heaters coolant $heatercoolant ptc $heaterptc refrig temp $refrigeranttemp heaters l/r $heaterl $heaterr\n";
 
 
   # units? bit wtf
