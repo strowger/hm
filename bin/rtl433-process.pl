@@ -44,6 +44,7 @@ $logccclampcook="rtl433-ccclampcook.log";
 $logccclamptowelrail="rtl433-ccclamptowelrail.log";
 $logcciamdryer="rtl433-cciamdryer.log";
 $logcciamcar2="rtl433-cciamcar2.log";
+$logcciamcatpad="rtl433-cciamcatpad.log";
 $logcciamwasher="rtl433-cciamwasher.log";
 $logcciamfridge="rtl433-cciamfridge.log";
 $logcciamfridge2="rtl433-cciamfridge2.log";
@@ -88,6 +89,7 @@ $timelastccclampcook=`tail -1 $logdirectory/$logccclampcook|awk '{print \$1}'`;
 $timelastccclamptowelrail=`tail -1 $logdirectory/$logccclamptowelrail|awk '{print \$1}'`;
 $timelastcciamdryer=`tail -1 $logdirectory/$logcciamdryer|awk '{print \$1}'`;
 $timelastcciamcar2=`tail -1 $logdirectory/$logcciamcar2|awk '{print \$1}'`;
+$timelastcciamcatpad=`tail -1 $logdirectory/$logcciamcatpad|awk '{print \$1}'`;
 $timelastcciamwasher=`tail -1 $logdirectory/$logcciamwasher|awk '{print \$1}'`;
 $timelastcciamfridge=`tail -1 $logdirectory/$logcciamfridge|awk '{print \$1}'`;
 $timelastcciamfridge2=`tail -1 $logdirectory/$logcciamfridge2|awk '{print \$1}'`;
@@ -110,7 +112,7 @@ $timelastprolhumfridgeds=`tail -1 $logdirectory/$logprolhumfridgeds|awk '{print 
 $timelastprolhumfridge=`tail -1 $logdirectory/$logprolhumfridge|awk '{print\$1}'`;                 
 $timelastprolhumfreezer=`tail -1 $logdirectory/$logprolhumfreezer|awk '{print\$1}'`; 
 
-$timelastlogwaterdetcellarmain=`tail -1 $logdirectory/$logwaterdetcellarmain|awk '{print\$1}'`;
+$timelastwaterdetcellarmain=`tail -1 $logdirectory/$logwaterdetcellarmain|awk '{print\$1}'`;
 
 # we need previous values from all these so we can de-spike them
 $lastproltempconservatory=`tail -1 $logdirectory/$logproltempconservatory|awk '{print \$2}'`;
@@ -134,6 +136,7 @@ open CCCLAMPCOOK, ">>", "$logdirectory/$logccclampcook" or die $!;
 open CCCLAMPTOWELRAIL, ">>", "$logdirectory/$logccclamptowelrail" or die $!;
 open CCIAMDRYER, ">>", "$logdirectory/$logcciamdryer" or die $!;
 open CCIAMCAR2, ">>", "$logdirectory/$logcciamcar2" or die $!;
+open CCIAMCATPAD, ">>", "$logdirectory/$logcciamcatpad" or die $!;
 open CCIAMWASHER, ">>", "$logdirectory/$logcciamwasher" or die $!;
 open CCIAMFRIDGE, ">>", "$logdirectory/$logcciamfridge" or die $!;
 open CCIAMFRIDGE2, ">>", "$logdirectory/$logcciamfridge2" or die $!;
@@ -249,8 +252,9 @@ while (<STDIN>)
       if ( $line[0] eq "Raw" )
       {
         $gs558raw = $line[2];
-        if (( $gs558id1 eq "24383" ) && ( $gs558id2 eq "28" ) && ( $gs558id3 eq "0" ))
+        if (( $gs558id1 eq "274" ) && ( $gs558id2 eq "11" ) && ( $gs558id3 eq "0" ) && ( $linetime > $timelastwaterdetcellarmain ))
         {
+          $timelastwaterdetcellarmain = $linetime;
           print WATERDETCELLARMAIN "$linetime $gs558raw\n";
           # perhaps we should alarm more stridently here esp if it's an actual smoke alarm
           print STDERR "$linetime water detected in main cellar\n";
@@ -431,7 +435,7 @@ while (<STDIN>)
       # 2232 = clamp - went to euan
       # 3107 = clamp transmitter on car charger line in fusebox 20180524
       # 3957 - clamp - master bedroom ensuite towel rail
-      # 272  = iam car2 (granny cable for imiev)
+      # 272  = iam catpad (was granny cable for imiev)
       # 921  = iam washing machine
       # 1971 = iam dryer
       # 3037 = iam fridge
@@ -583,14 +587,14 @@ while (<STDIN>)
 
         if ( $ccdevid == 272 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamcar2))
+          if (($modeswitch eq "process") && ($linetime > $timelastcciamcatpad))
           {
-            $timelastcciamcar2 = $linetime;
-            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'car2 value=${ccpower} ${linetime}000000000\n'`;
-            print CCIAMCAR2 "$linetime $ccpower\n"; 
+            $timelastcciamcatpad = $linetime;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'catpad value=${ccpower} ${linetime}000000000\n'`;
+            print CCIAMCATPAD "$linetime $ccpower\n"; 
           }
           if ($modeswitch eq "dump")
-            { print "$linetime iam car2 sensor power $ccpower watts\n"; }
+            { print "$linetime iam catpad sensor power $ccpower watts\n"; }
         }
 
 
