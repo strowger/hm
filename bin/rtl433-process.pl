@@ -429,6 +429,7 @@ while (<STDIN>)
       # 77   = clamp transmitter on car charger, still in place but unused as comms unreliable
       # 910  = clamp on ch
       # 996  = clamp transmitter SPARE - inaccurate, under-reads
+      # 2178 - clamp tx on second car charger
       # 2267 = clamp - went to euan
       # 1090 = clamp transmitter on cooker
       # 1048 = clamp on whole house
@@ -518,22 +519,22 @@ while (<STDIN>)
 #            { print "$linetime clamp sensor car power $ccpower watts\n"; }
 #        }
 
-#        if ( $ccdevid == 996 )
-#        {
-#          if (($modeswitch eq "process") && ($linetime > $timelastccclampcar2))
-#          {
-#            $timelastccclampcar2 = $linetime;
-#            $output = `rrdtool update $rrddirectory/ccclampwattscar.rrd $linetime:$ccpower`;
-#            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'car_charger2 value=${ccpower} ${linetime}000000000\n'`;
-#            if (length $output)
-#              { chomp $output; print LOGFILE "got error $output..."; }
-#            else
-#              { print CCCLAMPCAR2 "$linetime $ccpower\n"; }
-#            print CCCLAMPCAR2 "$linetime $ccpower\n";
-#          }
-#          if ($modeswitch eq "dump")
-#            { print "$linetime clamp sensor car2 power $ccpower watts\n"; }
-#        }
+        if ( $ccdevid == 2178 )
+        {
+          if (($modeswitch eq "process") && ($linetime > $timelastccclampcar2))
+          {
+            $timelastccclampcar2 = $linetime;
+            $output = `rrdtool update $rrddirectory/ccclampwattscar.rrd $linetime:$ccpower`;
+            $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'car_charger2 value=${ccpower} ${linetime}000000000\n'`;
+            if (length $output)
+              { chomp $output; print LOGFILE "got error $output..."; }
+            else
+              { print CCCLAMPCAR2 "$linetime $ccpower\n"; }
+            print CCCLAMPCAR2 "$linetime $ccpower\n";
+          }
+          if ($modeswitch eq "dump")
+            { print "$linetime clamp sensor car2 power $ccpower watts\n"; }
+        }
 
         if ( $ccdevid == 3107 )
         {
