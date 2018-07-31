@@ -24,6 +24,7 @@ $fridgelog="rtl433-proltempfridge.log";
 $freezerlog="rtl433-proltempfreezer.log";
 $fridgedslog="rtl433-proltempfridgeds.log";
 $conslog="rtl433-proltempconservatory.log";
+$bed1log="rtl433-nextempbed1.log";
 
 if ( -f $lockfile ) 
 { die "Lockfile exists in $lockfile; exiting"; }
@@ -223,6 +224,12 @@ $lastline = `tail -1 $logdirectory/$conslog`;
 $lastvalage = $timestamp-$lasttime;
 if ($lastvalage > 2000)
   { print "conservatory temperature sensor hasn't output for $lastvalage seconds\n"; }
+
+$lastline = `tail -1 $logdirectory/$bed1log`;
+($lasttime,$temp) = split(' ',$lastline);
+$lastvalage = $timestamp-$lasttime;
+if ($lastvalage > 2000)
+  { print "bedroom1 temperature sensor hasn't output for $lastvalage seconds\n"; }
 
 # if there are no owfs errors then that's all good, no need to warn 
 # that the file isn't there
