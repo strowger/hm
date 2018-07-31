@@ -43,7 +43,7 @@ $logccclampheat="rtl433-ccclampheat.log";
 $logccclampcook="rtl433-ccclampcook.log";
 $logccclamptowelrail="rtl433-ccclamptowelrail.log";
 $logcciamdryer="rtl433-cciamdryer.log";
-$logcciamcar2="rtl433-cciamcar2.log";
+$logccclampcar2="rtl433-cccclampcar2.log";
 $logcciamcatpad="rtl433-cciamcatpad.log";
 $logcciamwasher="rtl433-cciamwasher.log";
 $logcciamfridge="rtl433-cciamfridge.log";
@@ -88,7 +88,7 @@ $timelastccclampheat=`tail -1 $logdirectory/$logccclampheat|awk '{print \$1}'`;
 $timelastccclampcook=`tail -1 $logdirectory/$logccclampcook|awk '{print \$1}'`;
 $timelastccclamptowelrail=`tail -1 $logdirectory/$logccclamptowelrail|awk '{print \$1}'`;
 $timelastcciamdryer=`tail -1 $logdirectory/$logcciamdryer|awk '{print \$1}'`;
-$timelastcciamcar2=`tail -1 $logdirectory/$logcciamcar2|awk '{print \$1}'`;
+$timelastccclampcar2=`tail -1 $logdirectory/$logccclampcar2|awk '{print \$1}'`;
 $timelastcciamcatpad=`tail -1 $logdirectory/$logcciamcatpad|awk '{print \$1}'`;
 $timelastcciamwasher=`tail -1 $logdirectory/$logcciamwasher|awk '{print \$1}'`;
 $timelastcciamfridge=`tail -1 $logdirectory/$logcciamfridge|awk '{print \$1}'`;
@@ -135,7 +135,7 @@ open CCCLAMPCAR, ">>", "$logdirectory/$logccclampcar" or die $!;
 open CCCLAMPCOOK, ">>", "$logdirectory/$logccclampcook" or die $!;
 open CCCLAMPTOWELRAIL, ">>", "$logdirectory/$logccclamptowelrail" or die $!;
 open CCIAMDRYER, ">>", "$logdirectory/$logcciamdryer" or die $!;
-open CCIAMCAR2, ">>", "$logdirectory/$logcciamcar2" or die $!;
+open CCCLAMPCAR2, ">>", "$logdirectory/$logccclampcar2" or die $!;
 open CCIAMCATPAD, ">>", "$logdirectory/$logcciamcatpad" or die $!;
 open CCIAMWASHER, ">>", "$logdirectory/$logcciamwasher" or die $!;
 open CCIAMFRIDGE, ">>", "$logdirectory/$logcciamfridge" or die $!;
@@ -247,6 +247,9 @@ while (<STDIN>)
   else
   {
 
+# gs558 "smoke detectors", in this case water detector like 
+# https://www.aliexpress.com/item/433-868-Wireless-water-leakage-sensor-water-flood-self-inspection-report-detector-sensor-high-sensitivity-water/32847269385.html
+
     if ( $txtype eq "gs558" )
     {
       if ( $line[0] eq "Raw" )
@@ -266,6 +269,8 @@ while (<STDIN>)
     }
 
     # prologue temperature/humidity sensors, from aliexpress
+    # like https://www.aliexpress.com/item/433MHz-Wireless-Weather-Station-with-Forecast-Temperature-Digital-Thermometer-Hygrometer-Humidity-Sensor/32862342455.html
+    # also https://www.aliexpress.com/item/Digoo-DG-R8S-R8S-Wireless-Sensor-433MHz-Wireless-Digital-Hygrometer-Thermometer-Weather-Station-Sensor-for-DG/32845808693.html
     # ids (remember they change on power-cycle/battery-change)
     # 172: conservatory
     # 25: downstairs fridge
@@ -524,7 +529,7 @@ while (<STDIN>)
           if (($modeswitch eq "process") && ($linetime > $timelastccclampcar2))
           {
             $timelastccclampcar2 = $linetime;
-            $output = `rrdtool update $rrddirectory/ccclampwattscar.rrd $linetime:$ccpower`;
+#            $output = `rrdtool update $rrddirectory/ccclampwattscar2.rrd $linetime:$ccpower`;
             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'car_charger2 value=${ccpower} ${linetime}000000000\n'`;
             if (length $output)
               { chomp $output; print LOGFILE "got error $output..."; }
