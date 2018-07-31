@@ -11,6 +11,8 @@
 # prologue sensors added
 # GH 2018-07-22
 # "gs 558 smoke detector" water sensor
+# GH 2018-07-31
+# "nexus temperature/humidity" sensor
 #
 $influxcmd="curl -s -S -i -XPOST ";
 $influxurl="http://localhost:8086/";
@@ -70,6 +72,8 @@ $logprolhumconservatory="rtl433-prolhumconservatory.log";
 $logprolhumfridgeds="rtl433-prolhumfridgeds.log";
 $logprolhumfridge="rtl433-prolhumfridge.log";                                 
 $logprolhumfreezer="rtl433-prolhumfreezer.log"; 
+$lognextempbed1="rtl433-nextempbed1.log";
+$lognexhumbed1="rtl433-nexhumbed1.log";
 
 $logwaterdetcellarmain="rtl433-waterdetcellarmain.log";
 
@@ -111,6 +115,8 @@ $timelastprolhumconservatory=`tail -1 $logdirectory/$logprolhumconservatory|awk 
 $timelastprolhumfridgeds=`tail -1 $logdirectory/$logprolhumfridgeds|awk '{print \$1}'`;
 $timelastprolhumfridge=`tail -1 $logdirectory/$logprolhumfridge|awk '{print\$1}'`;                 
 $timelastprolhumfreezer=`tail -1 $logdirectory/$logprolhumfreezer|awk '{print\$1}'`; 
+$timelastnextempbed1=`tail -1 $logdirectory/$lognextempbed1|awk '{print\$1}'`;
+$timelastnexhumbed1=`tail -1 $logdirectory/$lognexhumbed1|awk '{print\$1}'`;
 
 $timelastwaterdetcellarmain=`tail -1 $logdirectory/$logwaterdetcellarmain|awk '{print\$1}'`;
 
@@ -123,6 +129,8 @@ $lastprolhumconservatory=`tail -1 $logdirectory/$logprolhumconservatory|awk '{pr
 $lastprolhumfridgeds=`tail -1 $logdirectory/$logprolhumfridgeds|awk '{print \$2}'`;
 $lastprolhumfridge=`tail -1 $logdirectory/$logprolhumfridge|awk '{print\$2}'`;                 
 $lastprolhumfreezer=`tail -1 $logdirectory/$logprolhumfreezer|awk '{print\$2}'`; 
+$lastnextempbed1=`tail -1 $logdirectory/$lognextempbed1|awk '{print\$2}'`;
+$lastnexhumbed1=`tail -1 $logdirectory/$lognexhumbed1|awk '{print\$2}'`;
 
 
 
@@ -158,6 +166,8 @@ open PROLHUMCONSERVATORY, ">>", "$logdirectory/$logprolhumconservatory" or die $
 open PROLHUMFRIDGEDS, ">>", "$logdirectory/$logprolhumfridgeds" or die $!;
 open PROLHUMFRIDGE, ">>", "$logdirectory/$logprolhumfridge" or die $!;                             
 open PROLHUMFREEZER, ">>", "$logdirectory/$logprolhumfreezer" or die $!; 
+open NEXTEMPBED1, ">>", "$logdirectory/$lognextempbed1" or die $!;
+open NEXHUMBED1, ">>", "$logdirectory/$lognexhumbed1" or die $!;
 
 open WATERDETCELLARMAIN, ">>", "$logdirectory/$logwaterdetcellarmain" or die $!;
 
@@ -231,8 +241,24 @@ while (<STDIN>)
        $gs558id2 = $line[10];
        $gs558id3 = $line[12];
      }
-   } 
+   }
 
+   if ( $line[3] eq "Nexus" ) 
+   # the full line is "Nexus Temperature/Humidity" then 5 lines of values
+   {
+     if ( $line[4] eq "Temperature/Humidity" ) 
+     { 
+        $txtype = "nexus"; 
+        # zero the values of all the things we hope to find in the tx
+        $nexushousecode = "";
+        $nexusbat = "";
+        $nexuschan = "";
+        $nexustemp = "";
+        $nexushum = "";
+     }
+   } 
+   
+  
     if ( $txtype eq "" )  
     { 
       print LOGFILE "$linetime got alien device $line[3]\n"; 
@@ -246,6 +272,68 @@ while (<STDIN>)
   # any other kind of line than the start of a new tx
   else
   {
+
+# nexus temperature/humidity sensors, like 
+# https://www.aliexpress.com/item/Digoo-DG-R8B-433MHz-Wireless-Digital-Hygrometer-Thermometer-Weather-Station-Sensor-for-DG-TH3330/32866929093.html
+# don't seem any more accurate than the prologue ones but case is smaller and takes AAs not AAAs
+
+   if ( $txtype eq "nexus" )
+   {
+     # this will emit 5 lines after the date/time/label one, the 5th of which is
+     # humidity, and the last line, so means we can do the processing
+     if (( $line[0] eq "House") && ( $line[1] eq "Code:" ))
+     {
+       # "house code" is basically device id, changes on battery swap
+       $nexushousecode = $line[2];
+     }
+     if ( $line[0] eq "Battery:" )
+     {
+       # battery status, only seen "OK" so far
+       $nexusbat = $line[1];
+       if ( ! $nexusbat eq "OK" ) { print "$linetime nexus device $nexushousecode battery low\n"; }
+     }
+     if ( $line[0] eq "Channel:" )
+     {
+       # "channel" selectable 1-3 using switch on device
+       $nexuschan = $line[1];
+     }
+     if ( $line[0] eq "Temperature:" )
+     {
+       $nexustemp = $line[1];
+     }
+     if ( $line[0] eq "Humidity:" )
+     {
+       $nexushum = $line[1];
+       if (( ! $nexushousecode eq "") && ( ! $nexusbat eq "" ) && ( ! $nexuschan eq "" ) && ( ! $nexustemp eq ""))
+       # we're on the last line and we got a value for all the other lines; winning!
+       {
+#         print LOGFILE "DEBUG: nexus got all values so gonna look at writing\n";
+         # 121: main bedroom in fritzl3: "bed1"
+         if (( $nexushousecode eq "121" ) && ( $linetime > $timelastnextempbed1 ))
+         {
+           $timelastnextempbed1 = $linetime;
+           $tempdiff = abs ($lastnextempbed1 - $nexustemp);
+           $humdiff = abs ($lastnexhumbed1 - $nexushum);
+#           print LOGFILE "DEBUG: nexus bed1 tempdiff $tempdiff humdiff $humdiff\n";
+           if (( $nexustemp > -20 ) && ( $nexustemp < 60 ) && ( $tempdiff < 5 ))
+           {
+             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'temp_bed1 value=${nexustemp} ${linetime}000000000\n'`;
+             print NEXTEMPBED1 "$linetime $nexustemp\n";
+           }
+           else { print LOGFILE "$linetime not writing nexus temp $nexustemp where diff is $tempdiff last $lastnextempbed1\n"; }
+           if (( $nexushum > 0 ) && ( $nexushum < 101 ) && ( $humdiff < 5 ))
+           {
+             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'hum_bed1 value=${nexushum} ${linetime}000000000\n'`;
+             print NEXHUMBED1 "$linetime $nexushum\n";
+           }
+           else { print LOGFILE "$linetime not writing nexus hum $nexushum where diff is $humdiff last $lastnexhumbed1\n"; }
+         }
+
+       }
+       else { print STDERR "$linetime got an incomplete or mangled nexus tx\n"; }
+       $midtx = 0;
+     }
+   }
 
 # gs558 "smoke detectors", in this case water detector like 
 # https://www.aliexpress.com/item/433-868-Wireless-water-leakage-sensor-water-flood-self-inspection-report-detector-sensor-high-sensitivity-water/32847269385.html
