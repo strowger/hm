@@ -25,6 +25,7 @@ $freezerlog="rtl433-proltempfreezer.log";
 $fridgedslog="rtl433-proltempfridgeds.log";
 $conslog="rtl433-proltempconservatory.log";
 $bed1log="rtl433-nextempbed1.log";
+$catlog="rtl433-cciamcatpad.log";
 
 if ( -f $lockfile ) 
 { die "Lockfile exists in $lockfile; exiting"; }
@@ -231,6 +232,12 @@ $lastvalage = $timestamp-$lasttime;
 if ($lastvalage > 2000)
   { print "bedroom1 temperature sensor hasn't output for $lastvalage seconds\n"; }
 
+# the cat pad has a stat and cycles on/off, but if it's never drawing power
+# then it's probably fucked
+# check for lines that aren't "<time> 0"
+$catlog = `grep -v \\ 0 $logdirectory/$catlog`;
+if ( ! $catlog =~ /\d/ ) { print "cat pad appears stuck on 0 watts\n"; }
+
 # if there are no owfs errors then that's all good, no need to warn 
 # that the file isn't there
 if (-f "$logdirectory/$owerrorlog" )
@@ -371,7 +378,7 @@ foreach $collector (@rtlcollectors)
   }
 }
 
-@cciamdevices = ("upsb", "upso", "officedesk", "fridge", "fridge2", "washer", "dryer", "dwasher", "kettle", "toaster", "car2");
+@cciamdevices = ("upsb", "upso", "officedesk", "fridge", "fridge2", "washer", "dryer", "dwasher", "kettle", "toaster", "catpad");
 foreach $pdev (@cciamdevices)
 {
   if (-f "$logdirectory/rtl433-cciam$pdev.log" )
@@ -380,9 +387,8 @@ foreach $pdev (@cciamdevices)
     $lastline = `tail -1 $logdirectory/rtl433-cciam$pdev.log`;
     ($lasttime) = split(' ',$lastline);
     $lastvalage = $timestamp-$lasttime;
-#### this is too spammy for now
-####    if ( $lastvalage > 900)
-####      { print "power device $pdev last read $lastvalage seconds ago\n"; }
+    if ( $lastvalage > 900)
+      { print "power device $pdev last read $lastvalage seconds ago\n"; }
 #    # they tx every 6 seconds so this should catch a minimum of an hour
 #    $fileend = `tail -600 $logdirectory/rtl433-cciam$pdev.log`;
 #    @fileendar = split ('\n',$fileend);
