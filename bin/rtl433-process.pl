@@ -116,7 +116,7 @@ $timelastprolhumfridgeds=`tail -1 $logdirectory/$logprolhumfridgeds|awk '{print 
 $timelastprolhumfridge=`tail -1 $logdirectory/$logprolhumfridge|awk '{print\$1}'`;                 
 $timelastprolhumfreezer=`tail -1 $logdirectory/$logprolhumfreezer|awk '{print\$1}'`; 
 $timelastnextempbed1=`tail -1 $logdirectory/$lognextempbed1|awk '{print\$1}'`;
-$timelastnexhumbed1=`tail -1 $logdirectory/$lognexhumbed1|awk '{print\$1}'`;
+#$timelastnexhumbed1=`tail -1 $logdirectory/$lognexhumbed1|awk '{print\$1}'`;
 
 $timelastwaterdetcellarmain=`tail -1 $logdirectory/$logwaterdetcellarmain|awk '{print\$1}'`;
 
@@ -375,7 +375,7 @@ while (<STDIN>)
         {
           $timelastproltempconservatory = $linetime;
           $tempdiff = abs ($lastproltempconservatory - $prologuetemp);
-          if (( $prologuetemp > -40) && ( $prologuetemp < 80) && ($tempdiff < 5))
+          if (( $prologuetemp > -40) && ( $prologuetemp < 80) && ($tempdiff < 35))
           {
             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'temp_conservatory value=${prologuetemp} ${linetime}000000000\n'`;
             print PROLTEMPCONSERVATORY "$linetime $prologuetemp\n";
