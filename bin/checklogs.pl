@@ -196,7 +196,7 @@ if ($lastvalage > 600)
 $lastline = `tail -1 $logdirectory/$fridgelog`;
 ($lasttime,$temp) = split(' ',$lastline);
 $lastvalage = $timestamp-$lasttime;
-if ($lastvalage > 2000)
+if ($lastvalage > 10000)
   { print "fridge temperature sensor hasn't output for $lastvalage seconds\n"; }
 # these sensors are shite, this one reads high
 if ($temp > 10)
@@ -205,7 +205,7 @@ if ($temp > 10)
 $lastline = `tail -1 $logdirectory/$freezerlog`;
 ($lasttime,$temp) = split(' ',$lastline);
 $lastvalage = $timestamp-$lasttime;
-if ($lastvalage > 2000)
+if ($lastvalage > 10000)
   { print "freezer temperature sensor hasn't output for $lastvalage seconds\n"; }
 # these sensors are shite, this one reads high
 if ($temp > -15 )
@@ -214,7 +214,7 @@ if ($temp > -15 )
 $lastline = `tail -1 $logdirectory/$fridgedslog`;
 ($lasttime,$temp) = split(' ',$lastline);
 $lastvalage = $timestamp-$lasttime;
-if ($lastvalage > 2000)
+if ($lastvalage > 10000)
   { print "downstairs fridge temperature sensor hasn't output for $lastvalage seconds\n"; }
 # these sensors are shite, this one reads high
 if ($temp > 7)
@@ -223,7 +223,7 @@ if ($temp > 7)
 $lastline = `tail -1 $logdirectory/$conslog`;
 ($lasttime,$temp) = split(' ',$lastline);
 $lastvalage = $timestamp-$lasttime;
-if ($lastvalage > 2000)
+if ($lastvalage > 10000)
   { print "conservatory temperature sensor hasn't output for $lastvalage seconds\n"; }
 
 $lastline = `tail -1 $logdirectory/$bed1log`;
@@ -555,6 +555,16 @@ else
   }
 }
 
+# 20180905 check if both dashcams are present, if we only see one then one's broken
+$frontcam = `ssh office sudo iwlist wlan1 scan|grep Goluk_T2`;
+$rearcam = `ssh office sudo iwlist wlan1 scan|grep Goluk_T1`;
+chomp $frontcam;
+chomp $rearcam;
+# cam present line contains this string, missing is null
+if (( $frontcam =~ /ESSID/ ) && ( $rearcam !~ /ESSID/ ))
+  { print "rear dashcam missing while front present\n"; }
+if (( $frontcam !~ /ESSID/ ) && ( $rearcam =~ /ESSID/ ))
+  { print "rear dashcam missing while front present\n"; }
 
 close LOCKFILE;
 unlink $lockfile;
