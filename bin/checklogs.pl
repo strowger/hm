@@ -548,7 +548,7 @@ else
     # we didn't obtain this earlier for comparison
     $sec = `/usr/bin/date +%S`;
     chomp $sec;
-    print "central heating time wrong - setting to $hour $min $sec\n";
+    print "central heating time wrong: $vhour $vmin $vsec - setting to $hour $min $sec\n";
     $output = `/usr/bin/ebusctl write -c 470 time $hour:$min:$sec`;
     if (($output =~ /error/ ) || ($output =~ /ERR/ ))
       { print "got error trying to write time to central heating\n"; }
@@ -565,6 +565,13 @@ if (( $frontcam =~ /ESSID/ ) && ( $rearcam !~ /ESSID/ ))
   { print "rear dashcam missing while front present\n"; }
 if (( $frontcam !~ /ESSID/ ) && ( $rearcam =~ /ESSID/ ))
   { print "rear dashcam missing while front present\n"; }
+
+# 20180917 alert if the "leaf" (tesla) dropbox is getting full
+# it holds just over 2gb and if over this, the sync app loops
+# endlessly burning bandwidth
+$leafdisk = `du -cs /home/leaf/Dropbox/|tail -1|awk '{print \$1}'`;
+chomp $leafdisk;
+if ( $leafdisk > 1300000 ) { print "leaf dropbox account filling up: $leafdisk\n"; }
 
 close LOCKFILE;
 unlink $lockfile;
