@@ -158,6 +158,21 @@ if ($invalidcount > 0)
 # for debug - i don't think we want to actually print unless something is wrong
 ##print "processed $validcount valid config items, ignored $invalidcount invalid lines\n";
 
+
+# 20180927 before any of the rtl433 stuff, alert if one of the 
+# boxes with receivers is broken - as this will likely be followed
+# by a large number of errors
+
+$alarmboxcheck = `ssh -o ConnectTimeout=10 -o BatchMode=yes alarmbox uptime`;
+$officecheck = `ssh -o ConnectTimeout=10 -o BatchMode=yes office uptime`;
+
+if ( ! $alarmboxcheck =~ /average/ )
+  { print "problem with alarmbox ssh check\n"; }
+
+if ( ! $officecheck =~ /average/ )
+  { print "problem with office ssh check\n"; }
+
+
 # the currentcost
 $timestamp = time();                                                          
 
@@ -565,11 +580,13 @@ if (( $frontcam =~ /ESSID/ ) && ( $rearcam !~ /ESSID/ ))
   { print "rear dashcam missing while front present\n"; }
 if (( $frontcam !~ /ESSID/ ) && ( $rearcam =~ /ESSID/ ))
   { print "rear dashcam missing while front present\n"; }
+# 20180927 seems a dashcam can be present but not accessible/working/recording so this is not a complete solution
+# this is now checked by a script on the mac
 
 # 20180917 alert if the "leaf" (tesla) dropbox is getting full
 # it holds just over 2gb and if over this, the sync app loops
 # endlessly burning bandwidth
-$leafdisk = `du -cs /home/leaf/Dropbox/|tail -1|awk '{print \$1}'`;
+$leafdisk = `du -cs /home/leaf/Dropbox/autosync_bodge|tail -1|awk '{print \$1}'`;
 chomp $leafdisk;
 if ( $leafdisk > 1300000 ) { print "leaf dropbox account filling up: $leafdisk\n"; }
 
