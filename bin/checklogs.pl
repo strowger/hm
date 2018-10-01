@@ -571,8 +571,8 @@ else
 }
 
 # 20180905 check if both dashcams are present, if we only see one then one's broken
-$frontcam = `ssh office sudo iwlist wlan1 scan|grep Goluk_T2`;
-$rearcam = `ssh office sudo iwlist wlan1 scan|grep Goluk_T1`;
+$frontcam = `ssh office sudo iwlist wlan1 scan|grep Goluk_T2_00`;
+$rearcam = `ssh office sudo iwlist wlan1 scan|grep Goluk_T2_01`;
 chomp $frontcam;
 chomp $rearcam;
 # cam present line contains this string, missing is null
