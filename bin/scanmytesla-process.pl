@@ -209,6 +209,9 @@ while (<INPUT>)
   # epoch format timestamp we'll use to feed the db
   $timestampline = $filetimestupid + $timeoffset;
   $battvolts = $line[1];
+
+#if ( $modeswitch == "dump" ) { print "batt volts $battvolts amps $battamps power $battpower\n"; }
+
   $battamps = $line[2];
   $battpower = $line[3];    # kW
   if ( $logversion >1 )
@@ -577,12 +580,16 @@ while (<INPUT>)
   if ( ! $chargetotal eq "" ) { $influxcmdline .= "pack_charge_total value=${chargetotal} ${timestampline}000000\n"; }
   if ( ! $dischargetotal eq "" ) { $influxcmdline .= "pack_discharge_total value=${dischargetotal} ${timestampline}000000\n"; }
 
+  if ( ! $bmsmaxdischarge eq "") { $influxcmdline .= "pack_max_discharge value=${bmsmaxdischarge} ${timestampline}000000\n"; }
+  if ( ! $bmsmaxregen eq "") { $influxcmdline .= "pack_max_regen value=${bmsmaxregen} ${timestampline}000000\n"; }
+
+
 # km/h, convert to miles
   if ( ! $speed eq "" ) { $speed = $speed * 0.621371; $influxcmdline .= "speed value=${speed} ${timestampline}000000\n"; }
 # wh/km, convert to miles
   if (( ! $consumption eq "" ) && ( ! $consumption eq "inf")) { $consumption = $consumption / 0.621371; $influxcmdline .= "consumption value=${consumption} ${timestampline}000000\n"; }
 #  never reads?
-  if ( ! $coolantinletrr eq "" ) { $influxcmdline .= "temp_inlet_rear value=${coolantinletrr} ${timestampline}000000\n"; print "coolant rear $coolantinletrr\n"; } 
+  if ( ! $coolantinletrr eq "" ) { $influxcmdline .= "temp_inlet_rear value=${coolantinletrr} ${timestampline}000000\n";  }
   if ( ! $inverterpcbrr eq "" ) { $influxcmdline .= "temp_inverterpcb_rear value=${inverterpcbrr} ${timestampline}000000\n"; }
 
   if ( ! $tempoutfilt eq "" ) { if (( $tempoutfilt > -40 ) && ( $tempoutfilt < 60 )) { $influxcmdline .= "temp_outside_filtered value=${tempoutfilt} ${timestampline}000000\n"; } }
