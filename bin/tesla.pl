@@ -139,29 +139,63 @@ if (( $tc[0] =~ /Error/ ) || ( $tc[1] =~ /Error/ ))
   exit 1;
 }
 
-# these values are all followed by a comma
-# "disconnected" etc
-chop $tc[2]; $chargingstate = $tc[2];
-# what max percent to charge to is
-chop $tc[8]; $chargelimit = $tc[8];
-# number of times charged to max?
-chop $tc[18]; $maxrangecharges = $tc[18];
-# "battery range", "est battery range", "ideal battery range" 
-chop $tc[22]; $batteryrange = $tc[22];
-chop $tc[24]; $estbatteryrange = $tc[24];
-chop $tc[26]; $idealbatteryrange = $tc[26];
-# soc!
-chop $tc[28]; $batterylevel = $tc[28];
-chop $tc[30]; $batterylevelusable = $tc[30];
-chop $tc[32]; $chargenergyadded = $tc[32];
-chop $tc[38]; $chargervoltage = $tc[38];
-if ( $chargervoltage eq "null" ) { $chargervoltage = 0; }
-chop $tc[40]; $chargercurrentpilot = $tc[40];
-if ( $chargercurrentpilot eq "null" ) { $chargercurrentpilot = 0; }
-chop $tc[42]; $chargercurrentactual = $tc[42];
-if ( $chargercurrentactual eq "null" ) { $chargercurrentactual = 0; }
-chop $tc[44]; $chargerpower = $tc[44];
-chop $tc[50]; $chargerate = $tc[50];
+# api for v8
+if ( $tc[1] =~ /charging_state/ )
+{
+  $api_version = "v8";
+  # these values are all followed by a comma
+  # "disconnected" etc
+  chop $tc[2]; $chargingstate = $tc[2];
+  # what max percent to charge to is
+  chop $tc[8]; $chargelimit = $tc[8];
+  # number of times charged to max?
+  chop $tc[18]; $maxrangecharges = $tc[18];
+  # "battery range", "est battery range", "ideal battery range" 
+  chop $tc[22]; $batteryrange = $tc[22];
+  chop $tc[24]; $estbatteryrange = $tc[24];
+  chop $tc[26]; $idealbatteryrange = $tc[26];
+  # soc!
+  chop $tc[28]; $batterylevel = $tc[28];
+  chop $tc[30]; $batterylevelusable = $tc[30];
+  chop $tc[32]; $chargenergyadded = $tc[32];
+  chop $tc[38]; $chargervoltage = $tc[38];
+  if ( $chargervoltage eq "null" ) { $chargervoltage = 0; }
+  chop $tc[40]; $chargercurrentpilot = $tc[40];
+  if ( $chargercurrentpilot eq "null" ) { $chargercurrentpilot = 0; }
+  chop $tc[42]; $chargercurrentactual = $tc[42];
+  if ( $chargercurrentactual eq "null" ) { $chargercurrentactual = 0; }
+  chop $tc[44]; $chargerpower = $tc[44];
+  chop $tc[50]; $chargerate = $tc[50];
+}
+
+# api for v9
+if ( $tc[1] =~ /battery_heater_on/ )
+{
+  $api_version = "v9";
+  chop $tc[46]; $chargingstate = $tc[46];
+  # what max percent to charge to is
+  chop $tc[16]; $chargelimit = $tc[16];
+  # number of times charged to max?
+  chop $tc[66]; $maxrangecharges = $tc[66];
+  # "battery range", "est battery range", "ideal battery range" 
+  chop $tc[6]; $batteryrange = $tc[6];
+  chop $tc[50]; $estbatteryrange = $tc[50];
+  chop $tc[58]; $idealbatteryrange = $tc[58];
+  # soc!
+  chop $tc[4]; $batterylevel = $tc[4];
+  chop $tc[80]; $batterylevelusable = $tc[80];
+  chop $tc[14]; $chargenergyadded = $tc[14];
+  chop $tc[44]; $chargervoltage = $tc[44];
+  if ( $chargervoltage eq "null" ) { $chargervoltage = 0; }
+  chop $tc[40]; $chargercurrentpilot = $tc[40];
+  if ( $chargercurrentpilot eq "null" ) { $chargercurrentpilot = 0; }
+  chop $tc[36]; $chargercurrentactual = $tc[36];
+  if ( $chargercurrentactual eq "null" ) { $chargercurrentactual = 0; }
+  chop $tc[42]; $chargerpower = $tc[42];
+  chop $tc[32]; $chargerate = $tc[32];
+}
+
+if ( $api_version eq "" ) { die "unknown api version\n"; }
 
 print LOGFILE "charging state $chargingstate, max charge percent $chargelimit, max range charges count $maxrangecharges\n";
 print LOGFILE "battery range/est/ideal $batteryrange $estbatteryrange $idealbatteryrange battery level/usable $batterylevel $batterylevelusable\n";
