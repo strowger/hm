@@ -171,7 +171,7 @@ if ( $tc[1] =~ /charging_state/ )
 # api for v9
 if ( $tc[1] =~ /battery_heater_on/ )
 {
-  $api_version = "v9";
+  $api_version = "v9-initial";
   chop $tc[46]; $chargingstate = $tc[46];
   # what max percent to charge to is
   chop $tc[16]; $chargelimit = $tc[16];
@@ -194,6 +194,35 @@ if ( $tc[1] =~ /battery_heater_on/ )
   chop $tc[42]; $chargerpower = $tc[42];
   chop $tc[32]; $chargerate = $tc[32];
 }
+
+if ( ( $tc[1] =~ /battery_heater_on/ ) && ( $tc[81] =~ /usable_battery_level/ ))
+{
+  $api_version = "v9-2018.50.6";
+  # added the charge_port_cold_weather_mode item
+  chop $tc[48]; $chargingstate = $tc[48];
+  # what max percent to charge to is
+  chop $tc[16]; $chargelimit = $tc[16];
+  # number of times charged to max?
+  chop $tc[68]; $maxrangecharges = $tc[68];
+  # "battery range", "est battery range", "ideal battery range" 
+  chop $tc[6]; $batteryrange = $tc[6];
+  chop $tc[52]; $estbatteryrange = $tc[52];
+  chop $tc[60]; $idealbatteryrange = $tc[60];
+  # soc!
+  chop $tc[4]; $batterylevel = $tc[4];
+  chop $tc[82]; $batterylevelusable = $tc[82];
+  chop $tc[14]; $chargenergyadded = $tc[14];
+  chop $tc[46]; $chargervoltage = $tc[46];
+  if ( $chargervoltage eq "null" ) { $chargervoltage = 0; }
+  chop $tc[42]; $chargercurrentpilot = $tc[42];
+  if ( $chargercurrentpilot eq "null" ) { $chargercurrentpilot = 0; }
+  chop $tc[38]; $chargercurrentactual = $tc[38];
+  if ( $chargercurrentactual eq "null" ) { $chargercurrentactual = 0; }
+  chop $tc[44]; $chargerpower = $tc[44];
+  chop $tc[34]; $chargerate = $tc[34];
+}
+
+print LOGFILE "api is version $api_version\n";
 
 if ( $api_version eq "" ) { die "unknown api version\n"; }
 
