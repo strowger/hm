@@ -579,7 +579,7 @@ chomp $rearcam;
 if (( $frontcam =~ /ESSID/ ) && ( $rearcam !~ /ESSID/ ))
   { print "rear dashcam missing while front present\n"; }
 if (( $frontcam !~ /ESSID/ ) && ( $rearcam =~ /ESSID/ ))
-  { print "rear dashcam missing while front present\n"; }
+  { print "front dashcam missing while rear present\n"; }
 # 20180927 seems a dashcam can be present but not accessible/working/recording so this is not a complete solution
 # this is now checked by a script on the mac
 
