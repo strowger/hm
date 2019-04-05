@@ -363,7 +363,7 @@ while (<STDIN>)
     # 172: conservatory
     # 25: downstairs fridge
     # 27: fridge; 
-    # 209: freezer (if it survives)
+    # 171: freezer (if it survives) # prev 209 to 20190404
     # 242: black car (maybe?)
     if (( $txtype eq "prologue-sensor" ) && ( $line[0] eq "Temperature:" ))
     {
@@ -417,7 +417,7 @@ while (<STDIN>)
           { print "$linetime prologue sensor fridge temperature $prologuetemp c\n"; } 
       }
 
-      if ( $prologuedevid == 209 )                                                                    
+      if ( $prologuedevid == 171 )                                                                    
       {                                                                                              
         if (($modeswitch eq "process") && ($linetime > $timelastproltempfreezer))                
         {                                                                                            
@@ -487,7 +487,7 @@ while (<STDIN>)
           { print "$linetime prologue sensor fridge humidity $prologuehum c\n"; } 
       }
 
-      if ( $prologuedevid == 209 )                                                                    
+      if ( $prologuedevid == 171 )                                                                    
       {                                                                                              
         if (($modeswitch eq "process") && ($linetime > $timelastprolhumfreezer))                
         {                                                                                            
