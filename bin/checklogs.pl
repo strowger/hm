@@ -580,6 +580,14 @@ if (( $frontcam =~ /ESSID/ ) && ( $rearcam !~ /ESSID/ ))
   { print "rear dashcam missing while front present\n"; }
 if (( $frontcam !~ /ESSID/ ) && ( $rearcam =~ /ESSID/ ))
   { print "front dashcam missing while rear present\n"; }
+# 20190407 observed a cam present but not giving an ip by dhcp - probably bad wifi signal -
+# looks like it can last days so need to check for it
+if (( $frontcam =~ /ESSID/ ) || ($rearcam =~ /ESSID/ ))
+{
+  $officewifiip = `ssh office /sbin/ifconfig wlan1|head -2|grep inet\\ addr|awk '{print \$2}'|cut -d \\: -f 2`;
+  if ( $officewifiip !~ /192.168.62./ )
+    { print "office wifi1 ip is wrong for dashcam - possible dashcam wifi issue\n"; }
+}
 # 20180927 seems a dashcam can be present but not accessible/working/recording so this is not a complete solution
 # this is now checked by a script on the mac
 
