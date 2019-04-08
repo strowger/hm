@@ -353,9 +353,9 @@ if (-f "$logdirectory/$rtlprocesserrorslog" )
     push(@errorlines, $errorline);
   }
   close AWRSLOG;
-  if ($errorlinecount > 8)
+  if ($errorlinecount > 10)
   {
-    print "More than 8 log lines from rtl433 processing log:\n";
+    print "More than 10 log lines from rtl433 processing log:\n";
     print "@errorlines";
   }
   unlink "$logdirectory/$rtlprocesserrorslog";
