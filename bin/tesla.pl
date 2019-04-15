@@ -169,7 +169,7 @@ if ( $tc[1] =~ /charging_state/ )
 }
 
 # api for v9
-if ( $tc[1] =~ /battery_heater_on/ )
+if (( $tc[1] =~ /battery_heater_on/ ) && ($tc[79] =~ /usable_battery_level/ ))
 {
   $api_version = "v9-initial";
   chop $tc[46]; $chargingstate = $tc[46];
