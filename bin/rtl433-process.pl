@@ -418,12 +418,13 @@ while (<STDIN>)
       }
 
       if ( $prologuedevid == 171 )                                                                    
-      {                                                                                              
+      {
+#        print LOGFILE "FDEBUG: got a freezer frame\n";                                                                                              
         if (($modeswitch eq "process") && ($linetime > $timelastproltempfreezer))                
         {                                                                                            
           $timelastproltempfreezer = $linetime;
           $tempdiff = abs ($lastproltempfreezer - $prologuetemp);
-          if (( $prologuetemp > -40) && ( $prologuetemp < 30) && ($tempdiff < 5)) 
+          if (( $prologuetemp > -40) && ( $prologuetemp < 30) && ($tempdiff < 23)) 
           {
             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'temp_freezer value=${prologuetemp} ${linetime}000000000\n'`;
             print PROLTEMPFREEZER "$linetime $prologuetemp\n";                                                 }
@@ -488,12 +489,13 @@ while (<STDIN>)
       }
 
       if ( $prologuedevid == 171 )                                                                    
-      {                                                                                              
+      {                          
+#        print LOGFILE "FDEBUG: got a freezer frame\n";                                                                    
         if (($modeswitch eq "process") && ($linetime > $timelastprolhumfreezer))                
         {                                                                                            
           $timelastprolhumfreezer = $linetime;                                                     
           $humdiff = abs ($lastprolhumfreezer - $prologuehum); 
-          if (( $prologuehum > 0) && ($prologuehum < 101) && ($humdiff < 5))
+          if (( $prologuehum > 0) && ($prologuehum < 101) && ($humdiff < 23))
           {
             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'hum_freezer value=${prologuehum} ${linetime}000000000\n'`;                                                       
             print PROLHUMFREEZER "$linetime $prologuehum\n";                                        
