@@ -185,7 +185,8 @@ while (<INPUT>)
       print "file is version 3 format\n";
     }
     # scanmytesla 1.5.0 20180720 adds 13(!) new values, we call this "version 4"
-    if (( $lineitems == 267) && ( $line[58] =~/SOC Min/ )) 
+    # note misspelling of "Powertrain"
+    if (( $lineitems == 267) && ( $line[102] =~/Powetrain pump 2/ )) 
     {
       $logoffset1 = 2;
       $logversion = 4;
@@ -196,7 +197,18 @@ while (<INPUT>)
       $logoffset3c = 13;
       print "file is version 4 format\n";
     }
-
+    # scanmytesla 1.5.1 20181025 moves powertrain pump 2 from position 103 ( $line[102] ) 
+    # to 99 ( $line[98] ). everything from 1 to 98 and 104 to the end is as before.
+    if (( $lineitems == 267) && ( $line[102] =~/PTC air heater/ ))
+    {
+      $logoffset1 = 2;
+      $logversion = 5;
+      $logoffset2 = 2;
+      $logoffset3a = 1;
+      $logoffset3b = 10;
+      $logoffset3c = 13;
+      print "file is version 5 format\n";   
+    }
 
     # if we didn't positively identify a log format, quit
     if ( $logversion eq "" ) { die "first line of file appears corrupt or unknown scanmytesla format\n"; }
@@ -228,7 +240,7 @@ while (<INPUT>)
     # soc ui
     $socui = $line[$logoffset3a+58];
   }
-  if ( $logversion >3 )
+  if ( $logversion == 4 )
   {
     # coolant temperature leaving the battery heater
     $coolantheateroutlettemp = $line[6];
@@ -244,6 +256,25 @@ while (<INPUT>)
     $heaterptc = $line[101];
     # has a questionmark in the description, perhaps authoer is unsure or doens't have a D car
     $pumppowertrain2 = $line[102];
+    $refrigeranttemp = $line[107];
+    $heaterl = $line[108];
+    $heaterr = $line[109];
+  }
+  if ( $logversion == 5 )
+  {
+    # coolant temperature leaving the battery heater
+    $coolantheateroutlettemp = $line[6];
+    # these pumps/bypass/heaters all read in percent (of max?)
+    # coolant circulation mode see https://teslamotorsclub.com/tmc/threads/scan-my-tesla-a-canbus-reader-for-android.112636/page-7
+    $seriesparallel = $line[94];
+    $pumpbattery1 = $line[95];
+    $pumpbattery2 = $line[96];
+    $pumppowertrain1 = $line[97];
+    $pumppowertrain2 = $line[98];
+    $bypassradiator = $line[99];
+    $bypasschiller = $line[100];
+    $heatercoolant = $line[101];
+    $heaterptc = $line[102];
     $refrigeranttemp = $line[107];
     $heaterl = $line[108];
     $heaterr = $line[109];
