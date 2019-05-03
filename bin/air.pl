@@ -16,12 +16,17 @@
 # sudo hcidump -i hci0 -R|./am.pl
 # sudo hcidump -i hci0 -XR is friendlier for manual (shows ascii too, and rssi)
 #
+# 20190503: add influxdb
 #
 $config="/data/hm/conf/air.conf";
 $rrddirectory="/data/hm/rrd";
 $logdirectory="/data/hm/log";
 $logfile="air.log";
 $lockfile="/tmp/air.lock";
+
+$influxcmd="curl -s -S -i -XPOST ";
+$influxurl="http://localhost:8086/";
+$influxdb="styes_air";
 
 if ( -f $lockfile )
 {
@@ -149,6 +154,7 @@ while (<STDIN>)
             if (length $output) { print LOGFILE "rrdtool errored $output"; }  
           }
           else { print LOGFILE "rrd for air${devicename}-co2 doesn't exist, skipping update"; }
+          $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'air_kitchen_co2 value=${co2} ${timestamp}000000000\n'`;
           # pm2.5
           open LINE, ">>", "$logdirectory/air${devicename}-pm25.log" or die $!;
           print LINE "$timestamp $pm25\n";
@@ -158,7 +164,8 @@ while (<STDIN>)
             $output = `rrdtool update $rrddirectory/air${devicename}-pm25.rrd $timestamp:$pm25`;
             if (length $output) { print LOGFILE "rrdtool errored $output"; }
           }
-          else { print LOGFILE "rrd for air${devicename}-pm25 doesn't exist, skipping update"; }          
+          else { print LOGFILE "rrd for air${devicename}-pm25 doesn't exist, skipping update"; }
+          $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'air_kitchen_pm25 value=${pm25} ${timestamp}000000000\n'`;
           # pm10
           open LINE, ">>", "$logdirectory/air${devicename}-pm10.log" or die $!;
           print LINE "$timestamp $pm10\n";
@@ -168,7 +175,8 @@ while (<STDIN>)
             $output = `rrdtool update $rrddirectory/air${devicename}-pm10.rrd $timestamp:$pm10`;
             if (length $output) { print LOGFILE "rrdtool errored $output"; }
           }
-          else { print LOGFILE "rrd for air${devicename}-pm10 doesn't exist, skipping update"; }          
+          else { print LOGFILE "rrd for air${devicename}-pm10 doesn't exist, skipping update"; }
+          $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'air_kitchen_pm10 value=${pm10} ${timestamp}000000000\n'`;
           # rssi
           open LINE, ">>", "$logdirectory/rssi-${devicename}.log" or die $!;
           print LINE "$timestamp $rssi\n";
@@ -231,6 +239,7 @@ while (<STDIN>)
             if (length $output) { print LOGFILE "rrdtool errored $output"; }
           }
           else { print LOGFILE "rrd for air${devicename}-tvoc doesn't exist, skipping update"; }
+          $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'air_kitchen_tvoc value=${tvoc} ${timestamp}000000000\n'`;
           # iaq
           open LINE, ">>", "$logdirectory/air${devicename}-iaq.log" or die $!;
           print LINE "$timestamp $iaq\n";
@@ -241,6 +250,7 @@ while (<STDIN>)
             if (length $output) { print LOGFILE "rrdtool errored $output"; }
           }
           else { print LOGFILE "rrd for air${devicename}-iaq doesn't exist, skipping update"; }
+          $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'air_kitchen_iaq value=${iaq} ${timestamp}000000000\n'`;
           # rssi
           open LINE, ">>", "$logdirectory/rssi-${devicename}.log" or die $!;
           print LINE "$timestamp $rssi\n";
