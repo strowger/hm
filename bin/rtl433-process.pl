@@ -651,7 +651,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 910 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastccclampheat))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastccclampheat))
           {
             $timelastccclampheat = $linetime;
             $output = `rrdtool update $rrddirectory/ccclampwattsheating.rrd $linetime:$ccpower`;
@@ -667,7 +667,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 1090 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastccclampcook))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastccclampcook))
           {
             $timelastccclampcook = $linetime;
             $output = `rrdtool update $rrddirectory/ccclampwattscooker.rrd $linetime:$ccpower`;
@@ -683,7 +683,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 272 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamcatpad))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamcatpad))
           {
             $timelastcciamcatpad = $linetime;
             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'catpad value=${ccpower} ${linetime}000000000\n'`;
@@ -696,7 +696,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 921 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamwasher))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamwasher))
           {
             $timelastcciamwasher = $linetime;
             $output = `rrdtool update $rrddirectory/cciamwasher.rrd $linetime:$ccpower`;
@@ -712,7 +712,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 1971 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamdryer))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamdryer))
           {
             $timelastcciamdryer = $linetime;
             $output = `rrdtool update $rrddirectory/cciamdryer.rrd $linetime:$ccpower`;
@@ -728,7 +728,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 3037 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamfridge))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamfridge))
           {
             $timelastcciamfridge = $linetime;
             $output = `rrdtool update $rrddirectory/cciamfridge.rrd $linetime:$ccpower`;
@@ -744,7 +744,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 1130 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamfridge2))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamfridge2))
           {
             $timelastcciamfridge2 = $linetime;
             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'fridge2 value=${ccpower} ${linetime}000000000\n'`;
@@ -756,7 +756,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 1430 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciammwave))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciammwave))
           {
             $timelastcciammwave = $linetime;
             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'mwave value=${ccpower} ${linetime}000000000\n'`;
@@ -769,7 +769,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 3214 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamdwasher))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamdwasher))
           {
             $timelastcciamdwasher = $linetime;
             $output = `rrdtool update $rrddirectory/cciamdwasher.rrd $linetime:$ccpower`;
@@ -785,7 +785,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 1314 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamupsb))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamupsb))
           {
             $timelastcciamupsb = $linetime;
             $output = `rrdtool update $rrddirectory/cciamupsb.rrd $linetime:$ccpower`;
@@ -801,7 +801,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 2829 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamofficedesk))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamofficedesk))
           {
             $timelastcciamofficedesk = $linetime;
             $output = `rrdtool update $rrddirectory/cciamofficedesk.rrd $linetime:$ccpower`;
@@ -817,7 +817,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 3879 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamupso))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamupso))
           {
             $timelastcciamupso = $linetime;
             $output = `rrdtool update $rrddirectory/cciamupso.rrd $linetime:$ccpower`;
@@ -833,7 +833,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 2071 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamtoaster))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamtoaster))
           {
             $timelastcciamtoaster = $linetime;
             $output = `rrdtool update $rrddirectory/cciamtoaster.rrd $linetime:$ccpower`;
@@ -849,7 +849,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 4023 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastcciamkettle))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastcciamkettle))
           {
             $timelastcciamkettle = $linetime;
             $output = `rrdtool update $rrddirectory/cciamkettle.rrd $linetime:$ccpower`;
@@ -865,7 +865,7 @@ while (<STDIN>)
 
         if ( $ccdevid == 3957 )
         {
-          if (($modeswitch eq "process") && ($linetime > $timelastccclamptowelrail))
+          if (($ccpower < 8191) && ($modeswitch eq "process") && ($linetime > $timelastccclamptowelrail))
           {
             $timelastccclamptowelrail = $linetime;
             $output = `rrdtool update $rrddirectory/ccclampwattstowelrail.rrd $linetime:$ccpower`;
