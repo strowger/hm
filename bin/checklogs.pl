@@ -26,6 +26,7 @@ $fridgedslog="rtl433-proltempfridgeds.log";
 $conslog="rtl433-proltempconservatory.log";
 $bed1log="rtl433-nextempbed1.log";
 $catlog="rtl433-cciamcatpad.log";
+$hs100errorlog="hs100-errors.log";
 
 if ( -f $lockfile ) 
 { die "Lockfile exists in $lockfile; exiting"; }
@@ -375,6 +376,21 @@ if (-f "$logdirectory/barompressure2-errors.log" )
     print "More than 5 log lines from barompressure2 cron job: ${errorlinecount}\n";
   }
   unlink "$logdirectory/barompressure2-errors.log";
+}
+
+# the hs100 script
+#
+if (-f "$logdirectory/$hs100errorlog" )
+{
+  $errorlinecount = 0;
+  open HS100LOG, "<", "$logdirectory/$hs100errorlog" or die $!;
+  foreach $errorline (<HS100LOG>) { $errorlinecount++; }
+  close HS100LOG;
+  if ($errorlinecount > 3)
+  {
+    print "More than 3 log lines from hs100 cron job: ${errorlinecount}\n";
+  }
+  unlink "$logdirectory/$hs100errorlog";
 }
 
 @rtlcollectors = ("alarmbox", "office");
