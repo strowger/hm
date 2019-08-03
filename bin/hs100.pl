@@ -17,6 +17,9 @@ $influxcmd="curl -s -S -i -XPOST ";
 $influxurl="http://localhost:8086/";
 $influxdb="styes_power";
 
+# because we're grep'ing through the stderr+stio output together and we'll get nowt if there's an error
+no warnings 'uninitialized';
+
 open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;
 
 if ( -f $lockfile ) 
@@ -48,21 +51,32 @@ foreach $line (<CONFIG>)
 {
   $timestamp = time();
 # device id, name for log/influx, type
-  ($device, $name, $type) = split(',',$line);
+  ($device, $name, $type, $ip) = split(',',$line);
   # starts with hash means comment, so ignore
-  # ignore if there isn't a value for all items
+  # ignore if there isn't a value for all vital items
   if (($device !~ /\#.*/) && (defined $device) && (defined $name) && (defined $type))
   {
     # here is stuff we just do for each *valid* config line
+    chomp $ip;
     chomp $type;
-    print LOGFILE "$timestamp: reading $device $name $type: ";
+    if ( defined $ip )
+    {
+      # an ip has been defined so we'll use it, which speeds up reads and reduces
+      # errors but is not resilient to changes made by dhcp server
+      $ipstring="--host $ip ";
+    }
+    else
+    {
+      $ipstring="";
+    }
+    print LOGFILE "$timestamp: reading $device $name $type $ip: ";
     if ( $type ne "plug" )
     {
       print LOGFILE "unknown type $type, skipping\n";
       next;
     }
     # redirect stderr
-    $output = `pyhs100 --alias $device --$type emeter 2>&1`;
+    $output = `/usr/local/bin/pyhs100 --alias $device $ipstring --$type emeter 2>&1|grep voltage`;
     # remove *leading* whitespace only - means we don't mangle the errors
     $output =~ s/^\s+//;
     chomp $output;
@@ -78,15 +92,16 @@ foreach $line (<CONFIG>)
     {
 
       @outputline = split(" ", $output);
-      $voltagemv = $outputline[35];
-      $currentma = $outputline[37];
-      $powermw = $outputline[39];
-      $totalwh = $outputline[41];
+      $voltagemv = $outputline[1];
+      $currentma = $outputline[3];
+      $powermw = $outputline[5];
+      $totalwh = $outputline[7];
       chop $voltagemv ; chop $currentma ; chop $powermw ; chop $totalwh;
 
       if (( $voltagemv !~ /^\d+$/ ) || ( $currentma !~ /^\d+$/ ) || ( $powermw !~ /^\d+$/ ) || ( $totalwh !~ /^\d+$/ ))
       {
-        print ERRORLOG "$timestamp got a non-numeric value, skipping\n";
+        print LOGFILE "$timestamp got a non-numeric value (v $voltagemv a $currentma w $powermw totwh $totalwh, skipping\n";       
+        print ERRORLOG "$timestamp got a non-numeric value (v $voltagemv a $currentma w $powermw totwh $totalwh, skipping\n";
         next;
       }
 
