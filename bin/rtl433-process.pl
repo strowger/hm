@@ -361,7 +361,7 @@ while (<STDIN>)
     # also https://www.aliexpress.com/item/Digoo-DG-R8S-R8S-Wireless-Sensor-433MHz-Wireless-Digital-Hygrometer-Thermometer-Weather-Station-Sensor-for-DG/32845808693.html
     # ids (remember they change on power-cycle/battery-change)
     # 172: conservatory
-    # 25: downstairs fridge
+    # 89: downstairs fridge
     # 27: fridge; 
     # 171: freezer (if it survives) # prev 209 to 20190404
     # 242: black car (maybe?)
@@ -385,7 +385,7 @@ while (<STDIN>)
           { print "$linetime prologue sensor conservatory temperature $prologuetemp c\n"; }
       }
 
-      if ( $prologuedevid == 25 )
+      if ( $prologuedevid == 89 )
       {
         if (($modeswitch eq "process") && ($linetime > $timelastproltempfridgeds))
         {
@@ -456,7 +456,7 @@ while (<STDIN>)
           { print "$linetime prologue sensor conservatory humidity $prologuehum %\n"; }
       }
 
-      if ( $prologuedevid == 25 )
+      if ( $prologuedevid == 89 )
       {
         if (($modeswitch eq "process") && ($linetime > $timelastprolhumfridgeds))
         {
