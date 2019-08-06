@@ -386,9 +386,10 @@ if (-f "$logdirectory/$hs100errorlog" )
   open HS100LOG, "<", "$logdirectory/$hs100errorlog" or die $!;
   foreach $errorline (<HS100LOG>) { $errorlinecount++; }
   close HS100LOG;
-  if ($errorlinecount > 3)
+# we have one device with slightly bad connectivity and 3 polls a minute
+  if ($errorlinecount > 30)
   {
-    print "More than 3 log lines from hs100 cron job: ${errorlinecount}\n";
+    print "More than 30 log lines from hs100 cron job: ${errorlinecount}\n";
   }
   unlink "$logdirectory/$hs100errorlog";
 }
