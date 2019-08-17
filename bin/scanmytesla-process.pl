@@ -118,6 +118,7 @@ while (<INPUT>)
     $logoffset7g = 0;
     $logoffset7h = 0;
     $logoffset7i = 0;
+
     # scanmytesla 1.4.0(ish), we call this "version 1"
     if (( $lineitems == 250) && ($line[4] =~/DC-DC current/ ))
     {
@@ -211,6 +212,14 @@ while (<INPUT>)
       print "file is version 7 format\n";
     }
 
+    # scanmytesla 1.8.0 to which we accidentally ugpraded, has a single value added mid-file
+    if (( $lineitems == 279) && ( $line[140] =~/Cell imbalance/ ))
+    {
+      # a bodge: this break occurs at the same place as the logoffset7c one so we'll just re-use it 
+      # with the higher value
+      $logoffset7c = 4;
+      print "file is version 8 format\n";
+    }
 
     # if we didn't positively identify a log format, quit
     if ( $logversion eq "" ) { die "first line of file appears corrupt or unknown scanmytesla format\n"; }
@@ -598,6 +607,36 @@ while (<INPUT>)
     $time60to100 = $line[153];
     $time80to120 = $line[155];
   }
+
+  if ( $logversion == 8 )
+  {
+    $coolingload400v = $line[7];
+    $coolingload12v = $line[8];
+    # if the app is just calculating this we don't need to grab it separately
+    $coolingloadtotal = $line[9];
+    $dcdcamps = $line[10];
+    $dcdcvolts = $line[11];
+    $dcdccoolantin = $line[12];
+    $dcdcinpower = $line[13];
+    $sys12v = $line[14];
+    $dcdcoutpower = $line[15];
+    $dcdcefficiency = $line[16];
+    $sys400v = $line[17];
+    
+    # this item is new for this version and the subsequent ones displaced by one position
+    $cellimbalance = $line[140];
+
+    $speed = $line[141];
+    $time0to50 = $line[142];
+    $time0to60 = $line[143];
+    $time0to100 = $line[145];
+    $time0to130 = $line[147];
+    $time0to160 = $line[150];
+    $time0to200 = $line[152];
+    $time60to100 = $line[154];
+    $time80to120 = $line[156];
+  }
+
 
   if ( ! $battvolts eq "" ) { $influxcmdline .= "battery_voltage value=${battvolts} ${timestampline}000000\n"; }
   if ( ! $battamps eq "" ) { $influxcmdline .= "battery_amps value=${battamps} ${timestampline}000000\n"; }
