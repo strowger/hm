@@ -192,7 +192,7 @@ while (<INPUT>)
     if (( $lineitems == 278) && ( $line[7] =~/Thermal controller 400V/ ))
     {
       $logoffset1 = 2;
-      $logversion = 6;
+      $logversion = 7;
       $logoffset2 = 2;
       $logoffset3a = 1;
       $logoffset3b = 10;
@@ -217,7 +217,24 @@ while (<INPUT>)
     {
       # a bodge: this break occurs at the same place as the logoffset7c one so we'll just re-use it 
       # with the higher value
+      $logoffset1 = 2;
+      $logversion = 8;
+      $logoffset2 = 2;
+      $logoffset3a = 1;
+      $logoffset3b = 10;
+      $logoffset3c = 13;
+      $logoffset6a = 2;
+      $logoffset6b = 1;
+      $logoffset6c = 3;
+      $logoffset7a = -1;
+      $logoffset7b = -3;
       $logoffset7c = 4;
+      $logoffset7d = 1;
+      $logoffset7e = 1;
+      $logoffset7f = 1;
+      $logoffset7g = 1;
+      $logoffset7h = 1;
+      $logoffset7i = 1;
       print "file is version 8 format\n";
     }
 
