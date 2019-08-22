@@ -222,9 +222,50 @@ if ( ( $tc[1] =~ /battery_heater_on/ ) && ( $tc[81] =~ /usable_battery_level/ ))
   chop $tc[34]; $chargerate = $tc[34];
 }
 
-print LOGFILE "api is version $api_version\n";
+# 20190821 gh: i think 2019.28.3.1 added "minutes_to_full_charge" after "max_range_charge_counter"
+# "max_range_charge_counter is tc[67] and the value with appended , is tc[68]
 
-if ( $api_version eq "" ) { die "unknown api version\n"; }
+if ( ( $tc[1] =~ /battery_heater_on/ ) && ( $tc[67] =~ /max_range_charge_counter/ ) && ( $tc[83] =~ /usable_battery_level/ ))
+{
+  $api_version = "v9-2019.28.3.1";
+  # added the charge_port_cold_weather_mode item
+  chop $tc[48]; $chargingstate = $tc[48];
+  # what max percent to charge to is
+  chop $tc[16]; $chargelimit = $tc[16];
+  # number of times charged to max?
+  chop $tc[68]; $maxrangecharges = $tc[68];
+  # "battery range", "est battery range", "ideal battery range"
+  chop $tc[6]; $batteryrange = $tc[6];
+  chop $tc[52]; $estbatteryrange = $tc[52];
+  chop $tc[60]; $idealbatteryrange = $tc[60];
+  # soc!
+  chop $tc[4]; $batterylevel = $tc[4];
+  chop $tc[82]; $batterylevelusable = $tc[84];
+  chop $tc[14]; $chargenergyadded = $tc[14];
+  chop $tc[46]; $chargervoltage = $tc[46];
+  if ( $chargervoltage eq "null" ) { $chargervoltage = 0; }
+  chop $tc[42]; $chargercurrentpilot = $tc[42];
+  if ( $chargercurrentpilot eq "null" ) { $chargercurrentpilot = 0; }
+  chop $tc[38]; $chargercurrentactual = $tc[38];
+  if ( $chargercurrentactual eq "null" ) { $chargercurrentactual = 0; }
+  chop $tc[44]; $chargerpower = $tc[44];
+  chop $tc[34]; $chargerate = $tc[34];
+}
+
+if ( $api_version eq "" ) 
+{
+  print "DEBUG: didn't id an api version\n";
+  print "DEBUG: tc1 $tc[1] tc79 $tc[79] tc81 $tc[81]\n";
+  print "DEBUG: if we had last v9-2018.50.6 we'd have:\n";
+  print "DEBUG: charging state $tc[48], max charge percent $tc[16], max range charges count $tc[68]\n";
+  print "DEBUG: battery range/est/ideal $tc[6] $tc[52] $tc[60] battery level/usable $tc[4] $tc[82]\n";
+  print "DEBUG: charge energy added $tc[14] voltage $tc[46] current pilot/actual $tc[42] $tc[38]\n";
+  print "DEBUG: charger power $tc[44] rate $tc[34]\n";
+  unlink $lockfile; 
+  die "unknown api version\n"; 
+}
+
+print LOGFILE "api is version $api_version\n";
 
 print LOGFILE "charging state $chargingstate, max charge percent $chargelimit, max range charges count $maxrangecharges\n";
 print LOGFILE "battery range/est/ideal $batteryrange $estbatteryrange $idealbatteryrange battery level/usable $batterylevel $batterylevelusable\n";
