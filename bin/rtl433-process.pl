@@ -276,16 +276,21 @@ while (<STDIN>)
 # nexus temperature/humidity sensors, like 
 # https://www.aliexpress.com/item/Digoo-DG-R8B-433MHz-Wireless-Digital-Hygrometer-Thermometer-Weather-Station-Sensor-for-DG-TH3330/32866929093.html
 # don't seem any more accurate than the prologue ones but case is smaller and takes AAs not AAAs
+# 'house code' seems to persist across battery changes, and we have a conflict
+# already with only 3 devices around, so need to be careful
 
    if ( $txtype eq "nexus" )
    {
+#     print LOGFILE "DEBUG: gorra nexus frame with values: ";
      # this will emit 5 lines after the date/time/label one, the 5th of which is
      # humidity, and the last line, so means we can do the processing
      if (( $line[0] eq "House") && ( $line[1] eq "Code:" ))
      {
-       # "house code" is basically device id, changes on battery swap
+       # "house code" is basically device id, changes on battery swap[??]
        $nexushousecode = $line[2];
+       chomp $nexushousecode;
      }
+     print LOGFILE "housecode $nexushousecode ";
      if ( $line[0] eq "Battery:" )
      {
        # battery status, only seen "OK" so far
@@ -296,7 +301,9 @@ while (<STDIN>)
      {
        # "channel" selectable 1-3 using switch on device
        $nexuschan = $line[1];
+       chomp $nexuschan;
      }
+     print LOGFILE "channel $nexuschan \n";
      if ( $line[0] eq "Temperature:" )
      {
        $nexustemp = $line[1];
@@ -308,9 +315,11 @@ while (<STDIN>)
        # we're on the last line and we got a value for all the other lines; winning!
        {
 #         print LOGFILE "DEBUG: nexus got all values so gonna look at writing\n";
-         # 121: main bedroom in fritzl3: "bed1"
-         if (( $nexushousecode eq "121" ) && ( $linetime > $timelastnextempbed1 ))
+
+         # code 121 chan 1: main bedroom in fritzl3: "bed1"
+         if (( $nexushousecode eq "121" ) && ( $nexuschan eq "1" ) && ( $linetime > $timelastnextempbed1 ))
          {
+#           print LOGFILE "DEBUG: nexus considering writing housecode $nexushousecode chan $nexuschan\n";
            $timelastnextempbed1 = $linetime;
            $tempdiff = abs ($lastnextempbed1 - $nexustemp);
            $humdiff = abs ($lastnexhumbed1 - $nexushum);
@@ -328,6 +337,28 @@ while (<STDIN>)
            }
            else { print LOGFILE "$linetime not writing nexus hum $nexushum where diff is $humdiff last $lastnexhumbed1\n"; }
          }
+
+        # 115 chan 1: tbc 
+##         if (( $nexushousecode eq "115" ) && ( $nexuschan eq "1" ) && ( $linetime > $timelastnextempbed1 ))
+##         {
+##           $timelastnextempbed1 = $linetime;
+##           $tempdiff = abs ($lastnextempbed1 - $nexustemp);
+##           $humdiff = abs ($lastnexhumbed1 - $nexushum);
+##           if (( $nexustemp > -20 ) && ( $nexustemp < 60 ) && ( $tempdiff < 5 ))
+##           {
+##             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'temp_bed1 value=${nexustemp} ${linetime}000000000\n'`;
+##             print NEXTEMPBED1 "$linetime $nexustemp\n";
+##           }
+##           else { print LOGFILE "$linetime not writing nexus temp $nexustemp where diff is $tempdiff last $lastnextempbed1\n"; }
+##           if (( $nexushum > 0 ) && ( $nexushum < 101 ) && ( $humdiff < 5 ))
+##           {
+##             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'hum_bed1 value=${nexushum} ${linetime}000000000\n'`;
+##             print NEXHUMBED1 "$linetime $nexushum\n";
+##           }
+##           else { print LOGFILE "$linetime not writing nexus hum $nexushum where diff is $humdiff last $lastnexhumbed1\n"; }
+##         }
+
+
 
        }
        else { print STDERR "$linetime got an incomplete or mangled nexus tx\n"; }
@@ -360,16 +391,16 @@ while (<STDIN>)
     # like https://www.aliexpress.com/item/433MHz-Wireless-Weather-Station-with-Forecast-Temperature-Digital-Thermometer-Hygrometer-Humidity-Sensor/32862342455.html
     # also https://www.aliexpress.com/item/Digoo-DG-R8S-R8S-Wireless-Sensor-433MHz-Wireless-Digital-Hygrometer-Thermometer-Weather-Station-Sensor-for-DG/32845808693.html
     # ids (remember they change on power-cycle/battery-change)
-    # 172: conservatory
+    # 73: conservatory
     # 89: downstairs fridge
-    # 27: fridge; 
+    # 4: fridge; 
     # 171: freezer (if it survives) # prev 209 to 20190404
     # 242: black car (maybe?)
     if (( $txtype eq "prologue-sensor" ) && ( $line[0] eq "Temperature:" ))
     {
       $prologuetemp = $line[1];
 
-      if ( $prologuedevid == 172 )
+      if ( $prologuedevid == 73 )
       {
         if (($modeswitch eq "process") && ($linetime > $timelastproltempconservatory))
         {
@@ -401,7 +432,7 @@ while (<STDIN>)
           { print "$linetime prologue sensor fridge_ds temperature $prologuetemp c\n"; }
       }      
 
-      if ( $prologuedevid == 27 )                                                                    
+      if ( $prologuedevid == 4 )                                                                    
       {                                                                                              
         if (($modeswitch eq "process") && ($linetime > $timelastproltempfridge))                   
         {                                                                                            
@@ -440,7 +471,7 @@ while (<STDIN>)
     {
       $prologuehum = $line[1];
 
-      if ( $prologuedevid == 172 )
+      if ( $prologuedevid == 73 )
       {
         if (($modeswitch eq "process") && ($linetime > $timelastprolhumconservatory))
         {
@@ -472,7 +503,7 @@ while (<STDIN>)
           { print "$linetime prologue sensor fridge_ds humidity $prologuehum %\n"; }
       }
 
-      if ( $prologuedevid == 27 )                                                                    
+      if ( $prologuedevid == 4 )                                                                    
       {                                                                                              
         if (($modeswitch eq "process") && ($linetime > $timelastprolhumfridge))                   
         {                                                                                            
