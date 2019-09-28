@@ -316,8 +316,8 @@ while (<STDIN>)
        {
 #         print LOGFILE "DEBUG: nexus got all values so gonna look at writing\n";
 
-         # code 121 chan 1: main bedroom in fritzl3: "bed1"
-         if (( $nexushousecode eq "121" ) && ( $nexuschan eq "1" ) && ( $linetime > $timelastnextempbed1 ))
+         # code 151 chan 1: main bedroom in fritzl3: "bed1"
+         if (( $nexushousecode eq "151" ) && ( $nexuschan eq "1" ) && ( $linetime > $timelastnextempbed1 ))
          {
 #           print LOGFILE "DEBUG: nexus considering writing housecode $nexushousecode chan $nexuschan\n";
            $timelastnextempbed1 = $linetime;
