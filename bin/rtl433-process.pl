@@ -117,10 +117,10 @@ $timelastprolhumconservatory=`tail -1 $logdirectory/$logprolhumconservatory|awk 
 $timelastprolhumfridgeds=`tail -1 $logdirectory/$logprolhumfridgeds|awk '{print \$1}'`;
 $timelastprolhumfridge=`tail -1 $logdirectory/$logprolhumfridge|awk '{print\$1}'`;                 
 $timelastprolhumfreezer=`tail -1 $logdirectory/$logprolhumfreezer|awk '{print\$1}'`; 
-$timelastnextempbed1=`tail -1 $logdirectory/$lognextempbed1|awk '{print\$1}'`;
-$timelastnexhumbed1=`tail -1 $logdirectory/$lognexhumbed1|awk '{print\$1}'`;
+#$timelastnextempbed1=`tail -1 $logdirectory/$lognextempbed1|awk '{print\$1}'`;
+$timelastnexhumbed2=`tail -1 $logdirectory/$lognexhumbed1|awk '{print\$1}'`;
 $timelastnextempfreezerds=`tail -1 $logdirectory/$lognextempfreezerds|awk '{print\$1}'`;
-$timelastnexhumfreezerds=`tail -1 $logdirectory/$lognexhumfreezerds|awk '{print\$1}'`;
+#$timelastnexhumfreezerds=`tail -1 $logdirectory/$lognexhumfreezerds|awk '{print\$1}'`;
 
 
 $timelastwaterdetcellarmain=`tail -1 $logdirectory/$logwaterdetcellarmain|awk '{print\$1}'`;
