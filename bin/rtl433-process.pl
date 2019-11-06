@@ -74,6 +74,8 @@ $logprolhumfridge="rtl433-prolhumfridge.log";
 $logprolhumfreezer="rtl433-prolhumfreezer.log"; 
 $lognextempbed1="rtl433-nextempbed1.log";
 $lognexhumbed1="rtl433-nexhumbed1.log";
+$lognextempfreezerds="rtl433-nextempfreezerds.log";
+$lognexhumfreezerds="rtl433-nexhumfreezerds.log";
 
 $logwaterdetcellarmain="rtl433-waterdetcellarmain.log";
 
@@ -116,7 +118,10 @@ $timelastprolhumfridgeds=`tail -1 $logdirectory/$logprolhumfridgeds|awk '{print 
 $timelastprolhumfridge=`tail -1 $logdirectory/$logprolhumfridge|awk '{print\$1}'`;                 
 $timelastprolhumfreezer=`tail -1 $logdirectory/$logprolhumfreezer|awk '{print\$1}'`; 
 $timelastnextempbed1=`tail -1 $logdirectory/$lognextempbed1|awk '{print\$1}'`;
-#$timelastnexhumbed1=`tail -1 $logdirectory/$lognexhumbed1|awk '{print\$1}'`;
+$timelastnexhumbed1=`tail -1 $logdirectory/$lognexhumbed1|awk '{print\$1}'`;
+$timelastnextempfreezerds=`tail -1 $logdirectory/$lognextempfreezerds|awk '{print\$1}'`;
+$timelastnexhumfreezerds=`tail -1 $logdirectory/$lognexhumfreezerds|awk '{print\$1}'`;
+
 
 $timelastwaterdetcellarmain=`tail -1 $logdirectory/$logwaterdetcellarmain|awk '{print\$1}'`;
 
@@ -131,6 +136,8 @@ $lastprolhumfridge=`tail -1 $logdirectory/$logprolhumfridge|awk '{print\$2}'`;
 $lastprolhumfreezer=`tail -1 $logdirectory/$logprolhumfreezer|awk '{print\$2}'`; 
 $lastnextempbed1=`tail -1 $logdirectory/$lognextempbed1|awk '{print\$2}'`;
 $lastnexhumbed1=`tail -1 $logdirectory/$lognexhumbed1|awk '{print\$2}'`;
+$lastnextempfreezerds=`tail -1 $logdirectory/$lognextempfreezerds|awk '{print\$2}'`;
+$lastnexhumfreezerds=`tail -1 $logdirectory/$lognexhumfreezerds|awk '{print\$2}'`;
 
 
 
@@ -168,6 +175,8 @@ open PROLHUMFRIDGE, ">>", "$logdirectory/$logprolhumfridge" or die $!;
 open PROLHUMFREEZER, ">>", "$logdirectory/$logprolhumfreezer" or die $!; 
 open NEXTEMPBED1, ">>", "$logdirectory/$lognextempbed1" or die $!;
 open NEXHUMBED1, ">>", "$logdirectory/$lognexhumbed1" or die $!;
+open NEXTEMPFREEZERDS, ">>", "$logdirectory/$lognextempfreezerds" or die $!;
+open NEXHUMFREEZERDS, ">>", "$logdirectory/$lognexhumfreezerds" or die $!;
 
 open WATERDETCELLARMAIN, ">>", "$logdirectory/$logwaterdetcellarmain" or die $!;
 
@@ -336,6 +345,28 @@ while (<STDIN>)
              print NEXHUMBED1 "$linetime $nexushum\n";
            }
            else { print LOGFILE "$linetime not writing nexus hum $nexushum where diff is $humdiff last $lastnexhumbed1\n"; }
+         }
+
+        # code 172 chan 1: second hand freezer: "freezerds"
+         if (( $nexushousecode eq "172" ) && ( $nexuschan eq "1" ) && ( $linetime > $timelastnextempbed1 ))
+         {
+#           print LOGFILE "DEBUG: nexus considering writing housecode $nexushousecode chan $nexuschan\n";
+           $timelastnextempfreezerds = $linetime;
+           $tempdiff = abs ($lastnextempfreezerds - $nexustemp);
+           $humdiff = abs ($lastnexhumfreezerds - $nexushum);
+#           print LOGFILE "DEBUG: nexus freezerds tempdiff $tempdiff humdiff $humdiff\n";
+           if (( $nexustemp > -35 ) && ( $nexustemp < 40 ) && ( $tempdiff < 5 ))
+           {
+             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'temp_freezerds value=${nexustemp} ${linetime}000000000\n'`;
+             print NEXTEMPFREEZERDS "$linetime $nexustemp\n";
+           }
+           else { print LOGFILE "$linetime not writing nexus temp $nexustemp where diff is $tempdiff last $lastnextempfreezerds\n"; }
+           if (( $nexushum > 0 ) && ( $nexushum < 101 ) && ( $humdiff < 5 ))
+           {
+             $output2 = `${influxcmd} '${influxurl}write?db=${influxdb}' --data-binary 'hum_freezerds value=${nexushum} ${linetime}000000000\n'`;
+             print NEXHUMFREEZERDS "$linetime $nexushum\n";
+           }
+           else { print LOGFILE "$linetime not writing nexus hum $nexushum where diff is $humdiff last $lastnexhumfreezerds\n"; }
          }
 
         # 115 chan 1: tbc 
