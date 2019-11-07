@@ -80,7 +80,7 @@ foreach $line (<CONFIG>)
     # remove *leading* whitespace only - means we don't mangle the errors
     $output =~ s/^\s+//;
     chomp $output;
-    print LOGFILE "$output\n";
+    print LOGFILE "$output ";
 
     if (($output =~ /error/ ) || ($output =~ /ERR/ ) || ($output =~ /No\ device\ with\ name/ ))
     {
@@ -92,22 +92,47 @@ foreach $line (<CONFIG>)
     {
 
       @outputline = split(" ", $output);
-      $voltagemv = $outputline[1];
-      $currentma = $outputline[3];
-      $powermw = $outputline[5];
-      $totalwh = $outputline[7];
-      chop $voltagemv ; chop $currentma ; chop $powermw ; chop $totalwh;
 
-      if (( $voltagemv !~ /^\d+$/ ) || ( $currentma !~ /^\d+$/ ) || ( $powermw !~ /^\d+$/ ) || ( $totalwh !~ /^\d+$/ ))
+     if ( $outputline[0] =~ /voltage_mv/ )
+     {
+       print LOGFILE " - is hw2/fw1.5.7 or similar\n";
+
+        $voltagemv = $outputline[1];
+        $currentma = $outputline[3];
+        $powermw = $outputline[5];
+        $totalwh = $outputline[7];
+        chop $voltagemv ; chop $currentma ; chop $powermw ; chop $totalwh;
+
+        if (( $voltagemv !~ /^\d+$/ ) || ( $currentma !~ /^\d+$/ ) || ( $powermw !~ /^\d+$/ ) || ( $totalwh !~ /^\d+$/ ))
+        {
+          print LOGFILE "$timestamp got a non-numeric value (v $voltagemv a $currentma w $powermw totwh $totalwh, skipping\n";       
+          print ERRORLOG "$timestamp got a non-numeric value (v $voltagemv a $currentma w $powermw totwh $totalwh, skipping\n";
+          next;
+        }
+
+        $voltage = $voltagemv / 1000;
+        $current = $currentma / 1000;
+        $power = $powermw / 1000;
+      }  
+     
+      if ( $outputline[0] =~ /current/ )
       {
-        print LOGFILE "$timestamp got a non-numeric value (v $voltagemv a $currentma w $powermw totwh $totalwh, skipping\n";       
-        print ERRORLOG "$timestamp got a non-numeric value (v $voltagemv a $currentma w $powermw totwh $totalwh, skipping\n";
-        next;
-      }
+        print LOGFILE " - is hw1/fw1.2.5 or similar\n";
 
-      $voltage = $voltagemv / 1000;
-      $current = $currentma / 1000;
-      $power = $powermw / 1000;
+        $current = $outputline[1];
+        $voltage = $outputline[3];
+        $power = $outputline[5];
+        # this might actually be kwh not wh but we don't use it anyway
+        $totalwh = $outputline[7];
+        chop $voltage ; chop $current ; chop $power ; chop $totalwh;
+# different regex here because these have decimal points in
+        if (( $voltage !~ /^\d+.\d+$/ ) || ( $current !~ /^\d+.\d+$/ ) || ( $power !~ /^\d+.\d+$/ ) || ( $totalwh !~ /^\d+.\d+$/ ))
+        {
+          print LOGFILE "$timestamp got a non-numeric value (v $voltage a $current w $power totwh $totalwh, skipping\n";
+          print ERRORLOG "$timestamp got a non-numeric value (v $voltage a $current w $power totwh $totalwh, skipping\n";
+          next;
+        }
+      }
 
 ##      print "DEBUG: $voltage v $current a $power w $totalwh total wh\n";
 
