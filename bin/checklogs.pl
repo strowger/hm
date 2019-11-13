@@ -570,7 +570,13 @@ else
   chomp $min;
 
 #  print "system hour $hour minute $min\n";
-  if (($min eq $vmin) && ($hour eq $vhour))
+
+# 20191113 - getting too many mails from this for small differences
+  $mindiff = abs($min - $vmin);
+
+#  print "CH times $mindiff min apart\n";
+
+  if (($mindiff < 3) && ($hour eq $vhour))
   {
 #    print "time is good!\n";
   }
