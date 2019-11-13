@@ -240,7 +240,7 @@ if ( ( $tc[1] =~ /battery_heater_on/ ) && ( $tc[67] =~ /max_range_charge_counter
   chop $tc[60]; $idealbatteryrange = $tc[60];
   # soc!
   chop $tc[4]; $batterylevel = $tc[4];
-  chop $tc[82]; $batterylevelusable = $tc[84];
+  chop $tc[84]; $batterylevelusable = $tc[84];
   chop $tc[14]; $chargenergyadded = $tc[14];
   chop $tc[46]; $chargervoltage = $tc[46];
   if ( $chargervoltage eq "null" ) { $chargervoltage = 0; }
