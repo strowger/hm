@@ -28,6 +28,7 @@ $conslog="rtl433-proltempconservatory.log";
 $bed1log="rtl433-nextempbed1.log";
 $catlog="rtl433-cciamcatpad.log";
 $hs100errorlog="hs100-errors.log";
+$tasmotaerrorlog="tasmota-errors.log";
 
 if ( -f $lockfile ) 
 { die "Lockfile exists in $lockfile; exiting"; }
@@ -402,6 +403,22 @@ if (-f "$logdirectory/$hs100errorlog" )
     print "More than 30 log lines from hs100 cron job: ${errorlinecount}\n";
   }
   unlink "$logdirectory/$hs100errorlog";
+}
+
+# tasmota, works just like hs100
+
+if (-f "$logdirectory/$tasmotaerrorlog" )
+{
+  $errorlinecount = 0;
+  open TASMOTALOG, "<", "$logdirectory/$tasmotaerrorlog" or die $!;
+  foreach $errorline (<TASMOTALOG>) { $errorlinecount++; }
+  close TASMOTALOG;
+# we have one device with slightly bad connectivity and 3 polls a minute
+  if ($errorlinecount > 3)
+  {
+    print "More than 3 log lines from tasmota cron job: ${errorlinecount}\n";
+  }
+  unlink "$logdirectory/$tasmotaerrorlog";
 }
 
 @rtlcollectors = ("alarmbox", "office");

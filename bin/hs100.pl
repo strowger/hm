@@ -126,7 +126,7 @@ foreach $line (<CONFIG>)
         $totalwh = $outputline[7];
         chop $voltage ; chop $current ; chop $power ; chop $totalwh;
 # different regex here because these have decimal points in, ignore watts because it can be zero (not 0.0)
-        if (( $voltage !~ /^\d+.\d+$/ ) || ( $current !~ /^\d+.\d+$/ ) || ( $totalwh !~ /^\d+.\d+$/ ))
+        if (( $voltage !~ /^\d+.\d+$/ ) || ( $current !~ /^\d+.\d+$/ ))
         {
           print LOGFILE "$timestamp got a non-numeric value (v $voltage a $current w $power totwh $totalwh, skipping\n";
           print ERRORLOG "$timestamp got a non-numeric value (v $voltage a $current w $power totwh $totalwh, skipping\n";

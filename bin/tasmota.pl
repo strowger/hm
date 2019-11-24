@@ -63,7 +63,7 @@ foreach $line (<CONFIG>)
       next;
     }
 
-    $output = `arp|grep ${mac}`;
+    $output = `/usr/sbin/arp|grep ${mac}`;
     if ( $output !~ /${ip}/ )
     {
       print LOGFILE "couldn't find ip $ip with mac $mac in arp table, skipping\n";
