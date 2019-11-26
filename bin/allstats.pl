@@ -25,6 +25,14 @@ if ( -f $lockfile )
 }
 open LOCKFILE, ">", $lockfile or die $!;
 
+$yesterday = 0;
+
+if ($ARGV[0] =~ /yesterday/)
+{
+  print "performing run for yesterday\n";
+  $yesterday = 1;
+}
+
 $listing = `ls $logdirectory/hs100*|grep -v errors|grep -v runtime|grep -v hs100.log`;
 
 $listing2 = `ls $logdirectory/tasmota*|grep -v errors|grep -v runtime|grep -v tasmota.log`;
@@ -37,11 +45,20 @@ $listing2 = `ls $logdirectory/rtl433-cciam*`;
 $listing = $listing . $listing2;
 
 $timestamp = time();
-$starttime = $timestamp;
+$starttime = $timestamp; # for counting runtime
+$endtime = $timestamp; # for reading logfiles
 
 # this will give us the epoch at midnight (ie the start of today, in the past)
 ($day, $month, $year) = ( localtime() )[3 .. 5];
 $midnight = timelocal( 0, 0, 0, $day, $month, $year );
+
+if ($yesterday == 1)
+{
+  $endtime = $midnight;
+  $midnight = $midnight - 86400;
+}
+
+
 
 # we hopefully get a log line from the charger a few times a minute, so if
 # we accept rtl433 and/or the currentcost being a bit rubbish, we'll look for
@@ -98,6 +115,7 @@ foreach $filename (@filelist)
       print "bollocks line $logline\n";
       $badlines++;
     }
+    if ( $linetime > $endtime) { last; }
     $lineinterval=$linetime - $lastline;
     if ($lineinterval > 180) 
     { 
