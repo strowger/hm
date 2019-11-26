@@ -62,7 +62,8 @@ foreach $line (<CONFIG>)
       print LOGFILE "unknown type $type, skipping\n";
       next;
     }
-
+    # if we've never spoken to the device before, it won't be in the arp table and so this check fails
+    `/usr/bin/ping -c1 -w 0.1 -W 0.1 ${ip} > /dev/null 2>/dev/null`;
     $output = `/usr/sbin/arp|grep ${mac}`;
     if ( $output !~ /${ip}/ )
     {
@@ -72,7 +73,7 @@ foreach $line (<CONFIG>)
       next;
     }
 
-    $output = `curl -s -S http://${ip}/cm?cmnd=status%208 2>&1`;
+    $output = `curl -m2 -s -S http://${ip}/cm?cmnd=status%208 2>&1`;
     # test curl return code
     if ( $? > 0 ) 
     { 
