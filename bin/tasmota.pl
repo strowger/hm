@@ -72,7 +72,7 @@ foreach $line (<CONFIG>)
       next;
     }
 
-    $output = `curl -s -S http://${ip}/cm?cmnd=status%208`;
+    $output = `curl -s -S http://${ip}/cm?cmnd=status%208 2>&1`;
     # test curl return code
     if ( $? > 0 ) 
     { 
