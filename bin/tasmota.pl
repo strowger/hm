@@ -22,7 +22,7 @@ open ERRORLOG, ">>", "$logdirectory/$errorlog" or die $!;
 
 if ( -f $lockfile ) 
 {
-  print ERRORLOG "FATAL: lockfile exists, exiting";
+  print ERRORLOG "FATAL: lockfile exists, exiting\n";
   exit 2;
 }
 
@@ -72,8 +72,8 @@ foreach $line (<CONFIG>)
       push(@errordevices, $device);
       next;
     }
-
-    $output = `curl -m2 -s -S http://${ip}/cm?cmnd=status%208 2>&1`;
+    `echo >> ${logdirectory}/tasmota-debug.log`;
+    $output = `curl -m2 --connect-timeout 2 -s -S http://${ip}/cm?cmnd=status%208 |tee -a ${logdirectory}/tasmota-debug.log 2>&1`;
     # test curl return code
     if ( $? > 0 ) 
     { 
