@@ -10,6 +10,8 @@ $logdirectory="/data/hm/log";
 $logfile="tasmota.log";
 $errorlog="tasmota-errors.log";
 $lockfile="/tmp/tasmota.lock";
+# while we try to work out what makes it freeze
+$debuglog="tasmota-debug.log";
 
 $influxcmd="curl -s -S -i -XPOST ";
 $influxurl="http://localhost:8086/";
@@ -63,8 +65,14 @@ foreach $line (<CONFIG>)
       next;
     }
     # if we've never spoken to the device before, it won't be in the arp table and so this check fails
-    `/usr/bin/ping -c1 -w 0.1 -W 0.1 ${ip} > /dev/null 2>/dev/null`;
-    $output = `/usr/sbin/arp|grep ${mac}`;
+##    $timestamp = time();
+##    `echo "$timestamp about to ping ${ip}" >> ${logdirectory}/${debuglog}`;
+##    `/usr/bin/ping -c1 -w 1 -W 1 ${ip} >> ${logdirectory}/${debuglog} 2>> ${logdirectory}/${debuglog}`;
+    `/usr/bin/ping -c1 -w 1 -W 1 ${ip} > /dev/null 2>/dev/null`;
+##    $timestamp = time();
+##    `echo "$timestamp about to check arp cache for ${ip}" >> ${logdirectory}/${debuglog}`;
+##    $output = `/usr/sbin/arp -n|grep ${mac}|tee -a ${logdirectory}/${debuglog}`;
+    $output = `/usr/sbin/arp -n|grep ${mac}`;
     if ( $output !~ /${ip}/ )
     {
       print LOGFILE "couldn't find ip $ip with mac $mac in arp table, skipping\n";
@@ -72,17 +80,25 @@ foreach $line (<CONFIG>)
       push(@errordevices, $device);
       next;
     }
-    `echo >> ${logdirectory}/tasmota-debug.log`;
-    $output = `curl -m2 --connect-timeout 2 -s -S http://${ip}/cm?cmnd=status%208 |tee -a ${logdirectory}/tasmota-debug.log 2>&1`;
+    $timestamp = time();
+##    `echo "${timestamp} about to curl to ${ip}" >> ${logdirectory}/${debuglog}`;
+##    $output = `curl -m2 --connect-timeout 2 -s -S http://${ip}/cm?cmnd=status%208 |tee -a ${logdirectory}/${debuglog} 2>&1`;
+    $output = `curl -m2 --connect-timeout 2 -s -S http://${ip}/cm?cmnd=status%208 2>&1`;
+##    `echo >> ${logdirectory}/${debuglog}`;
+##    $timestamp = time();
+##    `echo "${timestamp} done curl to ${ip}" >> ${logdirectory}/${debuglog}`;
     # test curl return code
     if ( $? > 0 ) 
     { 
+      `echo "trapped a curl error on ${ip}" >> ${logdirectory}/${debuglog}.log`;
       print LOGFILE "got error from curl - not saving\n";
       $errorcount++;
       push(@errordevices, $device); 
     }
     else
     {
+      $timestamp = time();
+##      `echo "${timestamp} starting normal curl output processing on ${ip}" >> ${logdirectory}/${debuglog}`;
       # continue processing curl output
       @outputline = split(":", $output);
       # the split returns an array, we only want the first value hence brackets
@@ -149,7 +165,7 @@ if ($errorcount > 0)
   }
   print ERRORLOG "\n";
 }
-
+`echo "all good, exiting happily" >> ${logdirectory}/${debuglog}`;
 print LOGFILE "processed $validcount valid config items, ignored $invalidcount invalid lines, had $errorcount errors in $runtime seconds\n";
 print LOGFILE "exiting successfully\n\n";
 
